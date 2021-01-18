@@ -35,6 +35,8 @@ class _MyAppState extends State<MyApp> {
         "b1a6572f-b0fc-45cd-8561-110c039c7744",
         false,
         NamiLogLevel.debug,
+        false,
+        false,
         ["useStagingAPI"]);
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform

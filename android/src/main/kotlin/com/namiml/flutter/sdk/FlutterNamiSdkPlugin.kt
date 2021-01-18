@@ -73,6 +73,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler {
                 configure(context,
                         call.argument<String>("appPlatformIDGoogle"),
                         call.argument<Boolean>("bypassStore"),
+                        call.argument<Boolean>("developmentMode"),
                         call.argument<Int>("namiLogLevel"),
                         call.argument<List<String>>("extraDataList"))
                 result.success(true)
@@ -104,18 +105,25 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler {
         }
     }
 
-    private fun configure(context: Context, platformId: String?, bypass: Boolean?, namiLogLevel: Int?, extraDataList: List<String>?) {
+    private fun configure(context: Context,
+                          platformId: String?,
+                          bypass: Boolean?,
+                          developmentMode: Boolean?,
+                          namiLogLevel: Int?,
+                          extraDataList: List<String>?) {
         if (platformId == null) {
             return
         }
         io.flutter.Log.d(LOG_TAG, "appPlatformIDGoogle $platformId")
         io.flutter.Log.d(LOG_TAG, "bypassMode $bypass")
+        io.flutter.Log.d(LOG_TAG, "developmentMode $developmentMode")
         io.flutter.Log.d(LOG_TAG, "namiLogLevel $namiLogLevel")
         io.flutter.Log.d(LOG_TAG, "extraDataList $extraDataList")
         val configuration = NamiConfiguration.build(context, platformId) {
-            logLevel = NamiLogLevel.values()[namiLogLevel ?: NamiLogLevel.WARN.ordinal]
-            bypassStore = bypass ?: false
-            settingsList = extraDataList
+            this.logLevel = NamiLogLevel.values()[namiLogLevel ?: NamiLogLevel.WARN.ordinal]
+            this.bypassStore = bypass ?: false
+            this.developmentMode = developmentMode ?: false
+            this.settingsList = extraDataList
         }
         Nami.configure(configuration)
     }
