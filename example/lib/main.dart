@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/nami.dart';
 import 'package:nami_flutter/nami_configuration.dart';
+import 'package:nami_flutter/nami_paywall_manager.dart';
 
 void main() {
   runApp(MyApp());
@@ -62,12 +63,11 @@ class _MyAppState extends State<MyApp> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton(
-                      onPressed: () {
-                        print('Pressed');
-                        var scaffoldState = Scaffold.of(context);
-                        scaffoldState.hideCurrentSnackBar();
-                        scaffoldState.showSnackBar(
-                            SnackBar(content: Text("Show Paywall!")));
+                      onPressed: () async {
+                        print('Subscribe clicked!');
+                        if (await NamiPaywallManager.canRaisePaywall()) {
+                          NamiPaywallManager.raisePaywall();
+                        }
                       },
                       child: Text('Subscribe'),
                     ),

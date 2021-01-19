@@ -1,5 +1,6 @@
 package com.namiml.flutter.sdk
 
+import android.app.Activity
 import android.content.Context
 import androidx.annotation.NonNull
 import com.namiml.Nami
@@ -9,17 +10,21 @@ import com.namiml.NamiLogLevel
 import com.namiml.paywall.NamiPaywall
 import com.namiml.paywall.NamiPaywallManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import java.lang.ref.WeakReference
 import java.util.logging.StreamHandler
+
 
 private const val LOG_TAG = "NAMI"
 
 /** FlutterNamiSdkPlugin */
-class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler {
+class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
     /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -27,6 +32,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
     private lateinit var signInListener: EventChannel
     private lateinit var context: Context
+    private var currentActivityWeakReference: WeakReference<Activity>? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
@@ -99,6 +105,14 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler {
             "getExternalIdentifier" -> {
                 result.success(Nami.getExternalIdentifier())
             }
+            "canRaisePaywall" -> {
+                result.success(NamiPaywallManager.canRaisePaywall())
+            }
+            "raisePaywall" -> {
+                currentActivityWeakReference?.get()?.let { activity ->
+                    NamiPaywallManager.raisePaywall(activity)
+                }
+            }
             else -> {
                 result.notImplemented()
             }
@@ -131,5 +145,21 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler {
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         signInListener.setStreamHandler(null)
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        currentActivityWeakReference = WeakReference(binding.activity)
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        // Do nothing
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        currentActivityWeakReference = WeakReference(binding.activity)
+    }
+
+    override fun onDetachedFromActivity() {
+        currentActivityWeakReference = null
     }
 }

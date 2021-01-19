@@ -65,6 +65,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
         case "getExternalIdentifier":
             result(Nami.getExternalIdentifier())
+        case "canRaisePaywall":
+            result(NamiPaywallManager.canRaisePaywall())
+        case "raisePaywall":
+            // https://github.com/flutter/flutter/issues/9961
+            // https://github.com/flutter/flutter/issues/44764
+            let viewController = UIApplication.shared.delegate!.window!!.rootViewController!
+            NamiPaywallManager.raisePaywall(fromVC: viewController)
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }
