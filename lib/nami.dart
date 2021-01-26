@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:ffi';
 
-import 'package:flutter/services.dart';
+import 'package:nami_flutter/channel.dart';
 import 'package:nami_flutter/nami_configuration.dart';
+
+export 'package:nami_flutter/nami_configuration.dart';
 
 /// This class is the main entry point of the SDK.
 class Nami {
-  static const MethodChannel _methodChannel = const MethodChannel('nami');
-  static const EventChannel _signInEvent = const EventChannel('signInEvent');
-
+  /// This method configures and initializes the SDK. This method must be
+  /// called as the first thing before interacting with the SDK.
   static Future<bool> configure(NamiConfiguration namiConfiguration) {
     var extraDataList = ["extendedClientInfo:flutter:0.0.1"];
     extraDataList.addAll(namiConfiguration.extraData);
@@ -21,34 +21,41 @@ class Nami {
       "namiLogLevel": namiConfiguration.namiLogLevel.index,
       "extraDataList": extraDataList
     };
-    return _methodChannel.invokeMethod("configure", variableMap);
+    return channel.invokeMethod("configure", variableMap);
   }
 
-  static Future<Void> setExternalIdentifier(
+  /// Provide a unique identifier that can be used to link different devices
+  /// to the same customer in the [Nami] platform. This customer id will also
+  /// be returned in any data sent from the [Nami] servers to your systems as well.
+  ///
+  /// The [ID] sent to Nami must be a valid [UUID] or you may hash any other
+  /// identifier with [SHA256] and provide it in this call.
+  ///
+  /// Note that [Nami] platform will reject the [externalIdentifier], and it
+  /// will not get saved in case where [externalIdentifier] value doesn't match
+  /// the format expected in the provided [type]. For example, if you provide
+  /// a regular string instead of a proper `UUID` formatted string and
+  /// use [NamiExternalIdentifierType.uuid] to set the value then it will get
+  /// rejected
+  static Future<void> setExternalIdentifier(
       String externalIdentifier, NamiExternalIdentifierType type) async {
-    var variableMap = {'externalIdentifier': externalIdentifier, "type": type.index};
-    return await _methodChannel.invokeMethod(
-        "setExternalIdentifier", variableMap);
+    var variableMap = {
+      'externalIdentifier': externalIdentifier,
+      "type": type.index
+    };
+    return await channel.invokeMethod("setExternalIdentifier", variableMap);
   }
 
+  /// A string of the external identifier that Nami has stored. Returns [null]
+  /// if no id has been stored, including if a string was passed to
+  /// [setExternalIdentifier] that was not valid.
   static Future<String> getExternalIdentifier() {
-    return _methodChannel.invokeMethod("getExternalIdentifier");
+    return channel.invokeMethod("getExternalIdentifier");
   }
 
-  static Future<Void> clearExternalIdentifier() {
-    return _methodChannel.invokeMethod("clearExternalIdentifier");
-  }
-
-  static Stream<Map<dynamic, dynamic>> signInEvents() {
-    var data = _signInEvent
-        .receiveBroadcastStream()
-        .map((dynamic event) => _handleSignInClicked(event));
-
-    return data;
-  }
-
-  static Map<dynamic, dynamic> _handleSignInClicked(Map<dynamic, dynamic> map) {
-    return map;
+  /// Clears out any external identifiers set
+  static Future<void> clearExternalIdentifier() async {
+    return await channel.invokeMethod("clearExternalIdentifier");
   }
 }
 
