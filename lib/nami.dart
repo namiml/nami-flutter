@@ -1,9 +1,6 @@
 import 'dart:async';
-
-import 'package:nami_flutter/channel.dart';
-import 'package:nami_flutter/nami_configuration.dart';
-
-export 'package:nami_flutter/nami_configuration.dart';
+import 'channel.dart';
+import 'nami_configuration.dart';
 
 /// This class is the main entry point of the SDK.
 class Nami {
@@ -60,5 +57,3 @@ class Nami {
 }
 
 enum NamiExternalIdentifierType { sha256, uuid }
-
-enum NamiLogLevel { error, warn, info, debug }

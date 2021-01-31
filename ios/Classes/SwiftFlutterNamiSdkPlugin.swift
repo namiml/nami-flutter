@@ -121,6 +121,21 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 setters.append(setter)
             })
             NamiEntitlementManager.setEntitlements(setters)
+        case "coreAction":
+            let args = call.arguments as? String
+            if let label = args {
+                NamiMLManager.coreAction(label: label)
+            }
+        case "enterCoreContent":
+            let args = call.arguments as? [String]
+            if let labels = args {
+                NamiMLManager.enterCoreContent(labels: labels)
+            }
+        case "exitCoreContent":
+            let args = call.arguments as? [String]
+            if let labels = args {
+                NamiMLManager.exitCoreContent(labels: labels)
+            }
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }

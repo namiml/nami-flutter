@@ -17,6 +17,7 @@ import com.namiml.entitlement.NamiEntitlement
 import com.namiml.entitlement.NamiEntitlementManager
 import com.namiml.entitlement.NamiEntitlementSetter
 import com.namiml.entitlement.NamiPlatformType
+import com.namiml.ml.NamiMLManager
 import com.namiml.paywall.*
 import com.namiml.util.extensions.getFormattedPrice
 import com.namiml.util.extensions.getSubscriptionPeriodEnum
@@ -205,6 +206,23 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             purchasedSKUid = itemMap["purchasedSKUid"] as? String))
                 }
                 NamiEntitlementManager.setEntitlements(entitlementSetters)
+            }
+            "coreAction" -> {
+                @Suppress("UNCHECKED_CAST")
+                val label = call.arguments as? String
+                label?.let {
+                    NamiMLManager.coreAction(it)   
+                }
+            }
+            "enterCoreContent" -> {
+                @Suppress("UNCHECKED_CAST")
+                val labels = call.arguments as List<String>
+                NamiMLManager.enterCoreContent(labels)
+            }
+            "exitCoreContent" -> {
+                @Suppress("UNCHECKED_CAST")
+                val labels = call.arguments as List<String>
+                NamiMLManager.exitCoreContent(labels)
             }
             else -> {
                 result.notImplemented()

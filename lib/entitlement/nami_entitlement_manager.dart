@@ -13,8 +13,8 @@ class NamiEntitlementManager {
       const EventChannel('entitlementChangeEvent');
 
   /// Call to remove any entitlements previously set in the SDK
-  static void clearAllEntitlements() {
-    channel.invokeMethod("clearAllEntitlements");
+  static Future<void> clearAllEntitlements() {
+    return channel.invokeMethod("clearAllEntitlements");
   }
 
   /// Returns [true] if a Nami Control Center defined Entitlement has at
