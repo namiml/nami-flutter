@@ -48,6 +48,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var signInListener: EventChannel
     private lateinit var analyticsListener: EventChannel
     private lateinit var entitlementChangeListener: EventChannel
+    private lateinit var paywallRaiseListener: EventChannel
     private lateinit var context: Context
     private lateinit var moshi: Moshi
     private var currentActivityWeakReference: WeakReference<Activity>? = null
@@ -58,12 +59,33 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
         analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
         entitlementChangeListener = EventChannel(flutterPluginBinding.binaryMessenger, "entitlementChangeEvent")
+        paywallRaiseListener = EventChannel(flutterPluginBinding.binaryMessenger, "paywallRaiseEvent")
 
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
         setAnalyticsStreamHandler()
         setEntitlementStreamHandler()
+        setPaywallRaiseStreamHandler()
+    }
+
+    private fun setPaywallRaiseStreamHandler() {
+        paywallRaiseListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiPaywallManager.registerPaywallRaiseListener { _, namiPaywall, skus, developerPaywallId ->
+                    val eventMap = mutableMapOf<String, Any>()
+                    eventMap["namiPaywall"] = namiPaywall.convertToMap()
+                    eventMap["skus"] = skus?.map { it.convertToMap() }
+                            ?: listOf<Map<String, Any?>>()
+                    eventMap["developerPaywallId"] = "developerPaywallId"
+                    events?.success(eventMap)
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                NamiPaywallManager.registerPaywallRaiseListener(null)
+            }
+        })
     }
 
     private fun setSignInStreamHandler() {
@@ -77,7 +99,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             override fun onCancel(arguments: Any?) {
                 NamiPaywallManager.registerSignInListener(null)
             }
-
         })
     }
 
@@ -211,7 +232,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 @Suppress("UNCHECKED_CAST")
                 val label = call.arguments as? String
                 label?.let {
-                    NamiMLManager.coreAction(it)   
+                    NamiMLManager.coreAction(it)
                 }
             }
             "enterCoreContent" -> {
@@ -223,6 +244,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 @Suppress("UNCHECKED_CAST")
                 val labels = call.arguments as List<String>
                 NamiMLManager.exitCoreContent(labels)
+            }
+            "blockPaywallAutoRaise" -> {
+                val allowAutoRaisingPaywall = !(call.arguments as? Boolean ?: false)
+                NamiPaywallManager.registerApplicationAutoRaisePaywallBlocker { allowAutoRaisingPaywall }
             }
             else -> {
                 result.notImplemented()
@@ -351,19 +376,59 @@ private fun SubscriptionPeriod.getFlutterString(): String {
 }
 
 private fun NamiPaywall.convertToMap(): HashMap<String, Any?> {
-    return hashMapOf("name" to this.name,
+    return hashMapOf("id" to this.id,
+            "developerPaywallId" to this.developerPaywallId,
             "allowClosing" to this.allowClosing,
             "backgroundImageUrlPhone" to this.backgroundImageUrlPhone,
             "backgroundImageUrlTablet" to this.backgroundImageUrlTablet,
+            "name" to this.name,
+            "title" to this.title,
             "body" to this.body,
-            "developerPaywallId" to this.developerPaywallId,
-            "privacyPolicy" to this.privacyPolicy,
             "purchaseTerms" to this.purchaseTerms,
+            "privacyPolicy" to this.privacyPolicy,
+            "tosLink" to this.tosLink,
             "restoreControl" to this.restoreControl,
             "signInControl" to this.signInControl,
-            "title" to this.title,
-            "tosLink" to this.tosLink,
-            "type" to this.type)
+            "type" to this.type,
+            "extraData" to this.extraData,
+            "styleData" to (this.styleData?.convertToMap() ?: mapOf()))
+}
+
+private fun PaywallStyleData.convertToMap(): HashMap<String, Any?> {
+    return hashMapOf(
+            "bodyFontSize" to bodyFontSize,
+            "bodyTextColor" to bodyTextColor,
+            "titleFontSize" to titleFontSize,
+            "backgroundColor" to backgroundColor,
+            "skuButtonColor" to skuButtonColor,
+            "skuButtonTextColor" to skuButtonTextColor,
+            "termsLinkColor" to termsLinkColor,
+            "titleTextColor" to titleTextColor,
+            "bodyShadowColor" to bodyShadowColor,
+            "bodyShadowRadius" to bodyShadowRadius,
+            "titleShadowColor" to titleShadowColor,
+            "titleShadowRadius" to titleShadowRadius,
+            "bottomOverlayColor" to bottomOverlayColor,
+            "bottomOverlayCornerRadius" to bottomOverlayCornerRadius,
+            "closeButtonFontSize" to closeButtonFontSize,
+            "closeButtonTextColor" to closeButtonTextColor,
+            "closeButtonShadowColor" to closeButtonShadowColor,
+            "closeButtonShadowRadius" to closeButtonShadowRadius,
+            "signInButtonFontSize" to signInButtonFontSize,
+            "signInButtonTextColor" to signInButtonTextColor,
+            "signInButtonShadowColor" to signInButtonShadowColor,
+            "signInButtonShadowRadius" to signInButtonShadowRadius,
+            "purchaseTermsFontSize" to purchaseTermsFontSize,
+            "purchaseTermsTextColor" to purchaseTermsTextColor,
+            "purchaseTermsShadowColor" to purchaseTermsShadowColor,
+            "purchaseTermsShadowRadius" to purchaseTermsShadowRadius,
+            "restoreButtonFontSize" to restoreButtonFontSize,
+            "restoreButtonTextColor" to restoreButtonTextColor,
+            "restoreButtonShadowColor" to restoreButtonShadowColor,
+            "restoreButtonShadowRadius" to restoreButtonShadowRadius,
+            "featuredSkuButtonColor" to featuredSkuButtonColor,
+            "featuredSkuButtonTextColor" to this.featuredSkuButtonTextColor
+    )
 }
 
 private fun NamiAnalyticsActionType.getFlutterString(): String {

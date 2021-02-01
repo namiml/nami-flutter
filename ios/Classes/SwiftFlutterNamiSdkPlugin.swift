@@ -8,11 +8,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let signInEventChannel = FlutterEventChannel(name: "signInEvent", binaryMessenger: registrar.messenger())
         let analyticsEventChannel = FlutterEventChannel(name: "analyticsEvent", binaryMessenger: registrar.messenger())
         let entitlementChangeEventChannel = FlutterEventChannel(name: "entitlementChangeEvent", binaryMessenger: registrar.messenger())
+        let paywallRaiseEventChannel = FlutterEventChannel(name: "paywallRaiseEvent", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
         analyticsEventChannel.setStreamHandler(AnalyticsEventHandler())
         entitlementChangeEventChannel.setStreamHandler(EntitlementChangeEventHandler())
+        paywallRaiseEventChannel.setStreamHandler(PaywallRaiseEventHandler())
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -136,6 +138,11 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             if let labels = args {
                 NamiMLManager.exitCoreContent(labels: labels)
             }
+        case "blockPaywallAutoRaise":
+            let blockPaywallFromRaising = call.arguments as? Bool ?? false
+            NamiPaywallManager.registerApplicationAutoRaisePaywallBlocker { () -> Bool in            
+                return !blockPaywallFromRaising
+            }
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }
@@ -144,21 +151,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     class SignInEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.register { (_, id: String, paywall: NamiPaywall) in
-                var eventMap = [String : String]()
-                eventMap["name"] = paywall.paywallValue(forKey: NamiPaywallKeys.name)
-                eventMap["allowClosing"] = paywall.paywallValue(forKey: NamiPaywallKeys.allow_closing)
-                eventMap["backgroundImageUrlPhone"] = paywall.paywallValue(forKey: NamiPaywallKeys.background_image_url_phone)
-                eventMap["backgroundImageUrlTablet"] = paywall.paywallValue(forKey: NamiPaywallKeys.background_image_url_tablet)
-                eventMap["body"] = paywall.description
-                eventMap["title"] = paywall.title
-                eventMap["developerPaywallId"] = paywall.paywallValue(forKey: NamiPaywallKeys.developer_paywall_id)
-                eventMap["privacyPolicy"] = paywall.paywallValue(forKey: NamiPaywallKeys.privacy_policy)
-                eventMap["purchaseTerms"] = paywall.paywallValue(forKey: NamiPaywallKeys.purchase_terms)
-                eventMap["restoreControl"] = paywall.paywallValue(forKey: NamiPaywallKeys.restore_control)
-                eventMap["signInControl"] = paywall.paywallValue(forKey: NamiPaywallKeys.sign_in_control)
-                eventMap["tosLink"] = paywall.paywallValue(forKey: NamiPaywallKeys.tos_link)
-                eventMap["type"] = paywall.paywallValue(forKey: NamiPaywallKeys.type)
-                events(eventMap)
+                events(paywall.convertToMap())
             }
             return nil
         }
@@ -227,6 +220,28 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
+    
+    class PaywallRaiseEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiPaywallManager.register { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
+                var eventMap = [String : Any]()
+                eventMap["namiPaywall"] = namiPaywall.convertToMap()
+                var list = [[String: Any]]()
+                skus?.forEach { (sku: NamiSKU) in
+                    list.append(sku.convertToMap())
+                }
+                eventMap["skus"] = list
+                eventMap["developerPaywallId"] = developerPaywallId
+                events(eventMap)
+            }
+            return nil
+        }
+        
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            NamiPaywallManager.register(applicationPaywallProvider: nil)
+            return nil
+        }
+    }
 }
 
 public extension NamiEntitlement {
@@ -290,5 +305,79 @@ public extension NamiSKU {
             map["periodUnit"] = "year"
         }
         return map
+    }
+}
+
+public extension NamiPaywall {
+    func convertToMap() -> [String: Any] {
+        var map = [String: Any]()
+        map["id"] = self.paywallID
+        map["developerPaywallId"] = self.developerPaywallID
+        map["allowClosing"] = self.paywallValue(forKey: NamiPaywallKeys.allow_closing)
+        map["backgroundImageUrlPhone"] = self.paywallValue(forKey: NamiPaywallKeys.background_image_url_phone)
+        map["backgroundImageUrlTablet"] = self.paywallValue(forKey: NamiPaywallKeys.background_image_url_tablet)
+        map["name"] = self.paywallValue(forKey: NamiPaywallKeys.name)
+        map["title"] = self.title
+        map["body"] = self.body
+        map["purchaseTerms"] = self.paywallValue(forKey: NamiPaywallKeys.purchase_terms)
+        map["privacyPolicy"] = self.paywallValue(forKey: NamiPaywallKeys.privacy_policy)
+        map["tosLink"] = self.paywallValue(forKey: NamiPaywallKeys.tos_link)
+        map["restoreControl"] = self.paywallValue(forKey: NamiPaywallKeys.restore_control)
+        map["signInControl"] = self.paywallValue(forKey: NamiPaywallKeys.sign_in_control)
+        map["type"] = self.paywallValue(forKey: NamiPaywallKeys.type)
+        map["extraData"] = self.paywallValue(forKey: NamiPaywallKeys.marketing_content)
+        map["styleData"] = self.styleData.convertToMap()
+        return map
+    }
+}
+
+public extension PaywallStyleData {
+    func convertToMap() -> [String: Any] {
+        var map = [String: Any]()
+        map["bodyFontSize"] = bodyFontSize
+        map["bodyTextColor"] = bodyTextColor.toHexString()
+        map["titleFontSize"] = titleFontSize
+        map["backgroundColor"] = backgroundColor.toHexString()
+        map["skuButtonColor"] = skuButtonColor.toHexString()
+        map["skuButtonTextColor"] = skuButtonTextColor.toHexString()
+        map["termsLinkColor"] = termsLinkColor.toHexString()
+        map["titleTextColor"] = titleTextColor.toHexString()
+        map["bodyShadowColor"] = bodyShadowColor.toHexString()
+        map["bodyShadowRadius"] = bodyShadowRadius
+        map["titleShadowColor"] = titleShadowColor.toHexString()
+        map["titleShadowRadius"] = titleShadowRadius
+        map["bottomOverlayColor"] = bottomOverlayColor.toHexString()
+        map["bottomOverlayCornerRadius"] = bottomOverlayCornerRadius
+        map["closeButtonFontSize"] = closeButtonFontSize
+        map["closeButtonTextColor"] = closeButtonTextColor.toHexString()
+        map["closeButtonShadowColor"] = closeButtonShadowColor.toHexString()
+        map["closeButtonShadowRadius"] = closeButtonShadowRadius
+        map["signInButtonFontSize"] = signinButtonFontSize
+        map["signInButtonTextColor"] = signinButtonTextColor.toHexString()
+        map["signInButtonShadowColor"] = signinButtonShadowColor.toHexString()
+        map["signInButtonShadowRadius"] = signinButtonShadowRadius
+        map["purchaseTermsFontSize"] = purchaseTermsFontSize
+        map["purchaseTermsTextColor"] = purchaseTermsTextColor.toHexString()
+        map["purchaseTermsShadowColor"] = purchaseTermsShadowColor.toHexString()
+        map["purchaseTermsShadowRadius"] = purchaseTermsShadowRadius
+        map["restoreButtonFontSize"] = restoreButtonFontSize
+        map["restoreButtonTextColor"] = restoreButtonTextColor.toHexString()
+        map["restoreButtonShadowColor"] = restoreButtonShadowColor.toHexString()
+        map["restoreButtonShadowRadius"] = restoreButtonShadowRadius
+        map["featuredSkuButtonColor"] = featuredSkusButtonColor.toHexString()
+        map["featuredSkuButtonTextColor"] = featuredSkusButtonTextColor.toHexString()
+        return map
+    }
+}
+
+public extension UIColor {
+    func toHexString() -> String {
+        let components = self.cgColor.components
+        let r: CGFloat = components?[0] ?? 0.0
+        let g: CGFloat = components?[1] ?? 0.0
+        let b: CGFloat = components?[2] ?? 0.0
+        
+        let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
+        return hexString
     }
 }

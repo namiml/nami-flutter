@@ -26,6 +26,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   static const _testExternalIdentifier = "9a9999a9-99aa-99a9-aa99-999a999999a8";
 
+  // Linked = "e340101d-c581-4c32-acd1-af0f66184d92
+  // Basic = "b1a6572f-b0fc-45cd-8561-110c039c7744"
+  static const _androidAppPlatformId = "b1a6572f-b0fc-45cd-8561-110c039c7744";
+
+  // Linked = 6a13d56b-540b-497f-9721-478b8b59fc0f
+  // Basic = db5e6672-ae5b-4a0e-b545-2b60d5fa9066
+  static const _iosAppPlatformId = "db5e6672-ae5b-4a0e-b545-2b60d5fa9066";
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -52,16 +60,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('--------- initState ---------');
     WidgetsBinding.instance.addObserver(this);
     initPlatformState();
-    NamiPaywallManager.signInEvents().listen((map) {
+    NamiPaywallManager.signInEvents().listen((namiPaywall) {
       Nami.clearExternalIdentifier();
       Nami.setExternalIdentifier(
           _testExternalIdentifier, NamiExternalIdentifierType.uuid);
-      print('Sign In Clicked');
+      print('--------- Sign In Clicked ---------');
     });
     _printCustomerJourneyState();
     _handleActiveEntitlements();
     NamiAnalyticsSupport.analyticsEvents().listen((analyticsData) {
       printAnalyticsEventData(analyticsData);
+    });
+    NamiPaywallManager.paywallRaiseEvents().listen((paywallRaiseRequestData) {
+      print('--------- RAISE PAYWALL REQUESTED ---------');
     });
     // Uncomment this to test NamiEntitlementManager.setEntitlements()
     //_setEntitlementSetters();
@@ -125,8 +136,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     var namiConfiguration = NamiConfiguration(
-        "db5e6672-ae5b-4a0e-b545-2b60d5fa9066",
-        "b1a6572f-b0fc-45cd-8561-110c039c7744",
+        _iosAppPlatformId,
+        _androidAppPlatformId,
         false,
         NamiLogLevel.debug,
         false,

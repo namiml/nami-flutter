@@ -3,10 +3,15 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 import '../channel.dart';
+import 'nami_paywall.dart';
+import 'nami_sku.dart';
 
 /// Class responsible for managing all aspects of a paywall in the Nami SDK
 class NamiPaywallManager {
   static const EventChannel _signInEvent = const EventChannel('signInEvent');
+  static const EventChannel _paywallRaiseEvent =
+      const EventChannel('paywallRaiseEvent');
+
   /// Checks to see if the Nami system can raise a paywall.  A paywall raise
   /// may not be possible due to missing configuration data or paywall is
   /// blocked from raising
@@ -19,9 +24,13 @@ class NamiPaywallManager {
     return channel.invokeMethod("raisePaywall");
   }
 
+  static Future<void> blockPaywallAutoRaise(bool blockRaise) {
+    return channel.invokeMethod("blockPaywallAutoRaise", blockRaise);
+  }
+
   /// Stream for when user presses sign in button on a paywall raised by
   /// Nami system
-  static Stream<Map<dynamic, dynamic>> signInEvents() {
+  static Stream<NamiPaywall> signInEvents() {
     var data = _signInEvent
         .receiveBroadcastStream()
         .map((dynamic event) => _handleSignInClicked(event));
@@ -29,7 +38,40 @@ class NamiPaywallManager {
     return data;
   }
 
-  static Map<dynamic, dynamic> _handleSignInClicked(Map<dynamic, dynamic> map) {
-    return map;
+  static NamiPaywall _handleSignInClicked(Map<dynamic, dynamic> map) {
+    return NamiPaywall.fromMap(map);
+  }
+
+  static Stream<PaywallRaiseRequestData> paywallRaiseEvents() {
+    var data = _paywallRaiseEvent
+        .receiveBroadcastStream()
+        .map((dynamic event) => _handlePaywallRaiseRequested(event));
+
+    return data;
+  }
+
+  static PaywallRaiseRequestData _handlePaywallRaiseRequested(
+      Map<dynamic, dynamic> map) {
+    List<dynamic> dynamicSkus = map['skus'];
+    List<NamiSKU> skus = List();
+    dynamicSkus.forEach((element) {
+      NamiSKU namiSKU = NamiSKU.fromMap(element);
+      skus.add(namiSKU);
+    });
+    return PaywallRaiseRequestData(NamiPaywall.fromMap(map['namiPaywall']),
+        skus, map['developerPaywallId']);
+  }
+}
+
+class PaywallRaiseRequestData {
+  final NamiPaywall namiPaywall;
+  final List<NamiSKU> skus;
+  final String developerPaywallId;
+
+  PaywallRaiseRequestData(this.namiPaywall, this.skus, this.developerPaywallId);
+
+  @override
+  String toString() {
+    return 'PaywallRaiseRequestData{namiPaywall: $namiPaywall, skus: $skus, developerPaywallId: $developerPaywallId}';
   }
 }
