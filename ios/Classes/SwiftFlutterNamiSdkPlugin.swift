@@ -29,18 +29,18 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                let bypassStore = myArgs["bypassStore"] as? Bool,
                let developmentMode = myArgs["developmentMode"] as? Bool,
                let passiveMode = myArgs["passiveMode"] as? Bool,
-               let namiLogLevel = myArgs["namiLogLevel"] as? Int,
+               let namiLogLevel = myArgs["namiLogLevel"] as? String,
                let namiCommands = myArgs["extraDataList"] as? Array<String> {
                 let namiConfig = NamiConfiguration(appPlatformID: appPlatformID)
                 namiConfig.bypassStore = bypassStore
                 namiConfig.developmentMode = developmentMode
                 namiConfig.passiveMode = passiveMode
                 namiConfig.namiCommands = namiCommands
-                if(namiLogLevel == NamiLogLevel.debug.rawValue) {
+                if(namiLogLevel == "debug") {
                     namiConfig.logLevel = NamiLogLevel.debug
-                } else if(namiLogLevel == NamiLogLevel.info.rawValue) {
+                } else if(namiLogLevel == "info") {
                     namiConfig.logLevel = NamiLogLevel.info
-                } else if(namiLogLevel == NamiLogLevel.warn.rawValue) {
+                } else if(namiLogLevel == "warn") {
                     namiConfig.logLevel = NamiLogLevel.warn
                 } else {
                     namiConfig.logLevel = NamiLogLevel.error
@@ -59,8 +59,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             if let myArgs = args as? [String: Any],
                let externalIdentifier = myArgs["externalIdentifier"] as? String,
-               let type = myArgs["type"] as? Int {
-                if(type == NamiExternalIdentifierType.uuid.rawValue) {
+               let type = myArgs["type"] as? String {
+                if(type == "uuid") {
                     Nami.setExternalIdentifier(externalIdentifier: externalIdentifier, type: NamiExternalIdentifierType.uuid)
                 } else {
                     Nami.setExternalIdentifier(externalIdentifier: externalIdentifier, type: NamiExternalIdentifierType.sha256)
@@ -142,6 +142,32 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let blockPaywallFromRaising = call.arguments as? Bool ?? false
             NamiPaywallManager.registerApplicationAutoRaisePaywallBlocker { () -> Bool in            
                 return !blockPaywallFromRaising
+            }
+        case "clearBypassStorePurchases":
+            NamiPurchaseManager.clearBypassStorePurchases()
+        case "allPurchases":
+            let allPurchases = NamiPurchaseManager.allPurchases()
+            let listofMaps = allPurchases.map({ (namiPurchase: NamiPurchase) in namiPurchase.convertToMap()})
+            result(listofMaps)
+        case "isSKUIDPurchased":
+            let args = call.arguments as? String
+            if let skuId = args {
+                result(NamiPurchaseManager.isSKUIDPurchased(skuId))
+            }
+        case "anySKUIDPurchased":
+            let args = call.arguments as? [String]
+            if let skuIds = args {
+                result(NamiPurchaseManager.anySKUIDPurchased(skuIds))
+            }
+        case "consumePurchasedSKU":
+            let args = call.arguments as? String
+            if let skuId = args {
+                NamiPurchaseManager.consumePurchasedSKU(skuID: skuId)
+            }
+        case "paywallImpression":
+            let args = call.arguments as? String
+            if let developerPaywallId = args {
+                NamiPaywallManager.paywallImpression(developerID: developerPaywallId)
             }
         default:
             result("iOS " + UIDevice.current.systemVersion)

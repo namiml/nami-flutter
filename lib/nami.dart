@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
+
 import 'channel.dart';
 import 'nami_configuration.dart';
 
@@ -15,7 +17,7 @@ class Nami {
       "bypassStore": namiConfiguration.bypassStore,
       "developmentMode": namiConfiguration.developmentMode,
       "passiveMode": namiConfiguration.passiveMode,
-      "namiLogLevel": namiConfiguration.namiLogLevel.index,
+      "namiLogLevel": describeEnum(namiConfiguration.namiLogLevel),
       "extraDataList": extraDataList
     };
     return channel.invokeMethod("configure", variableMap);
@@ -38,7 +40,7 @@ class Nami {
       String externalIdentifier, NamiExternalIdentifierType type) async {
     var variableMap = {
       'externalIdentifier': externalIdentifier,
-      "type": type.index
+      "type": describeEnum(type)
     };
     return await channel.invokeMethod("setExternalIdentifier", variableMap);
   }

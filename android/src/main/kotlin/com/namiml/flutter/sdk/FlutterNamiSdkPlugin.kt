@@ -12,6 +12,7 @@ import com.namiml.analytics.NamiAnalyticsKeys
 import com.namiml.analytics.NamiAnalyticsPurchaseActivityType
 import com.namiml.analytics.NamiAnalyticsSupport
 import com.namiml.billing.NamiPurchase
+import com.namiml.billing.NamiPurchaseManager
 import com.namiml.customer.NamiCustomerManager
 import com.namiml.entitlement.NamiEntitlement
 import com.namiml.entitlement.NamiEntitlementManager
@@ -148,28 +149,31 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success("Android ${android.os.Build.VERSION.RELEASE}")
             }
             "configure" -> {
+                val namiLogLevel = when (call.argument<String>("namiLogLevel")) {
+                    "warn" -> NamiLogLevel.WARN
+                    "debug" -> NamiLogLevel.DEBUG
+                    "info" -> NamiLogLevel.INFO
+                    else -> NamiLogLevel.ERROR
+                }
                 configure(context,
                         call.argument<String>("appPlatformIDGoogle"),
                         call.argument<Boolean>("bypassStore"),
                         call.argument<Boolean>("developmentMode"),
-                        call.argument<Int>("namiLogLevel"),
+                        namiLogLevel,
                         call.argument<List<String>>("extraDataList"))
                 result.success(true)
             }
             "setExternalIdentifier" -> {
                 val externalIdentifier = call.argument<String>("externalIdentifier")
-                val type = call.argument<Int>("type")
-                val namiExternalIdentifierType = type?.let {
-                    NamiExternalIdentifierType.values()[it]
+                val type = call.argument<String>("type")
+                val namiExternalIdentifierType = if (type == "uuid") {
+                    NamiExternalIdentifierType.UUID
+                } else {
+                    NamiExternalIdentifierType.SHA_256
                 }
                 io.flutter.Log.d(LOG_TAG, "externalIdentifier $externalIdentifier")
                 io.flutter.Log.d(LOG_TAG, "type $type")
-                namiExternalIdentifierType?.let {
-                    Nami.setExternalIdentifier(
-                            externalIdentifier = externalIdentifier ?: "",
-                            type = namiExternalIdentifierType
-                    )
-                }
+                Nami.setExternalIdentifier(externalIdentifier ?: "", namiExternalIdentifierType)
             }
             "clearExternalIdentifier" -> {
                 Nami.clearExternalIdentifier()
@@ -237,17 +241,40 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             "enterCoreContent" -> {
                 @Suppress("UNCHECKED_CAST")
-                val labels = call.arguments as List<String>
-                NamiMLManager.enterCoreContent(labels)
+                val labels = call.arguments as? List<String>
+                labels?.let {
+                    NamiMLManager.enterCoreContent(it)
+                }
             }
             "exitCoreContent" -> {
                 @Suppress("UNCHECKED_CAST")
-                val labels = call.arguments as List<String>
-                NamiMLManager.exitCoreContent(labels)
+                val labels = call.arguments as? List<String>
+                labels?.let {
+                    NamiMLManager.exitCoreContent(it)
+                }
             }
             "blockPaywallAutoRaise" -> {
                 val allowAutoRaisingPaywall = !(call.arguments as? Boolean ?: false)
                 NamiPaywallManager.registerApplicationAutoRaisePaywallBlocker { allowAutoRaisingPaywall }
+            }
+            "clearBypassStorePurchases" -> {
+                NamiPurchaseManager.clearBypassStorePurchases()
+            }
+            "allPurchases" -> {
+                result.success(NamiPurchaseManager.allPurchases().map { it.convertToMap() })
+            }
+            "isSKUIDPurchased" -> {
+                val skuId = call.arguments as? String
+                skuId?.let {
+                    result.success(NamiPurchaseManager.isSKUIDPurchased(it))
+                }
+            }
+            "anySKUIDPurchased" -> {
+                @Suppress("UNCHECKED_CAST")
+                val skuIds = call.arguments as? List<String>
+                skuIds?.let {
+                    result.success(NamiPurchaseManager.anySKUIDPurchased(it))
+                }
             }
             else -> {
                 result.notImplemented()
@@ -259,7 +286,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                           platformId: String?,
                           bypass: Boolean?,
                           developmentMode: Boolean?,
-                          namiLogLevel: Int?,
+                          namiLogLevel: NamiLogLevel,
                           extraDataList: List<String>?) {
         if (platformId == null) {
             return
@@ -270,7 +297,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         io.flutter.Log.d(LOG_TAG, "namiLogLevel $namiLogLevel")
         io.flutter.Log.d(LOG_TAG, "extraDataList $extraDataList")
         val configuration = NamiConfiguration.build(context, platformId) {
-            this.logLevel = NamiLogLevel.values()[namiLogLevel ?: NamiLogLevel.WARN.ordinal]
+            this.logLevel = namiLogLevel
             this.bypassStore = bypass ?: false
             this.developmentMode = developmentMode ?: false
             this.settingsList = extraDataList

@@ -28,6 +28,16 @@ class NamiPaywallManager {
     return channel.invokeMethod("blockPaywallAutoRaise", blockRaise);
   }
 
+  /// iOS Only
+  ///
+  /// When Nami does not control the paywall, manually create an impression
+  /// when the paywall is seen.
+  ///
+  /// NOTE: This call will only work when the SDK is set to Passive Mode.
+  static Future<void> paywallImpression(String developerPaywallId) {
+    return channel.invokeMethod("paywallImpression", developerPaywallId);
+  }
+
   /// Stream for when user presses sign in button on a paywall raised by
   /// Nami system
   static Stream<NamiPaywall> signInEvents() {
