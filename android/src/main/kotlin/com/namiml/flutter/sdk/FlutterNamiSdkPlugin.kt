@@ -12,6 +12,7 @@ import com.namiml.analytics.NamiAnalyticsKeys
 import com.namiml.analytics.NamiAnalyticsPurchaseActivityType
 import com.namiml.analytics.NamiAnalyticsSupport
 import com.namiml.billing.NamiPurchase
+import com.namiml.billing.NamiPurchaseCompleteResult
 import com.namiml.billing.NamiPurchaseManager
 import com.namiml.customer.NamiCustomerManager
 import com.namiml.entitlement.NamiEntitlement
@@ -276,6 +277,16 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     result.success(NamiPurchaseManager.anySKUIDPurchased(it))
                 }
             }
+            "buySKU" -> {
+                val skuRefId = call.arguments as? String
+                val activity = currentActivityWeakReference?.get()
+                if (skuRefId != null && activity != null) {
+                    NamiPurchaseManager.buySKU(activity, skuRefId) {
+                        io.flutter.Log.d(LOG_TAG, "result ${it.convertToMap()}")
+                        result.success(it.convertToMap())
+                    }
+                }
+            }
             else -> {
                 result.notImplemented()
             }
@@ -327,7 +338,16 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 }
 
-private fun NamiEntitlement.convertToMap(): HashMap<String, Any?> {
+private fun NamiPurchaseCompleteResult.convertToMap(): Map<String, Any?> {
+    val purchaseState = if (isSuccessful) {
+        "purchased"
+    } else {
+        "failed"
+    }
+    return hashMapOf("purchaseState" to purchaseState, "error" to this.message)
+}
+
+private fun NamiEntitlement.convertToMap(): Map<String, Any?> {
     return hashMapOf("name" to name,
             "description" to desc,
             "namiId" to namiId,
@@ -337,7 +357,7 @@ private fun NamiEntitlement.convertToMap(): HashMap<String, Any?> {
             "activePurchases" to activePurchases.map { it.convertToMap() })
 }
 
-private fun NamiPurchase.convertToMap(): HashMap<String, Any?> {
+private fun NamiPurchase.convertToMap(): Map<String, Any?> {
     return hashMapOf("purchaseInitiatedTimestamp" to purchaseInitiatedTimestamp,
             "expires" to (expires?.time ?: 0L),
             "purchaseSource" to purchaseSource.getFlutterString(),
@@ -366,7 +386,7 @@ private fun NamiAnalyticsPurchaseActivityType?.getFlutterString(): String {
     }
 }
 
-private fun NamiSKU.convertToMap(): HashMap<String, Any?> {
+private fun NamiSKU.convertToMap(): Map<String, Any?> {
     return hashMapOf("description" to this.skuDetails.description,
             "title" to this.skuDetails.title,
             "type" to this.type.getFlutterString(),
@@ -402,7 +422,7 @@ private fun SubscriptionPeriod.getFlutterString(): String {
     }
 }
 
-private fun NamiPaywall.convertToMap(): HashMap<String, Any?> {
+private fun NamiPaywall.convertToMap(): Map<String, Any?> {
     return hashMapOf("id" to this.id,
             "developerPaywallId" to this.developerPaywallId,
             "allowClosing" to this.allowClosing,
@@ -421,7 +441,7 @@ private fun NamiPaywall.convertToMap(): HashMap<String, Any?> {
             "styleData" to (this.styleData?.convertToMap() ?: mapOf()))
 }
 
-private fun PaywallStyleData.convertToMap(): HashMap<String, Any?> {
+private fun PaywallStyleData.convertToMap(): Map<String, Any?> {
     return hashMapOf(
             "bodyFontSize" to bodyFontSize,
             "bodyTextColor" to bodyTextColor,

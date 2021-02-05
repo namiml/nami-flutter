@@ -7,7 +7,7 @@ class NamiCustomerManager {
   /// returns current customer's journey state
   static Future<CustomerJourneyState> currentCustomerJourneyState() async {
     Map<dynamic, dynamic> map = await channel.invokeMethod("currentCustomerJourneyState");
-    if (map == null || map.isNotEmpty) {
+    if (map == null || map.isEmpty) {
       return null;
     } else {
       return CustomerJourneyState(

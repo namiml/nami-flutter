@@ -24,6 +24,11 @@ class NamiPaywallManager {
     return channel.invokeMethod("raisePaywall");
   }
 
+  /// Displays a particular paywall in the app
+  static Future<bool> raisePaywallByDeveloperPaywallId(String developerPaywallId) {
+    return channel.invokeMethod("raisePaywall", developerPaywallId);
+  }
+
   static Future<void> blockPaywallAutoRaise(bool blockRaise) {
     return channel.invokeMethod("blockPaywallAutoRaise", blockRaise);
   }

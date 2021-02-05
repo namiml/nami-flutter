@@ -169,6 +169,30 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             if let developerPaywallId = args {
                 NamiPaywallManager.paywallImpression(developerID: developerPaywallId)
             }
+        case "buySKU":
+            let args = call.arguments as? String
+            if let skuRefId = args {
+                NamiPurchaseManager.skusForSKUIDs(skuIDs: [skuRefId]) { (success: Bool, skus: [NamiSKU]?, invalidSKUIDs: [String]?, error: Error?) in
+                    if let sku = skus?.first {
+                        NamiPurchaseManager.buySKU(sku) { (purchases: [NamiPurchase], state: NamiPurchaseState, error: Error?) in
+                            var eventMap = [String : Any?]()
+                            eventMap["error"] = error?.localizedDescription
+                            // Delete this once buySKU is working on iOS
+                            eventMap["original_state"] = state.readableString()
+                            // Delete this once buySKU is working on iOS
+                            eventMap["purchases"] = purchases.count
+                            // react to the state of the purchase
+                            if state == .purchased {
+                                eventMap["purchaseState"] = "purchased"
+                            }
+                            else {
+                                eventMap["purchaseState"] = "failed"
+                            }
+                            result(eventMap)
+                        }
+                    }
+                }
+            }
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }

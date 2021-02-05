@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/analytics/nami_analytics_support.dart';
+import 'package:nami_flutter/billing/nami_purchase_manager.dart';
 import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:nami_flutter/entitlement/nami_entitlement_manager.dart';
 import 'package:nami_flutter/entitlement/nami_entitlement_setter.dart';
@@ -78,7 +79,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     //_setEntitlementSetters();
   }
 
-  void _setEntitlementSetters() {
+  void _setEntitlementSetters() { // ignore: unused_element
     List<NamiEntitlementSetter> entitlements = List();
     entitlements.add(NamiEntitlementSetter("123"));
     entitlements.add(NamiEntitlementSetter(
@@ -188,6 +189,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         if (await NamiPaywallManager.canRaisePaywall()) {
                           NamiPaywallManager.raisePaywall();
                         }
+                        // To test buySKU, uncomment below line and comment out
+                        // above two lines about raising paywall
+                        // _testBuySKU("test_product_monthly_subscription");
                       },
                       child: Text('Subscribe'),
                     ),
@@ -240,6 +244,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       print("PURCHASE_TIMESTAMP NULL");
     }
     print('--------- End ---------');
+  }
+
+  void _testBuySKU(String skuRefId) async { // ignore: unused_element
+    NamiPurchaseCompleteResult result =
+        await NamiPurchaseManager.buySKU(skuRefId);
+    if (result != null) {
+      print('Purchase Complete with state ${result.purchaseState}--');
+    } else {
+      print('Purchase Complete with NULL result');
+    }
   }
 }
 
