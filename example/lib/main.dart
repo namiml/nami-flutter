@@ -188,6 +188,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         print('Subscribe clicked!');
                         if (await NamiPaywallManager.canRaisePaywall()) {
                           NamiPaywallManager.raisePaywall();
+                          //NamiPaywallManager.raisePaywallByDeveloperPaywallId("TestDevID");
                         }
                         // To test buySKU, uncomment below line and comment out
                         // above two lines about raising paywall

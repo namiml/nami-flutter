@@ -77,7 +77,12 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             // https://github.com/flutter/flutter/issues/9961
             // https://github.com/flutter/flutter/issues/44764
             let viewController = UIApplication.shared.delegate!.window!!.rootViewController!
-            NamiPaywallManager.raisePaywall(fromVC: viewController)
+            let developerPaywallID = call.arguments as? String
+            if(developerPaywallID == nil) {
+                NamiPaywallManager.raisePaywall(fromVC: viewController)
+            } else {
+                NamiPaywallManager.raisePaywall(developerPaywallID: developerPaywallID!, fromVC: viewController)
+            }
         case "currentCustomerJourneyState":
             let state = NamiCustomerManager.currentCustomerJourneyState()
             var eventMap = [String : Any?]()
@@ -140,7 +145,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
         case "blockPaywallAutoRaise":
             let blockPaywallFromRaising = call.arguments as? Bool ?? false
-            NamiPaywallManager.registerApplicationAutoRaisePaywallBlocker { () -> Bool in            
+            NamiPaywallManager.registerAutoRaisePaywallBlocker { () -> Bool in
                 return !blockPaywallFromRaising
             }
         case "clearBypassStorePurchases":
@@ -200,14 +205,14 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     
     class SignInEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiPaywallManager.register { (_, id: String, paywall: NamiPaywall) in
+            NamiPaywallManager.registerSignInHandler { (_, id: String, paywall: NamiPaywall) in
                 events(paywall.convertToMap())
             }
             return nil
         }
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiPaywallManager.register(applicationSignInProvider: nil)
+            NamiPaywallManager.registerSignInHandler(nil)
             return nil
         }
     }
@@ -258,7 +263,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     
     class EntitlementChangeEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiEntitlementManager.registerChangeHandler { (namiEntitlements: [NamiEntitlement]) in
+            NamiEntitlementManager.registerEntitlementsChangedHandler { (namiEntitlements: [NamiEntitlement]) in
                 let listofMaps = namiEntitlements.map({ (namiEntitlement: NamiEntitlement) in namiEntitlement.convertToMap()})
                 events(listofMaps)
             }
@@ -266,14 +271,14 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiEntitlementManager.registerChangeHandler(entitlementsChangedHandler: nil)
+            NamiEntitlementManager.registerEntitlementsChangedHandler(nil)
             return nil
         }
     }
     
     class PaywallRaiseEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiPaywallManager.register { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
+            NamiPaywallManager.registerPaywallHandler { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
                 var eventMap = [String : Any]()
                 eventMap["namiPaywall"] = namiPaywall.convertToMap()
                 var list = [[String: Any]]()
@@ -288,7 +293,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiPaywallManager.register(applicationPaywallProvider: nil)
+            NamiPaywallManager.registerPaywallHandler(nil)
             return nil
         }
     }
