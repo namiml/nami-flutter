@@ -1,3 +1,5 @@
+import 'package:nami_flutter/paywall/featured_sku.dart';
+
 import 'paywall_style_data.dart';
 
 class NamiPaywall {
@@ -18,6 +20,10 @@ class NamiPaywall {
   final Map<dynamic, dynamic> extraData;
   final PaywallStyleData styleData;
 
+  // formattedSku list associated with this paywall if any
+  final List<FormattedSku> formattedSkus;
+  final bool useBottomOverlay;
+
   NamiPaywall(
       this.id,
       this.developerPaywallId,
@@ -34,9 +40,17 @@ class NamiPaywall {
       this.signInControl,
       this.type,
       this.extraData,
-      this.styleData);
+      this.styleData,
+      this.formattedSkus,
+      this.useBottomOverlay);
 
   factory NamiPaywall.fromMap(Map<dynamic, dynamic> map) {
+    List<dynamic> dynamicFormattedSkus = map['formattedSkus'];
+    List<FormattedSku> formattedSkus = List();
+    dynamicFormattedSkus.forEach((element) {
+      FormattedSku formattedSku = FormattedSku.fromMap(element);
+      formattedSkus.add(formattedSku);
+    });
     return NamiPaywall(
         map['id'],
         map['developerPaywallId'],
@@ -53,11 +67,13 @@ class NamiPaywall {
         map['signInControl'],
         map['type'],
         map['extraData'],
-        PaywallStyleData.fromMap(map['styleData']));
+        PaywallStyleData.fromMap(map['styleData']),
+        formattedSkus,
+        map['useBottomOverlay']);
   }
 
   @override
   String toString() {
-    return 'NamiPaywall{id: $id, developerPaywallId: $developerPaywallId, allowClosing: $allowClosing, backgroundImageUrlPhone: $backgroundImageUrlPhone, backgroundImageUrlTablet: $backgroundImageUrlTablet, name: $name, title: $title, body: $body, purchaseTerms: $purchaseTerms, privacyPolicy: $privacyPolicy, tosLink: $tosLink, restoreControl: $restoreControl, signInControl: $signInControl, type: $type, extraData: $extraData, styleData: $styleData}';
+    return 'NamiPaywall{id: $id, developerPaywallId: $developerPaywallId, allowClosing: $allowClosing, backgroundImageUrlPhone: $backgroundImageUrlPhone, backgroundImageUrlTablet: $backgroundImageUrlTablet, name: $name, title: $title, body: $body, purchaseTerms: $purchaseTerms, privacyPolicy: $privacyPolicy, tosLink: $tosLink, restoreControl: $restoreControl, signInControl: $signInControl, type: $type, extraData: $extraData, styleData: $styleData, formattedSkus: $formattedSkus, useBottomOverlay: $useBottomOverlay}';
   }
 }

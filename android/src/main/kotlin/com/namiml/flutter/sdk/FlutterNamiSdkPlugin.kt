@@ -11,6 +11,7 @@ import com.namiml.analytics.NamiAnalyticsActionType
 import com.namiml.analytics.NamiAnalyticsKeys
 import com.namiml.analytics.NamiAnalyticsPurchaseActivityType
 import com.namiml.analytics.NamiAnalyticsSupport
+import com.namiml.api.model.FormattedSku
 import com.namiml.billing.NamiPurchase
 import com.namiml.billing.NamiPurchaseCompleteResult
 import com.namiml.billing.NamiPurchaseManager
@@ -438,7 +439,13 @@ private fun NamiPaywall.convertToMap(): Map<String, Any?> {
             "signInControl" to this.signInControl,
             "type" to this.type,
             "extraData" to this.extraData,
+            "formattedSkus" to this.formattedSkus.map { it.convertToMap() },
+            "useBottomOverlay" to this.useBottomOverlay,
             "styleData" to (this.styleData?.convertToMap() ?: mapOf()))
+}
+
+private fun FormattedSku.convertToMap(): Map<String, Any?> {
+    return hashMapOf("featured" to this.featured, "id" to this.id)
 }
 
 private fun PaywallStyleData.convertToMap(): Map<String, Any?> {

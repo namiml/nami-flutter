@@ -19,13 +19,20 @@ class NamiPaywallManager {
     return channel.invokeMethod("canRaisePaywall");
   }
 
+  /// Will animate the closing of the paywall if [animated] is true. Returns
+  /// [true] when paywall is dismissed, may be immediate if not presented
+  static Future<bool> dismissNamiPaywallIfOpen(bool animated) {
+    return channel.invokeMethod("dismissNamiPaywallIfOpen", animated);
+  }
+
   /// Displays the current live paywall in the app
   static Future<bool> raisePaywall() {
     return channel.invokeMethod("raisePaywall");
   }
 
   /// Displays a particular paywall in the app
-  static Future<bool> raisePaywallByDeveloperPaywallId(String developerPaywallId) {
+  static Future<bool> raisePaywallByDeveloperPaywallId(
+      String developerPaywallId) {
     return channel.invokeMethod("raisePaywall", developerPaywallId);
   }
 

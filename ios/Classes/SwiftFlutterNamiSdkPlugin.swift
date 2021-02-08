@@ -83,6 +83,11 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             } else {
                 NamiPaywallManager.raisePaywall(developerPaywallID: developerPaywallID!, fromVC: viewController)
             }
+        case "dismissNamiPaywallIfOpen":
+            let animated = call.arguments as? Bool ?? false
+            NamiPaywallManager.dismissNamiPaywallIfOpen(animated: animated) {
+                result(true)
+            }
         case "currentCustomerJourneyState":
             let state = NamiCustomerManager.currentCustomerJourneyState()
             var eventMap = [String : Any?]()
@@ -180,20 +185,22 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 NamiPurchaseManager.skusForSKUIDs(skuIDs: [skuRefId]) { (success: Bool, skus: [NamiSKU]?, invalidSKUIDs: [String]?, error: Error?) in
                     if let sku = skus?.first {
                         NamiPurchaseManager.buySKU(sku) { (purchases: [NamiPurchase], state: NamiPurchaseState, error: Error?) in
-                            var eventMap = [String : Any?]()
-                            eventMap["error"] = error?.localizedDescription
-                            // Delete this once buySKU is working on iOS
-                            eventMap["original_state"] = state.readableString()
-                            // Delete this once buySKU is working on iOS
-                            eventMap["purchases"] = purchases.count
-                            // react to the state of the purchase
-                            if state == .purchased {
-                                eventMap["purchaseState"] = "purchased"
+                            if(state != NamiPurchaseState.pending) {
+                                var eventMap = [String : Any?]()
+                                eventMap["error"] = error?.localizedDescription
+                                // Delete this once buySKU is working on iOS
+                                eventMap["original_state"] = state.readableString()
+                                // Delete this once buySKU is working on iOS
+                                eventMap["purchases"] = purchases.count
+                                // react to the state of the purchase
+                                if state == .purchased {
+                                    eventMap["purchaseState"] = "purchased"
+                                }
+                                else {
+                                    eventMap["purchaseState"] = "failed"
+                                }
+                                result(eventMap)
                             }
-                            else {
-                                eventMap["purchaseState"] = "failed"
-                            }
-                            result(eventMap)
                         }
                     }
                 }
@@ -382,6 +389,19 @@ public extension NamiPaywall {
         map["type"] = self.paywallValue(forKey: NamiPaywallKeys.type)
         map["extraData"] = self.paywallValue(forKey: NamiPaywallKeys.marketing_content)
         map["styleData"] = self.styleData.convertToMap()
+        map["formattedSkus"] = self.paywallValue(forKey: NamiPaywallKeys.sku_ordered_metadata)
+        var formattedSkuArray = [[String: Any]]()
+        if let formattedSkuDicts = map["formattedSkus"] as? [[String: Any]] {
+            for dicts in formattedSkuDicts {
+                var map = [String: Any]()
+                map["featured"] = dicts[NamiSKUKeys.featured.rawValue]
+                map["id"] = dicts[NamiSKUKeys.sku_system_id.rawValue]
+                map["presentationPosition"] = dicts[NamiSKUKeys.presentation_position.rawValue]
+                formattedSkuArray.append(map)
+            }
+        }
+        map["formattedSkus"] = formattedSkuArray
+        map["useBottomOverlay"] = self.paywallValue(forKey: NamiPaywallKeys.use_bottom_overlay)
         return map
     }
 }
