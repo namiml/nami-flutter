@@ -445,7 +445,7 @@ private fun NamiPaywall.convertToMap(): Map<String, Any?> {
 }
 
 private fun FormattedSku.convertToMap(): Map<String, Any?> {
-    return hashMapOf("featured" to this.featured, "id" to this.id)
+    return hashMapOf("featured" to this.featured, "skuId" to this.skuId)
 }
 
 private fun PaywallStyleData.convertToMap(): Map<String, Any?> {

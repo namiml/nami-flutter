@@ -395,7 +395,7 @@ public extension NamiPaywall {
             for dicts in formattedSkuDicts {
                 var map = [String: Any]()
                 map["featured"] = dicts[NamiSKUKeys.featured.rawValue]
-                map["id"] = dicts[NamiSKUKeys.sku_system_id.rawValue]
+                map["skuId"] = dicts[NamiSKUKeys.sku_system_id.rawValue]
                 map["presentationPosition"] = dicts[NamiSKUKeys.presentation_position.rawValue]
                 formattedSkuArray.append(map)
             }

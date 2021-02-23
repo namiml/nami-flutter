@@ -1,4 +1,4 @@
-import 'package:nami_flutter/paywall/featured_sku.dart';
+import 'package:nami_flutter/paywall/formatted_sku.dart';
 
 import 'paywall_style_data.dart';
 
