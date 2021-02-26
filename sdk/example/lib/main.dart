@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/analytics/nami_analytics_support.dart';
+import 'package:nami_flutter/billing/nami_purchase_manager.dart';
 import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:nami_flutter/entitlement/nami_entitlement_manager.dart';
 import 'package:nami_flutter/entitlement/nami_entitlement_setter.dart';
@@ -62,9 +63,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       print('--------- Sign In Clicked ---------');
     });
     _printCustomerJourneyState();
-    _handleActiveEntitlements();
+    _handleActiveEntitlementsFuture(
+        NamiEntitlementManager.activeEntitlements());
+    NamiEntitlementManager.entitlementChangeEvents()
+        .listen((activeEntitlements) {
+      print("EntitlementChangeListener triggered");
+      _handleActiveEntitlements(activeEntitlements);
+    });
+    NamiPurchaseManager.purchaseChangeEvents()
+        .listen((purchaseChangeEventData) {
+      print("PurchasesChangedHandler triggered");
+      _evaluateLastPurchaseEvent(purchaseChangeEventData);
+    });
     NamiAnalyticsSupport.analyticsEvents().listen((analyticsData) {
-      printAnalyticsEventData(analyticsData);
+      _printAnalyticsEventData(analyticsData);
     });
     NamiPaywallManager.paywallRaiseEvents().listen((paywallRaiseRequestData) {
       print('--------- RAISE PAYWALL REQUESTED ---------');
@@ -92,16 +104,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
       print('--------- ON RESUME ---------');
       _printCustomerJourneyState();
-      _handleActiveEntitlements();
+      _handleActiveEntitlementsFuture(
+          NamiEntitlementManager.activeEntitlements());
     }
   }
 
-  void _handleActiveEntitlements() async {
-    var activeEntitlements = await NamiEntitlementManager.activeEntitlements();
+  void _evaluateLastPurchaseEvent(
+      PurchaseChangeEventData purchaseChangeEventData) {
+    print('--------- Start ---------');
+    print("Purchase State ${purchaseChangeEventData.purchaseState}");
+    if (purchaseChangeEventData.purchaseState == NamiPurchaseState.purchased) {
+      print("\nActive Purchases: ");
+      purchaseChangeEventData.activePurchases.forEach((element) {
+        print("\tSkuId: ${element.skuId}");
+      });
+    } else {
+      print("Reason : ${purchaseChangeEventData.error}");
+    }
+    print('--------- End ---------');
+  }
+
+  void _handleActiveEntitlements(List<NamiEntitlement> activeEntitlements) {
     print('--------- Start ---------');
     if (activeEntitlements.isNotEmpty) {
       print("Active entitlements found!");
@@ -112,6 +139,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       print("No active entitlements");
     }
     print('--------- End ---------');
+  }
+
+  void _handleActiveEntitlementsFuture(
+      Future<List<NamiEntitlement>> activeEntitlementsFuture) async {
+    _handleActiveEntitlements(await activeEntitlementsFuture);
   }
 
   void _printCustomerJourneyState() async {
@@ -131,14 +163,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    var namiConfiguration = NamiConfiguration(
-        _iosAppPlatformId,
-        _androidAppPlatformId,
-        false,
-        NamiLogLevel.debug,
-        false,
-        false,
-        ["useStagingAPI"]);
+    var namiConfiguration =
+    NamiConfiguration(_iosAppPlatformId, _androidAppPlatformId);
+    namiConfiguration.namiLogLevel = NamiLogLevel.debug;
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -192,7 +219,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 ])));
   }
 
-  void printAnalyticsEventData(NamiAnalyticsData analyticsData) {
+  void _printAnalyticsEventData(NamiAnalyticsData analyticsData) {
     print('--------- Start ---------');
     print('analyticsEvents');
     print("TYPE " + analyticsData.type.toString());
@@ -201,36 +228,36 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print("CAMPAIGN_NAME " +
         analyticsData.eventData[NamiAnalyticsKeys.CAMPAIGN_NAME]);
     dynamic campaignType =
-        analyticsData.eventData[NamiAnalyticsKeys.CAMPAIGN_TYPE];
+    analyticsData.eventData[NamiAnalyticsKeys.CAMPAIGN_TYPE];
     if (campaignType != null) {
       print("CAMPAIGN_TYPE " + campaignType.toString());
     }
     bool namiTriggered =
-        analyticsData.eventData[NamiAnalyticsKeys.NAMI_TRIGGERED];
+    analyticsData.eventData[NamiAnalyticsKeys.NAMI_TRIGGERED];
     print("NAMI_TRIGGERED " + namiTriggered.toString());
     print(
         "PAYWALL_ID " + analyticsData.eventData[NamiAnalyticsKeys.PAYWALL_ID]);
     print("PAYWALL_NAME " +
         analyticsData.eventData[NamiAnalyticsKeys.PAYWALL_NAME]);
     List<NamiSKU> products =
-        analyticsData.eventData[NamiAnalyticsKeys.PAYWALL_PRODUCTS];
+    analyticsData.eventData[NamiAnalyticsKeys.PAYWALL_PRODUCTS];
     print("PAYWALL_PRODUCTS " + products.toString());
     print("PAYWALL_TYPE " +
         analyticsData.eventData[NamiAnalyticsKeys.PAYWALL_TYPE]);
     dynamic purchaseActivityType =
-        analyticsData.eventData[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE];
+    analyticsData.eventData[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE];
     if (purchaseActivityType != null) {
       print("PURCHASE_ACTIVITY_TYPE " + purchaseActivityType.toString());
     }
     dynamic purchasedProduct =
-        analyticsData.eventData[NamiAnalyticsKeys.PURCHASE_PRODUCT];
+    analyticsData.eventData[NamiAnalyticsKeys.PURCHASE_PRODUCT];
     if (purchasedProduct != null) {
       print("PURCHASE_PRODUCT " + purchasedProduct.toString());
     } else {
       print("PURCHASE_PRODUCT NULL");
     }
     dynamic purchaseTimestamp =
-        analyticsData.eventData[NamiAnalyticsKeys.PURCHASE_TIMESTAMP];
+    analyticsData.eventData[NamiAnalyticsKeys.PURCHASE_TIMESTAMP];
     if (purchaseTimestamp != null) {
       print("PURCHASE_TIMESTAMP " + purchaseTimestamp.toString());
     } else {

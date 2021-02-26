@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:nami_flutter/billing/nami_purchase_manager.dart';
 import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:nami_flutter/entitlement/nami_entitlement_manager.dart';
 import 'package:nami_flutter/ml/nami_ml_manager.dart';
@@ -53,7 +54,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     initPlatformState();
     _printCustomerJourneyState();
-    _handleActiveEntitlements();
+    _handleActiveEntitlementsFuture(
+        NamiEntitlementManager.activeEntitlements());
+    NamiEntitlementManager.entitlementChangeEvents()
+        .listen((activeEntitlements) {
+      print("EntitlementChangeListener triggered");
+      _handleActiveEntitlements(activeEntitlements);
+    });
+    NamiPurchaseManager.purchaseChangeEvents()
+        .listen((purchaseChangeEventData) {
+      print("PurchasesChangedHandler triggered");
+      _evaluateLastPurchaseEvent(purchaseChangeEventData);
+    });
     NamiPaywallManager.paywallRaiseEvents().listen((paywallRaiseRequestData) {
       print('--------- RAISE PAYWALL REQUESTED ---------');
       Navigator.push(
@@ -75,12 +87,27 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       print('--------- ON RESUME ---------');
       _printCustomerJourneyState();
-      _handleActiveEntitlements();
+      _handleActiveEntitlementsFuture(
+          NamiEntitlementManager.activeEntitlements());
     }
   }
 
-  void _handleActiveEntitlements() async {
-    var activeEntitlements = await NamiEntitlementManager.activeEntitlements();
+  void _evaluateLastPurchaseEvent(
+      PurchaseChangeEventData purchaseChangeEventData) {
+    print('--------- Start ---------');
+    print("Purchase State ${purchaseChangeEventData.purchaseState}");
+    if (purchaseChangeEventData.purchaseState == NamiPurchaseState.purchased) {
+      print("\nActive Purchases: ");
+      purchaseChangeEventData.activePurchases.forEach((element) {
+        print("\tSkuId: ${element.skuId}");
+      });
+    } else {
+      print("Reason : ${purchaseChangeEventData.error}");
+    }
+    print('--------- End ---------');
+  }
+
+  void _handleActiveEntitlements(List<NamiEntitlement> activeEntitlements) {
     print('--------- Start ---------');
     if (activeEntitlements.isNotEmpty) {
       print("Active entitlements found!");
@@ -91,6 +118,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       print("No active entitlements");
     }
     print('--------- End ---------');
+  }
+
+  void _handleActiveEntitlementsFuture(
+      Future<List<NamiEntitlement>> activeEntitlementsFuture) async {
+    _handleActiveEntitlements(await activeEntitlementsFuture);
   }
 
   void _printCustomerJourneyState() async {
@@ -110,14 +142,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    var namiConfiguration = NamiConfiguration(
-        _iosAppPlatformId,
-        _androidAppPlatformId,
-        false,
-        NamiLogLevel.debug,
-        false,
-        false,
-        ["useStagingAPI"]);
+    var namiConfiguration =
+        NamiConfiguration(_iosAppPlatformId, _androidAppPlatformId);
+    namiConfiguration.namiLogLevel = NamiLogLevel.debug;
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling

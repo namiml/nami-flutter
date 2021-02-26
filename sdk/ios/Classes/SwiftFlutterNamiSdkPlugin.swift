@@ -9,12 +9,14 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let analyticsEventChannel = FlutterEventChannel(name: "analyticsEvent", binaryMessenger: registrar.messenger())
         let entitlementChangeEventChannel = FlutterEventChannel(name: "entitlementChangeEvent", binaryMessenger: registrar.messenger())
         let paywallRaiseEventChannel = FlutterEventChannel(name: "paywallRaiseEvent", binaryMessenger: registrar.messenger())
+        let purchaseChangeEventChannel = FlutterEventChannel(name: "purchaseChangeEvent", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
         analyticsEventChannel.setStreamHandler(AnalyticsEventHandler())
         entitlementChangeEventChannel.setStreamHandler(EntitlementChangeEventHandler())
         paywallRaiseEventChannel.setStreamHandler(PaywallRaiseEventHandler())
+        purchaseChangeEventChannel.setStreamHandler(PurchaseChangeEventHandler())
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -304,6 +306,39 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
+    
+    class PurchaseChangeEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiPurchaseManager.registerPurchasesChangedHandler { (activePurchases: [NamiPurchase], namiPurchaseState: NamiPurchaseState, error: Error?) in
+                var eventMap = [String : Any]()
+                eventMap["activePurchases"] = activePurchases.map({ (namiPurchase: NamiPurchase) in namiPurchase.convertToMap()})
+                eventMap["purchaseState"] = namiPurchaseState.toFlutterString()
+                eventMap["error"] = error?.localizedDescription
+                events(eventMap)
+            }
+            return nil
+        }
+        
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            NamiPurchaseManager.registerPurchasesChangedHandler(nil)
+            return nil
+        }
+    }
+}
+
+public extension NamiPurchaseState {
+    func toFlutterString() -> String {
+        switch self {
+        case NamiPurchaseState.cancelled:
+            return "cancelled"
+        case NamiPurchaseState.failed:
+            return "failed"
+        case NamiPurchaseState.purchased:
+            return "purchased"
+        default:
+            return "unknown"
+        }
+    }
 }
 
 public extension NamiEntitlement {
@@ -338,6 +373,7 @@ public extension NamiPurchase {
         }
         map["transactionIdentifier"] = self.transactionIdentifier
         map["localizedDescription"] = self.description
+        map["skuId"] = self.skuID
         return map
     }
 }

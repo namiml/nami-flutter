@@ -15,6 +15,7 @@ import com.namiml.api.model.FormattedSku
 import com.namiml.billing.NamiPurchase
 import com.namiml.billing.NamiPurchaseCompleteResult
 import com.namiml.billing.NamiPurchaseManager
+import com.namiml.billing.NamiPurchaseState
 import com.namiml.customer.NamiCustomerManager
 import com.namiml.entitlement.NamiEntitlement
 import com.namiml.entitlement.NamiEntitlementManager
@@ -52,6 +53,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var analyticsListener: EventChannel
     private lateinit var entitlementChangeListener: EventChannel
     private lateinit var paywallRaiseListener: EventChannel
+    private lateinit var purchaseChangeListener: EventChannel
     private lateinit var context: Context
     private lateinit var moshi: Moshi
     private var currentActivityWeakReference: WeakReference<Activity>? = null
@@ -63,6 +65,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
         entitlementChangeListener = EventChannel(flutterPluginBinding.binaryMessenger, "entitlementChangeEvent")
         paywallRaiseListener = EventChannel(flutterPluginBinding.binaryMessenger, "paywallRaiseEvent")
+        purchaseChangeListener = EventChannel(flutterPluginBinding.binaryMessenger, "purchaseChangeEvent")
 
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
@@ -70,17 +73,36 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         setAnalyticsStreamHandler()
         setEntitlementStreamHandler()
         setPaywallRaiseStreamHandler()
+        setPurchaseChangeStreamHandler()
+    }
+
+    private fun setPurchaseChangeStreamHandler() {
+        purchaseChangeListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiPurchaseManager.registerPurchasesChangedListener { activePurchases, namiPurchaseState, errorMsg ->
+                    val eventMap = mutableMapOf<String, Any?>()
+                    eventMap["activePurchases"] = activePurchases.map { it.convertToMap() }
+                    eventMap["purchaseState"] = namiPurchaseState.getFlutterString()
+                    eventMap["error"] = errorMsg
+                    events?.success(eventMap)
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                NamiPurchaseManager.registerPurchasesChangedListener(null)
+            }
+        })
     }
 
     private fun setPaywallRaiseStreamHandler() {
         paywallRaiseListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiPaywallManager.registerPaywallRaiseListener { _, namiPaywall, skus, developerPaywallId ->
-                    val eventMap = mutableMapOf<String, Any>()
+                    val eventMap = mutableMapOf<String, Any?>()
                     eventMap["namiPaywall"] = namiPaywall.convertToMap()
                     eventMap["skus"] = skus?.map { it.convertToMap() }
                             ?: listOf<Map<String, Any?>>()
-                    eventMap["developerPaywallId"] = "developerPaywallId"
+                    eventMap["developerPaywallId"] = developerPaywallId
                     events?.success(eventMap)
                 }
             }
@@ -124,8 +146,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             override fun onCancel(arguments: Any?) {
-                //TODO Add support for nullifying listener on Android SDK side
-                //NamiAnalyticsSupport.registerAnalyticsListener(null)
+                NamiAnalyticsSupport.registerAnalyticsListener(null)
             }
 
         })
@@ -483,6 +504,15 @@ private fun PaywallStyleData.convertToMap(): Map<String, Any?> {
             "featuredSkuButtonColor" to featuredSkuButtonColor,
             "featuredSkuButtonTextColor" to this.featuredSkuButtonTextColor
     )
+}
+
+private fun NamiPurchaseState.getFlutterString(): String {
+    return when (this) {
+        NamiPurchaseState.CANCELLED -> "cancelled"
+        NamiPurchaseState.FAILED -> "failed"
+        NamiPurchaseState.PURCHASED -> "purchased"
+        else -> "unknown"
+    }
 }
 
 private fun NamiAnalyticsActionType.getFlutterString(): String {

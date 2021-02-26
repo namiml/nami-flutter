@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:nami_flutter/billing/nami_purchase.dart';
 import 'package:nami_flutter/paywall/nami_sku.dart';
 
@@ -7,6 +8,9 @@ import '../channel.dart';
 /// whether it's done via the remote Google Play Billing service or Apple
 /// StoreKit or local Nami Bypass Store service
 class NamiPurchaseManager {
+  static const EventChannel _purchaseChangeEvent =
+      const EventChannel('purchaseChangeEvent');
+
   /// Clears out any purchases made while bypassStore was enabled. This clears
   /// out bypassStore purchases only, it cannot clear out production purchases
   /// made on device.
@@ -47,16 +51,49 @@ class NamiPurchaseManager {
           map['error']);
     }
   }
+
+  static Stream<PurchaseChangeEventData> purchaseChangeEvents() {
+    var data = _purchaseChangeEvent
+        .receiveBroadcastStream()
+        .map((dynamic event) => _mapToPurchaseChangeEventData(event));
+
+    return data;
+  }
+
+  static PurchaseChangeEventData _mapToPurchaseChangeEventData(
+      Map<dynamic, dynamic> map) {
+    List<dynamic> dynamicPurchases = map['activePurchases'];
+    List<NamiPurchase> activePurchases = List();
+    dynamicPurchases.forEach((element) {
+      NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
+      activePurchases.add(namiPurchase);
+    });
+    var purchaseState = (map['purchaseState'] as String)._toNamiPurchaseState();
+    return PurchaseChangeEventData(
+        activePurchases, purchaseState, map['error']);
+  }
 }
 
 extension on String {
   NamiPurchaseState _toNamiPurchaseState() {
     if (this == "purchased") {
       return NamiPurchaseState.purchased;
-    } else {
+    } else if (this == "failed") {
       return NamiPurchaseState.failed;
+    } else if (this == "cancelled") {
+      return NamiPurchaseState.cancelled;
+    } else {
+      return NamiPurchaseState.unknown;
     }
   }
+}
+
+class PurchaseChangeEventData {
+  final List<NamiPurchase> activePurchases;
+  final NamiPurchaseState purchaseState;
+  final String error;
+
+  PurchaseChangeEventData(this.activePurchases, this.purchaseState, this.error);
 }
 
 class NamiPurchaseCompleteResult {
@@ -66,4 +103,4 @@ class NamiPurchaseCompleteResult {
   NamiPurchaseCompleteResult(this.purchaseState, this.error);
 }
 
-enum NamiPurchaseState { purchased, failed }
+enum NamiPurchaseState { purchased, failed, cancelled, unknown }
