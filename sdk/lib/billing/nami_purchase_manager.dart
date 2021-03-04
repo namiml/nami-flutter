@@ -14,28 +14,34 @@ class NamiPurchaseManager {
   /// Clears out any purchases made while bypassStore was enabled. This clears
   /// out bypassStore purchases only, it cannot clear out production purchases
   /// made on device.
-  static Future<void> clearBypassStorePurchases() async {
-    return await channel.invokeMethod("clearBypassStorePurchases");
+  static Future<void> clearBypassStorePurchases() {
+    return channel.invokeMethod("clearBypassStorePurchases");
   }
 
   /// Returns a list of all purchases
   static Future<List<NamiPurchase>> allPurchases() async {
-    return await channel.invokeMethod("allPurchases");
+    List<dynamic> dynamicPurchases = await channel.invokeMethod("allPurchases");
+    List<NamiPurchase> allPurchases = List();
+    dynamicPurchases.forEach((element) {
+      NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
+      allPurchases.add(namiPurchase);
+    });
+    return allPurchases;
   }
 
   /// Check if a specific product SKU has been purchased
-  static Future<bool> isSKUIDPurchased(String skuID) async {
-    return await channel.invokeMethod("isSKUIDPurchased", skuID);
+  static Future<bool> isSKUIDPurchased(String skuID) {
+    return channel.invokeMethod("isSKUIDPurchased", skuID);
   }
 
   /// Ask Nami if it knows if a set of product SKU IDs has been purchased
-  static Future<bool> anySKUIDPurchased(List<String> skuIDs) async {
-    return await channel.invokeMethod("anySKUIDPurchased", skuIDs);
+  static Future<bool> anySKUIDPurchased(List<String> skuIDs) {
+    return channel.invokeMethod("anySKUIDPurchased", skuIDs);
   }
 
   /// Mark a consumable IAP as processed so it can be purchased again
-  static Future<void> consumePurchasedSKU(String skuID) async {
-    return await channel.invokeMethod("consumePurchasedSKU", skuID);
+  static Future<void> consumePurchasedSKU(String skuID) {
+    return channel.invokeMethod("consumePurchasedSKU", skuID);
   }
 
   /// Initiate a Google Play Billing or Apple StoreKit purchase using

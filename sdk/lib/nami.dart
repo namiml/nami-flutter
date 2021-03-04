@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import 'channel.dart';
@@ -37,12 +38,12 @@ class Nami {
   /// use [NamiExternalIdentifierType.uuid] to set the value then it will get
   /// rejected
   static Future<void> setExternalIdentifier(
-      String externalIdentifier, NamiExternalIdentifierType type) async {
+      String externalIdentifier, NamiExternalIdentifierType type) {
     var variableMap = {
       'externalIdentifier': externalIdentifier,
       "type": describeEnum(type)
     };
-    return await channel.invokeMethod("setExternalIdentifier", variableMap);
+    return channel.invokeMethod("setExternalIdentifier", variableMap);
   }
 
   /// A string of the external identifier that Nami has stored. Returns [null]
@@ -53,8 +54,8 @@ class Nami {
   }
 
   /// Clears out any external identifiers set
-  static Future<void> clearExternalIdentifier() async {
-    return await channel.invokeMethod("clearExternalIdentifier");
+  static Future<void> clearExternalIdentifier() {
+    return channel.invokeMethod("clearExternalIdentifier");
   }
 }
 
