@@ -21,7 +21,9 @@ class Nami {
       "namiLogLevel": describeEnum(namiConfiguration.namiLogLevel),
       "extraDataList": extraDataList
     };
-    return channel.invokeMethod("configure", variableMap);
+    return channel
+        .invokeMethod<bool>("configure", variableMap)
+        .then<bool>((bool? value) => value ?? false);
   }
 
   /// Provide a unique identifier that can be used to link different devices
@@ -49,7 +51,7 @@ class Nami {
   /// A string of the external identifier that Nami has stored. Returns [null]
   /// if no id has been stored, including if a string was passed to
   /// [setExternalIdentifier] that was not valid.
-  static Future<String> getExternalIdentifier() {
+  static Future<String?> getExternalIdentifier() {
     return channel.invokeMethod("getExternalIdentifier");
   }
 

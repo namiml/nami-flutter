@@ -91,13 +91,16 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 result(true)
             }
         case "currentCustomerJourneyState":
-            let state = NamiCustomerManager.currentCustomerJourneyState()
-            var eventMap = [String : Any?]()
-            eventMap["former_subscriber"] = state?.formerSubscriber
-            eventMap["in_grace_period"] = state?.formerSubscriber
-            eventMap["in_trial_period"] = state?.formerSubscriber
-            eventMap["in_intro_offer_period"] = state?.formerSubscriber
-            result(eventMap)
+            if let state = NamiCustomerManager.currentCustomerJourneyState() {
+                var eventMap = [String : Any]()
+                eventMap["former_subscriber"] = state.formerSubscriber
+                eventMap["in_grace_period"] = state.formerSubscriber
+                eventMap["in_trial_period"] = state.formerSubscriber
+                eventMap["in_intro_offer_period"] = state.formerSubscriber
+                result(eventMap)
+            } else {
+                result(nil)
+            }
         case "clearAllEntitlements":
             NamiEntitlementManager.clearAllEntitlements()
         case "isEntitlementActive":
@@ -229,7 +232,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     class AnalyticsEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiAnalyticsSupport.registerAnalyticsHandler { (type: NamiAnalyticsActionType, data: [String : Any]) in
-                var eventMap = [String : Any]()
+                var eventMap = [String : Any?]()
                 let typeString: String
                 if(type == NamiAnalyticsActionType.paywallRaise) {
                     typeString = "paywall_raise"
@@ -357,9 +360,13 @@ public extension NamiEntitlement {
 
 public extension NamiPurchase {
     func convertToMap() -> [String: Any] {
+        var expiry: Int? = nil
+        if let timeSince = self.expires?.timeIntervalSince1970 {
+            expiry = Int.init(timeSince)
+        }
         var map = [String: Any]()
         map["purchaseInitiatedTimestamp"] = Int.init(self.purchaseInitiatedTimestamp.timeIntervalSince1970)
-        map["expires"] = Int.init(self.expires?.timeIntervalSince1970 ?? 0)
+        map["expires"] = expiry
         map["fromNami"] = false
         if(self.purchaseSource == NamiPurchaseSource.application) {
             map["purchaseSource"] = "application"
@@ -372,7 +379,6 @@ public extension NamiPurchase {
             map["purchaseSource"] = "unknown"
         }
         map["transactionIdentifier"] = self.transactionIdentifier
-        map["localizedDescription"] = self.description
         map["skuId"] = self.skuID
         return map
     }
@@ -392,6 +398,13 @@ public extension NamiSKU {
         map["priceLanguage"] = self.product?.priceLocale.languageCode
         map["priceCurrency"] = self.product?.priceLocale.currencyCode
         map["priceCountry"] = self.product?.priceLocale.regionCode
+        if(self.type == NamiSKUType.one_time_purchase) {
+            map["type"] = "one_time_purchase"
+        } else if (self.type == NamiSKUType.subscription) {
+            map["type"] = "subscription"
+        } else {
+            map["type"] = "unknown"
+        }
         let period = self.product?.subscriptionPeriod?.unit
         if(period == SKProduct.PeriodUnit.day) {
             map["periodUnit"] = "day"

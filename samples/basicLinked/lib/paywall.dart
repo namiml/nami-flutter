@@ -6,7 +6,7 @@ import 'package:nami_flutter/paywall/nami_sku.dart';
 class PaywallPage extends StatefulWidget {
   final PaywallRaiseRequestData data;
 
-  const PaywallPage({Key key, this.data}) : super(key: key);
+  const PaywallPage({Key? key, required this.data}) : super(key: key);
 
   @override
   _PaywallState createState() => _PaywallState();
@@ -46,23 +46,23 @@ class _PaywallState extends State<PaywallPage> {
     return Container(
         margin: const EdgeInsets.only(top: 16),
         child: Text(
-          widget.data.namiPaywall.body,
+          widget.data.namiPaywall.body ?? "",
           textAlign: TextAlign.center,
           style: TextStyle(
               color:
-                  widget.data.namiPaywall.styleData.bodyTextColor.hexToColor(),
-              fontSize: widget.data.namiPaywall.styleData.bodyFontSize,
+                  widget.data.namiPaywall.styleData?.bodyTextColor.hexToColor(),
+              fontSize: widget.data.namiPaywall.styleData?.bodyFontSize,
               fontWeight: FontWeight.bold),
         ));
   }
 
   Widget _buildTitle() {
     return Text(
-      widget.data.namiPaywall.title,
+      widget.data.namiPaywall.title ?? "",
       textAlign: TextAlign.center,
       style: TextStyle(
-          color: widget.data.namiPaywall.styleData.titleTextColor.hexToColor(),
-          fontSize: widget.data.namiPaywall.styleData.titleFontSize,
+          color: widget.data.namiPaywall.styleData?.titleTextColor.hexToColor(),
+          fontSize: widget.data.namiPaywall.styleData?.titleFontSize,
           fontWeight: FontWeight.bold),
     );
   }
@@ -70,17 +70,17 @@ class _PaywallState extends State<PaywallPage> {
   Decoration _getBackgroundImageDecoration() {
     return BoxDecoration(
         image: DecorationImage(
-            image:
-                NetworkImage(widget.data.namiPaywall.backgroundImageUrlPhone),
+            image: NetworkImage(
+                widget.data.namiPaywall.backgroundImageUrlPhone ?? ""),
             fit: BoxFit.fill));
   }
 
   Widget _buildSkuButtons() {
-    var widgetList = List<Widget>();
+    var widgetList = <Widget>[];
     var buttonBgColor =
-        widget.data.namiPaywall.styleData.skuButtonColor.hexToColor();
+        widget.data.namiPaywall.styleData?.skuButtonColor.hexToColor();
     var buttonBgTextColor =
-        widget.data.namiPaywall.styleData.skuButtonTextColor.hexToColor();
+        widget.data.namiPaywall.styleData?.skuButtonTextColor.hexToColor();
     widget.data.skus.forEach((element) {
       var button = Padding(
         padding: EdgeInsets.only(bottom: 8.0),
@@ -112,13 +112,9 @@ class _PaywallState extends State<PaywallPage> {
   void _buySKU(String skuRefId) async {
     NamiPurchaseCompleteResult result =
         await NamiPurchaseManager.buySKU(skuRefId);
-    if (result != null) {
-      print('Purchase Complete with state ${result.purchaseState}--');
-      if (result.purchaseState == NamiPurchaseState.purchased) {
-        Navigator.pop(context);
-      }
-    } else {
-      print('Purchase Complete with NULL result');
+    print('Purchase Complete with state ${result.purchaseState}--');
+    if (result.purchaseState == NamiPurchaseState.purchased) {
+      Navigator.pop(context);
     }
   }
 }
@@ -147,6 +143,5 @@ extension on PeriodUnit {
       case PeriodUnit.annual:
         return "year";
     }
-    return "Error";
   }
 }

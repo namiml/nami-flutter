@@ -1,26 +1,48 @@
 /// This object represents a specific in-app purchase SKU available on a
 /// specific platform.
 class NamiSKU {
+  /// description of the product
   final String description;
+  /// title of the product
   final String title;
+  /// The type of SKU.  Will tell you if it is a subscription or one-time
+  /// purchase
   final NamiSKUType type;
 
-  // iOS only
-  final String localizedMultipliedPrice;
+  /// iOS only
+  ///
+  /// If a product has multiple units, this will be the total price the user
+  /// pays, calculated by taking the per unit price and multiplying by the
+  /// number of periods. Localization adds the correct currency symbol. An
+  /// example would be a weekly rate of $6.93 that comes from 7 units of
+  /// $0.99 per day.
+  final String? localizedMultipliedPrice;
+  /// Price for the user's store locale as a decimal value
   final String price;
 
-  // iOS only
-  final String subscriptionGroupIdentifier;
+  /// iOS only
+  ///
+  /// For subscription products, the identifier for the subscription group
+  final String? subscriptionGroupIdentifier;
+  /// The ID of the SKU, which will match what you set in the Control Center
   final String skuId;
+  /// Formatted price of the item, including its currency sign
   final String localizedPrice;
+  /// The number of times this product will occur in a single purchase term
   final int numberOfUnits;
 
-  // iOS only
-  final String priceLanguage;
+  /// iOS only
+  ///
+  /// Language and region code for the product from the user's store
+  final String? priceLanguage;
+  /// currency code for price
   final String priceCurrency;
 
-  // iOS only
-  final String priceCountry;
+  /// iOS only
+  ///
+  /// Country code for the user's store
+  final String? priceCountry;
+  /// The time period for the unit of purchase
   final PeriodUnit periodUnit;
 
   NamiSKU(
@@ -38,7 +60,7 @@ class NamiSKU {
       this.priceCountry,
       this.periodUnit);
 
-  factory NamiSKU.fromMap(Map<dynamic, dynamic> map) {
+  factory NamiSKU.fromMap(Map<dynamic, dynamic?> map) {
     return NamiSKU(
         map['description'],
         map['title'],
@@ -52,7 +74,7 @@ class NamiSKU {
         map['priceLanguage'],
         map['priceCurrency'],
         map['priceCountry'],
-        (map['periodUnit'] as String)._toPeriodUnit());
+        (map['periodUnit'] as String?)._toPeriodUnit());
   }
 
   @override
@@ -61,11 +83,12 @@ class NamiSKU {
   }
 }
 
+/// The time period for the unit of purchase
 enum PeriodUnit { not_used, day, weekly, monthly, quarterly, half_year, annual }
 
 enum NamiSKUType { one_time_purchase, subscription, unknown }
 
-extension on String {
+extension on String? {
   NamiSKUType _toNamiSKUType() {
     if (this == "one_time_purchase") {
       return NamiSKUType.one_time_purchase;

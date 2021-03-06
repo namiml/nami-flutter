@@ -20,7 +20,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/nami_flutter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   Nami: e87401f1229038952d574340b78f1550a4f4ddd4
   nami_flutter: c824e284ccb8f4ae8b2c72846e90e2a70f5a8de8
 

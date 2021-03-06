@@ -140,7 +140,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     finalMap[NamiAnalyticsKeys.PURCHASE_PRODUCT] = purchasedProduct?.convertToMap()
                     val activityType = map[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE]
                             as? NamiAnalyticsPurchaseActivityType
-                    finalMap[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE] = activityType.getFlutterString()
+                    finalMap[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE] = activityType?.getFlutterString()
                     events?.success(finalMap)
                 }
             }
@@ -381,7 +381,7 @@ private fun NamiEntitlement.convertToMap(): Map<String, Any?> {
 
 private fun NamiPurchase.convertToMap(): Map<String, Any?> {
     return hashMapOf("purchaseInitiatedTimestamp" to purchaseInitiatedTimestamp,
-            "expires" to (expires?.time ?: 0L),
+            "expires" to expires?.time,
             "purchaseSource" to purchaseSource.getFlutterString(),
             "fromNami" to fromNami,
             "skuId" to skuId,
@@ -399,12 +399,12 @@ private fun NamiPurchaseSource.getFlutterString(): String {
     }
 }
 
-private fun NamiAnalyticsPurchaseActivityType?.getFlutterString(): String {
+private fun NamiAnalyticsPurchaseActivityType.getFlutterString(): String? {
     return when (this) {
         NamiAnalyticsPurchaseActivityType.NEW_PURCHASE -> "new_purchase"
         NamiAnalyticsPurchaseActivityType.RESTORE -> "restore"
         NamiAnalyticsPurchaseActivityType.RESUBSCRIBE -> "resubscribe"
-        else -> ""
+        else -> null
     }
 }
 
@@ -412,16 +412,12 @@ private fun NamiSKU.convertToMap(): Map<String, Any?> {
     return hashMapOf("description" to this.skuDetails.description,
             "title" to this.skuDetails.title,
             "type" to this.type.getFlutterString(),
-            "localizedMultipliedPrice" to "",
             "price" to this.skuDetails.getFormattedPrice().toString(),
-            "subscriptionGroupIdentifier" to "",
             "skuId" to this.skuId,
             "localizedPrice" to this.skuDetails.price,
             "numberOfUnits" to 1,
-            "priceLanguage" to "",
             "priceCurrency" to this.skuDetails.priceCurrencyCode,
-            "priceCountry" to "",
-            "periodUnit" to (this.skuDetails.getSubscriptionPeriodEnum()?.getFlutterString() ?: "")
+            "periodUnit" to (this.skuDetails.getSubscriptionPeriodEnum()?.getFlutterString())
     )
 }
 
@@ -465,11 +461,11 @@ private fun NamiPaywall.convertToMap(): Map<String, Any?> {
             "styleData" to (this.styleData?.convertToMap() ?: mapOf()))
 }
 
-private fun FormattedSku.convertToMap(): Map<String, Any?> {
+private fun FormattedSku.convertToMap(): Map<String, Any> {
     return hashMapOf("featured" to this.featured, "skuId" to this.skuId)
 }
 
-private fun PaywallStyleData.convertToMap(): Map<String, Any?> {
+private fun PaywallStyleData.convertToMap(): Map<String, Any> {
     return hashMapOf(
             "bodyFontSize" to bodyFontSize,
             "bodyTextColor" to bodyTextColor,

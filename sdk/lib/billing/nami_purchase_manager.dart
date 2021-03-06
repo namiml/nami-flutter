@@ -21,7 +21,7 @@ class NamiPurchaseManager {
   /// Returns a list of all purchases
   static Future<List<NamiPurchase>> allPurchases() async {
     List<dynamic> dynamicPurchases = await channel.invokeMethod("allPurchases");
-    List<NamiPurchase> allPurchases = List();
+    List<NamiPurchase> allPurchases = List.empty(growable: true);
     dynamicPurchases.forEach((element) {
       NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
       allPurchases.add(namiPurchase);
@@ -31,12 +31,16 @@ class NamiPurchaseManager {
 
   /// Check if a specific product SKU has been purchased
   static Future<bool> isSKUIDPurchased(String skuID) {
-    return channel.invokeMethod("isSKUIDPurchased", skuID);
+    return channel
+        .invokeMethod<bool>("isSKUIDPurchased", skuID)
+        .then<bool>((bool? value) => value ?? false);
   }
 
   /// Ask Nami if it knows if a set of product SKU IDs has been purchased
   static Future<bool> anySKUIDPurchased(List<String> skuIDs) {
-    return channel.invokeMethod("anySKUIDPurchased", skuIDs);
+    return channel
+        .invokeMethod<bool>("anySKUIDPurchased", skuIDs)
+        .then<bool>((bool? value) => value ?? false);
   }
 
   /// Mark a consumable IAP as processed so it can be purchased again
@@ -47,15 +51,10 @@ class NamiPurchaseManager {
   /// Initiate a Google Play Billing or Apple StoreKit purchase using
   /// [skuId] from a [NamiSKU]
   static Future<NamiPurchaseCompleteResult> buySKU(String skuId) async {
-    Map<dynamic, dynamic> map = await channel.invokeMethod("buySKU", skuId);
+    Map<dynamic, dynamic?> map = await channel.invokeMethod("buySKU", skuId);
     print("buySKU returned $map");
-    if (map == null || map.isEmpty) {
-      return null;
-    } else {
-      return NamiPurchaseCompleteResult(
-          (map['purchaseState'] as String)._toNamiPurchaseState(),
-          map['error']);
-    }
+    return NamiPurchaseCompleteResult(
+        (map['purchaseState'] as String)._toNamiPurchaseState(), map['error']);
   }
 
   static Stream<PurchaseChangeEventData> purchaseChangeEvents() {
@@ -69,7 +68,7 @@ class NamiPurchaseManager {
   static PurchaseChangeEventData _mapToPurchaseChangeEventData(
       Map<dynamic, dynamic> map) {
     List<dynamic> dynamicPurchases = map['activePurchases'];
-    List<NamiPurchase> activePurchases = List();
+    List<NamiPurchase> activePurchases = List.empty(growable: true);
     dynamicPurchases.forEach((element) {
       NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
       activePurchases.add(namiPurchase);
@@ -97,14 +96,14 @@ extension on String {
 class PurchaseChangeEventData {
   final List<NamiPurchase> activePurchases;
   final NamiPurchaseState purchaseState;
-  final String error;
+  final String? error;
 
   PurchaseChangeEventData(this.activePurchases, this.purchaseState, this.error);
 }
 
 class NamiPurchaseCompleteResult {
   final NamiPurchaseState purchaseState;
-  final String error;
+  final String? error;
 
   NamiPurchaseCompleteResult(this.purchaseState, this.error);
 }

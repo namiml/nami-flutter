@@ -16,24 +16,32 @@ class NamiPaywallManager {
   /// may not be possible due to missing configuration data or paywall is
   /// blocked from raising
   static Future<bool> canRaisePaywall() {
-    return channel.invokeMethod("canRaisePaywall");
+    return channel
+        .invokeMethod<bool>("canRaisePaywall")
+        .then<bool>((bool? value) => value ?? false);
   }
 
   /// Will animate the closing of the paywall if [animated] is true. Returns
   /// [true] when paywall is dismissed, may be immediate if not presented
   static Future<bool> dismissNamiPaywallIfOpen(bool animated) {
-    return channel.invokeMethod("dismissNamiPaywallIfOpen", animated);
+    return channel
+        .invokeMethod<bool>("dismissNamiPaywallIfOpen", animated)
+        .then<bool>((bool? value) => value ?? false);
   }
 
   /// Displays the current live paywall in the app
   static Future<bool> raisePaywall() {
-    return channel.invokeMethod("raisePaywall");
+    return channel
+        .invokeMethod<bool>("raisePaywall")
+        .then<bool>((bool? value) => value ?? false);
   }
 
   /// Displays a particular paywall in the app
   static Future<bool> raisePaywallByDeveloperPaywallId(
       String developerPaywallId) {
-    return channel.invokeMethod("raisePaywall", developerPaywallId);
+    return channel
+        .invokeMethod<bool>("raisePaywall", developerPaywallId)
+        .then<bool>((bool? value) => value ?? false);
   }
 
   static Future<void> blockPaywallAutoRaise(bool blockRaise) {
@@ -60,7 +68,7 @@ class NamiPaywallManager {
     return data;
   }
 
-  static NamiPaywall _handleSignInClicked(Map<dynamic, dynamic> map) {
+  static NamiPaywall _handleSignInClicked(Map<dynamic, dynamic?> map) {
     return NamiPaywall.fromMap(map);
   }
 
@@ -75,7 +83,7 @@ class NamiPaywallManager {
   static PaywallRaiseRequestData _handlePaywallRaiseRequested(
       Map<dynamic, dynamic> map) {
     List<dynamic> dynamicSkus = map['skus'];
-    List<NamiSKU> skus = List();
+    List<NamiSKU> skus = List.empty(growable: true);
     dynamicSkus.forEach((element) {
       NamiSKU namiSKU = NamiSKU.fromMap(element);
       skus.add(namiSKU);
@@ -94,6 +102,7 @@ class PaywallRaiseRequestData {
 
   @override
   String toString() {
-    return 'PaywallRaiseRequestData{namiPaywall: $namiPaywall, skus: $skus, developerPaywallId: $developerPaywallId}';
+    return 'PaywallRaiseRequestData{namiPaywall: $namiPaywall, skus: $skus, '
+        'developerPaywallId: $developerPaywallId}';
   }
 }

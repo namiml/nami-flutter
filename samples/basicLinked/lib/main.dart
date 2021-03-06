@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     print('--------- initState ---------');
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     initPlatformState();
     _printCustomerJourneyState();
     _handleActiveEntitlementsFuture(
@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
@@ -145,6 +145,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     var namiConfiguration =
         NamiConfiguration(_iosAppPlatformId, _androidAppPlatformId);
     namiConfiguration.namiLogLevel = NamiLogLevel.debug;
+    namiConfiguration.extraData.add("useStagingAPI");
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
