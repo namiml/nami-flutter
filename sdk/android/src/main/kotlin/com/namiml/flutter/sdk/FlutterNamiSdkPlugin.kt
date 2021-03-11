@@ -22,7 +22,14 @@ import com.namiml.entitlement.NamiEntitlementManager
 import com.namiml.entitlement.NamiEntitlementSetter
 import com.namiml.entitlement.NamiPlatformType
 import com.namiml.ml.NamiMLManager
-import com.namiml.paywall.*
+import com.namiml.paywall.NamiPaywall
+import com.namiml.paywall.NamiPaywallManager
+import com.namiml.paywall.NamiPurchaseSource
+import com.namiml.paywall.NamiSKU
+import com.namiml.paywall.NamiSKUType
+import com.namiml.paywall.PaywallStyleData
+import com.namiml.paywall.PreparePaywallError
+import com.namiml.paywall.SubscriptionPeriod
 import com.namiml.util.extensions.getFormattedPrice
 import com.namiml.util.extensions.getSubscriptionPeriodEnum
 import com.squareup.moshi.Moshi
@@ -35,10 +42,8 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.lang.ref.WeakReference
-import java.util.*
+import java.util.Date
 import java.util.logging.StreamHandler
-import kotlin.collections.HashMap
-
 
 private const val LOG_TAG = "NAMI"
 
@@ -63,9 +68,12 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
         signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
         analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
-        entitlementChangeListener = EventChannel(flutterPluginBinding.binaryMessenger, "entitlementChangeEvent")
-        paywallRaiseListener = EventChannel(flutterPluginBinding.binaryMessenger, "paywallRaiseEvent")
-        purchaseChangeListener = EventChannel(flutterPluginBinding.binaryMessenger, "purchaseChangeEvent")
+        entitlementChangeListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "entitlementChangeEvent")
+        paywallRaiseListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "paywallRaiseEvent")
+        purchaseChangeListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "purchaseChangeEvent")
 
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
@@ -77,7 +85,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun setPurchaseChangeStreamHandler() {
-        purchaseChangeListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+        purchaseChangeListener.setStreamHandler(object : StreamHandler(),
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiPurchaseManager.registerPurchasesChangedListener { activePurchases, namiPurchaseState, errorMsg ->
                     val eventMap = mutableMapOf<String, Any?>()
@@ -101,7 +110,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     val eventMap = mutableMapOf<String, Any?>()
                     eventMap["namiPaywall"] = namiPaywall.convertToMap()
                     eventMap["skus"] = skus?.map { it.convertToMap() }
-                            ?: listOf<Map<String, Any?>>()
+                        ?: listOf<Map<String, Any?>>()
                     eventMap["developerPaywallId"] = developerPaywallId
                     events?.success(eventMap)
                 }
@@ -139,8 +148,9 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     val purchasedProduct = map[NamiAnalyticsKeys.PURCHASE_PRODUCT] as? NamiSKU
                     finalMap[NamiAnalyticsKeys.PURCHASE_PRODUCT] = purchasedProduct?.convertToMap()
                     val activityType = map[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE]
-                            as? NamiAnalyticsPurchaseActivityType
-                    finalMap[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE] = activityType?.getFlutterString()
+                        as? NamiAnalyticsPurchaseActivityType
+                    finalMap[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE] =
+                        activityType?.getFlutterString()
                     events?.success(finalMap)
                 }
             }
@@ -148,12 +158,12 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             override fun onCancel(arguments: Any?) {
                 NamiAnalyticsSupport.registerAnalyticsListener(null)
             }
-
         })
     }
 
     private fun setEntitlementStreamHandler() {
-        entitlementChangeListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+        entitlementChangeListener.setStreamHandler(object : StreamHandler(),
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiEntitlementManager.registerEntitlementChangeListener { namiEntitlements ->
                     events?.success(namiEntitlements.map { it.convertToMap() })
@@ -178,12 +188,14 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     "info" -> NamiLogLevel.INFO
                     else -> NamiLogLevel.ERROR
                 }
-                configure(context,
-                        call.argument<String>("appPlatformIDGoogle"),
-                        call.argument<Boolean>("bypassStore"),
-                        call.argument<Boolean>("developmentMode"),
-                        namiLogLevel,
-                        call.argument<List<String>>("extraDataList"))
+                configure(
+                    context,
+                    call.argument<String>("appPlatformIDGoogle"),
+                    call.argument<Boolean>("bypassStore"),
+                    call.argument<Boolean>("developmentMode"),
+                    namiLogLevel,
+                    call.argument<List<String>>("extraDataList")
+                )
                 result.success(true)
             }
             "setExternalIdentifier" -> {
@@ -194,8 +206,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 } else {
                     NamiExternalIdentifierType.SHA_256
                 }
-                io.flutter.Log.d(LOG_TAG, "externalIdentifier $externalIdentifier")
-                io.flutter.Log.d(LOG_TAG, "type $type")
                 Nami.setExternalIdentifier(externalIdentifier ?: "", namiExternalIdentifierType)
             }
             "clearExternalIdentifier" -> {
@@ -204,8 +214,30 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "getExternalIdentifier" -> {
                 result.success(Nami.getExternalIdentifier())
             }
-            "canRaisePaywall" -> {
-                result.success(NamiPaywallManager.canRaisePaywall())
+            "preparePaywallForDisplay" -> {
+                val callback = { success: Boolean, error: PreparePaywallError? ->
+                    with(hashMapOf("success" to success, "error" to error?.getFlutterString())) {
+                        result.success(this)
+                    }
+                }
+                val developerPaywallId = call.argument<String>("developerPaywallId")
+                val backgroundImageRequired = call.argument<Boolean>("backgroundImageRequired")
+                    ?: false
+                val imageFetchTimeout = call.argument<Long>("imageFetchTimeout")
+                if (developerPaywallId != null) {
+                    NamiPaywallManager.preparePaywallForDisplay(
+                        developerPaywallId,
+                        backgroundImageRequired,
+                        imageFetchTimeout,
+                        callback
+                    )
+                } else {
+                    NamiPaywallManager.preparePaywallForDisplay(
+                        backgroundImageRequired,
+                        imageFetchTimeout,
+                        callback
+                    )
+                }
             }
             "raisePaywall" -> {
                 currentActivityWeakReference?.get()?.let { activity ->
@@ -214,10 +246,12 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             "currentCustomerJourneyState" -> {
                 val stateMap = NamiCustomerManager.currentCustomerJourneyState()?.let {
-                    mapOf("former_subscriber" to it.formerSubscriber,
-                            "in_grace_period" to it.inGracePeriod,
-                            "in_trial_period" to it.inTrialPeriod,
-                            "in_intro_offer_period" to it.inIntroOfferPeriod)
+                    mapOf(
+                        "former_subscriber" to it.formerSubscriber,
+                        "in_grace_period" to it.inGracePeriod,
+                        "in_trial_period" to it.inTrialPeriod,
+                        "in_intro_offer_period" to it.inIntroOfferPeriod
+                    )
                 }
                 result.success(stateMap)
             }
@@ -228,7 +262,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success(NamiEntitlementManager.isEntitlementActive(call.arguments as String))
             }
             "activeEntitlements" -> {
-                result.success(NamiEntitlementManager.activeEntitlements().map { it.convertToMap() })
+                result.success(
+                    NamiEntitlementManager.activeEntitlements().map { it.convertToMap() })
             }
             "getEntitlements" -> {
                 result.success(NamiEntitlementManager.getEntitlements().map { it.convertToMap() })
@@ -247,11 +282,14 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         "roku" -> NamiPlatformType.ROKU
                         else -> NamiPlatformType.OTHER
                     }
-                    entitlementSetters.add(NamiEntitlementSetter(
+                    entitlementSetters.add(
+                        NamiEntitlementSetter(
                             referenceId = itemMap["referenceId"] as? String ?: "",
                             expires = expireTime?.let { Date(it) },
                             platform = platformType,
-                            purchasedSKUid = itemMap["purchasedSKUid"] as? String))
+                            purchasedSKUid = itemMap["purchasedSKUid"] as? String
+                        )
+                    )
                 }
                 NamiEntitlementManager.setEntitlements(entitlementSetters)
             }
@@ -304,7 +342,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val activity = currentActivityWeakReference?.get()
                 if (skuRefId != null && activity != null) {
                     NamiPurchaseManager.buySKU(activity, skuRefId) {
-                        io.flutter.Log.d(LOG_TAG, "result ${it.convertToMap()}")
                         result.success(it.convertToMap())
                     }
                 }
@@ -315,12 +352,14 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun configure(context: Context,
-                          platformId: String?,
-                          bypass: Boolean?,
-                          developmentMode: Boolean?,
-                          namiLogLevel: NamiLogLevel,
-                          extraDataList: List<String>?) {
+    private fun configure(
+        context: Context,
+        platformId: String?,
+        bypass: Boolean?,
+        developmentMode: Boolean?,
+        namiLogLevel: NamiLogLevel,
+        extraDataList: List<String>?
+    ) {
         if (platformId == null) {
             return
         }
@@ -371,22 +410,24 @@ private fun NamiPurchaseCompleteResult.convertToMap(): Map<String, Any?> {
 
 private fun NamiEntitlement.convertToMap(): Map<String, Any?> {
     return hashMapOf("name" to name,
-            "description" to desc,
-            "namiId" to namiId,
-            "referenceId" to referenceId,
-            "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
-            "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
-            "activePurchases" to activePurchases.map { it.convertToMap() })
+        "description" to desc,
+        "namiId" to namiId,
+        "referenceId" to referenceId,
+        "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
+        "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
+        "activePurchases" to activePurchases.map { it.convertToMap() })
 }
 
 private fun NamiPurchase.convertToMap(): Map<String, Any?> {
-    return hashMapOf("purchaseInitiatedTimestamp" to purchaseInitiatedTimestamp,
-            "expires" to expires?.time,
-            "purchaseSource" to purchaseSource.getFlutterString(),
-            "fromNami" to fromNami,
-            "skuId" to skuId,
-            "transactionIdentifier" to transactionIdentifier,
-            "localizedDescription" to localizedDescription)
+    return hashMapOf(
+        "purchaseInitiatedTimestamp" to purchaseInitiatedTimestamp,
+        "expires" to expires?.time,
+        "purchaseSource" to purchaseSource.getFlutterString(),
+        "fromNami" to fromNami,
+        "skuId" to skuId,
+        "transactionIdentifier" to transactionIdentifier,
+        "localizedDescription" to localizedDescription
+    )
 }
 
 private fun NamiPurchaseSource.getFlutterString(): String {
@@ -409,15 +450,16 @@ private fun NamiAnalyticsPurchaseActivityType.getFlutterString(): String? {
 }
 
 private fun NamiSKU.convertToMap(): Map<String, Any?> {
-    return hashMapOf("description" to this.skuDetails.description,
-            "title" to this.skuDetails.title,
-            "type" to this.type.getFlutterString(),
-            "price" to this.skuDetails.getFormattedPrice().toString(),
-            "skuId" to this.skuId,
-            "localizedPrice" to this.skuDetails.price,
-            "numberOfUnits" to 1,
-            "priceCurrency" to this.skuDetails.priceCurrencyCode,
-            "periodUnit" to (this.skuDetails.getSubscriptionPeriodEnum()?.getFlutterString())
+    return hashMapOf(
+        "description" to this.skuDetails.description,
+        "title" to this.skuDetails.title,
+        "type" to this.type.getFlutterString(),
+        "price" to this.skuDetails.getFormattedPrice().toString(),
+        "skuId" to this.skuId,
+        "localizedPrice" to this.skuDetails.price,
+        "numberOfUnits" to 1,
+        "priceCurrency" to this.skuDetails.priceCurrencyCode,
+        "periodUnit" to (this.skuDetails.getSubscriptionPeriodEnum()?.getFlutterString())
     )
 }
 
@@ -426,6 +468,20 @@ private fun NamiSKUType.getFlutterString(): String {
         NamiSKUType.ONE_TIME_PURCHASE -> "one_time_purchase"
         NamiSKUType.UNKNOWN -> "unknown"
         NamiSKUType.SUBSCRIPTION -> "subscription"
+    }
+}
+
+private fun PreparePaywallError?.getFlutterString(): String? {
+    return when (this) {
+        PreparePaywallError.SDK_NOT_INITIALIZED -> "sdk_not_initialized"
+        PreparePaywallError.DEVELOPER_PAYWALL_ID_NOT_FOUND -> "developer_paywall_id_not_found"
+        PreparePaywallError.IMAGE_LOAD_FAILED -> "image_load_failed"
+        PreparePaywallError.NO_LIVE_CAMPAIGN -> "no_live_campaign"
+        PreparePaywallError.PAYWALL_ALREADY_DISPLAYED -> "paywall_already_displayed"
+        PreparePaywallError.DATA_NOT_AVAILABLE -> "data_not_available"
+        else -> {
+            null
+        }
     }
 }
 
@@ -441,24 +497,26 @@ private fun SubscriptionPeriod.getFlutterString(): String {
 }
 
 private fun NamiPaywall.convertToMap(): Map<String, Any?> {
-    return hashMapOf("id" to this.id,
-            "developerPaywallId" to this.developerPaywallId,
-            "allowClosing" to this.allowClosing,
-            "backgroundImageUrlPhone" to this.backgroundImageUrlPhone,
-            "backgroundImageUrlTablet" to this.backgroundImageUrlTablet,
-            "name" to this.name,
-            "title" to this.title,
-            "body" to this.body,
-            "purchaseTerms" to this.purchaseTerms,
-            "privacyPolicy" to this.privacyPolicy,
-            "tosLink" to this.tosLink,
-            "restoreControl" to this.restoreControl,
-            "signInControl" to this.signInControl,
-            "type" to this.type,
-            "extraData" to this.extraData,
-            "formattedSkus" to this.formattedSkus.map { it.convertToMap() },
-            "useBottomOverlay" to this.useBottomOverlay,
-            "styleData" to (this.styleData?.convertToMap() ?: mapOf()))
+    return hashMapOf(
+        "id" to this.id,
+        "developerPaywallId" to this.developerPaywallId,
+        "allowClosing" to this.allowClosing,
+        "backgroundImageUrlPhone" to this.backgroundImageUrlPhone,
+        "backgroundImageUrlTablet" to this.backgroundImageUrlTablet,
+        "name" to this.name,
+        "title" to this.title,
+        "body" to this.body,
+        "purchaseTerms" to this.purchaseTerms,
+        "privacyPolicy" to this.privacyPolicy,
+        "tosLink" to this.tosLink,
+        "restoreControl" to this.restoreControl,
+        "signInControl" to this.signInControl,
+        "type" to this.type,
+        "extraData" to this.extraData,
+        "formattedSkus" to this.formattedSkus.map { it.convertToMap() },
+        "useBottomOverlay" to this.useBottomOverlay,
+        "styleData" to (this.styleData?.convertToMap() ?: mapOf())
+    )
 }
 
 private fun FormattedSku.convertToMap(): Map<String, Any> {
@@ -467,38 +525,38 @@ private fun FormattedSku.convertToMap(): Map<String, Any> {
 
 private fun PaywallStyleData.convertToMap(): Map<String, Any> {
     return hashMapOf(
-            "bodyFontSize" to bodyFontSize,
-            "bodyTextColor" to bodyTextColor,
-            "titleFontSize" to titleFontSize,
-            "backgroundColor" to backgroundColor,
-            "skuButtonColor" to skuButtonColor,
-            "skuButtonTextColor" to skuButtonTextColor,
-            "termsLinkColor" to termsLinkColor,
-            "titleTextColor" to titleTextColor,
-            "bodyShadowColor" to bodyShadowColor,
-            "bodyShadowRadius" to bodyShadowRadius,
-            "titleShadowColor" to titleShadowColor,
-            "titleShadowRadius" to titleShadowRadius,
-            "bottomOverlayColor" to bottomOverlayColor,
-            "bottomOverlayCornerRadius" to bottomOverlayCornerRadius,
-            "closeButtonFontSize" to closeButtonFontSize,
-            "closeButtonTextColor" to closeButtonTextColor,
-            "closeButtonShadowColor" to closeButtonShadowColor,
-            "closeButtonShadowRadius" to closeButtonShadowRadius,
-            "signInButtonFontSize" to signInButtonFontSize,
-            "signInButtonTextColor" to signInButtonTextColor,
-            "signInButtonShadowColor" to signInButtonShadowColor,
-            "signInButtonShadowRadius" to signInButtonShadowRadius,
-            "purchaseTermsFontSize" to purchaseTermsFontSize,
-            "purchaseTermsTextColor" to purchaseTermsTextColor,
-            "purchaseTermsShadowColor" to purchaseTermsShadowColor,
-            "purchaseTermsShadowRadius" to purchaseTermsShadowRadius,
-            "restoreButtonFontSize" to restoreButtonFontSize,
-            "restoreButtonTextColor" to restoreButtonTextColor,
-            "restoreButtonShadowColor" to restoreButtonShadowColor,
-            "restoreButtonShadowRadius" to restoreButtonShadowRadius,
-            "featuredSkuButtonColor" to featuredSkuButtonColor,
-            "featuredSkuButtonTextColor" to this.featuredSkuButtonTextColor
+        "bodyFontSize" to bodyFontSize,
+        "bodyTextColor" to bodyTextColor,
+        "titleFontSize" to titleFontSize,
+        "backgroundColor" to backgroundColor,
+        "skuButtonColor" to skuButtonColor,
+        "skuButtonTextColor" to skuButtonTextColor,
+        "termsLinkColor" to termsLinkColor,
+        "titleTextColor" to titleTextColor,
+        "bodyShadowColor" to bodyShadowColor,
+        "bodyShadowRadius" to bodyShadowRadius,
+        "titleShadowColor" to titleShadowColor,
+        "titleShadowRadius" to titleShadowRadius,
+        "bottomOverlayColor" to bottomOverlayColor,
+        "bottomOverlayCornerRadius" to bottomOverlayCornerRadius,
+        "closeButtonFontSize" to closeButtonFontSize,
+        "closeButtonTextColor" to closeButtonTextColor,
+        "closeButtonShadowColor" to closeButtonShadowColor,
+        "closeButtonShadowRadius" to closeButtonShadowRadius,
+        "signInButtonFontSize" to signInButtonFontSize,
+        "signInButtonTextColor" to signInButtonTextColor,
+        "signInButtonShadowColor" to signInButtonShadowColor,
+        "signInButtonShadowRadius" to signInButtonShadowRadius,
+        "purchaseTermsFontSize" to purchaseTermsFontSize,
+        "purchaseTermsTextColor" to purchaseTermsTextColor,
+        "purchaseTermsShadowColor" to purchaseTermsShadowColor,
+        "purchaseTermsShadowRadius" to purchaseTermsShadowRadius,
+        "restoreButtonFontSize" to restoreButtonFontSize,
+        "restoreButtonTextColor" to restoreButtonTextColor,
+        "restoreButtonShadowColor" to restoreButtonShadowColor,
+        "restoreButtonShadowRadius" to restoreButtonShadowRadius,
+        "featuredSkuButtonColor" to featuredSkuButtonColor,
+        "featuredSkuButtonTextColor" to this.featuredSkuButtonTextColor
     )
 }
 

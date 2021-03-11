@@ -2,8 +2,8 @@ group 'com.namiml.flutter.sdk'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.4.30'
-    ext.nami_sdk_version = '1.0.1'
+    ext.kotlin_version = '1.4.31'
+    ext.nami_sdk_version = '1.1.1'
     repositories {
         google()
         jcenter()
@@ -41,6 +41,5 @@ android {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "com.namiml:sdk-android:$nami_sdk_version"
 }

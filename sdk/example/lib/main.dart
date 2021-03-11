@@ -141,10 +141,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    var namiConfiguration =
-        NamiConfiguration(_iosAppPlatformId, _androidAppPlatformId);
-    namiConfiguration.namiLogLevel = NamiLogLevel.debug;
-    namiConfiguration.extraData.add("useStagingAPI");
+    var namiConfiguration = NamiConfiguration(
+        appPlatformIDApple: _iosAppPlatformId,
+        appPlatformIDGoogle: _androidAppPlatformId,
+        namiLogLevel: NamiLogLevel.debug);
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -187,9 +187,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       onPressed: () async {
                         NamiMLManager.coreAction("subscribe");
                         print('Subscribe clicked!');
-                        if (await NamiPaywallManager.canRaisePaywall()) {
+                        var preparePaywallResult =
+                            await NamiPaywallManager.preparePaywallForDisplay();
+                        if (preparePaywallResult.success) {
                           NamiPaywallManager.raisePaywall();
-                          //NamiPaywallManager.raisePaywallByDeveloperPaywallId("TestDevID");
+                        } else {
+                          print('preparePaywallForDisplay Error -> '
+                              '${preparePaywallResult.error}');
                         }
                       },
                       child: Text('Subscribe'),

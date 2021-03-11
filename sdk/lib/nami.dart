@@ -11,7 +11,7 @@ class Nami {
   /// called as the first thing before interacting with the SDK.
   static Future<bool> configure(NamiConfiguration namiConfiguration) {
     var extraDataList = ["extendedClientInfo:flutter:0.0.1"];
-    extraDataList.addAll(namiConfiguration.extraData);
+    extraDataList.addAll(namiConfiguration.extraData ?? []);
     var variableMap = {
       'appPlatformIDApple': namiConfiguration.appPlatformIDApple,
       "appPlatformIDGoogle": namiConfiguration.appPlatformIDGoogle,

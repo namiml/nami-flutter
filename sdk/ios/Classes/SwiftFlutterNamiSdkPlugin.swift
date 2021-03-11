@@ -73,8 +73,29 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
         case "getExternalIdentifier":
             result(Nami.getExternalIdentifier())
-        case "canRaisePaywall":
-            result(NamiPaywallManager.canRaisePaywall())
+        case "preparePaywallForDisplay":
+            let args = call.arguments as? [String: Any]
+            if let data = args {
+                let developerPaywallId = data["developerPaywallId"] as? String
+                let imageRequired = data["backgroundImageRequired"] as? Bool ?? false
+                let timeout = data["imageFetchTimeout"] as? Int
+                let preparePaywallHandler = { (success: Bool, error: Error?) in
+                    result(handlePreparePaywallHandler(success: success, error: error))
+                }
+                if(developerPaywallId == nil) {
+                    if(timeout == nil) {
+                        NamiPaywallManager.preparePaywallForDisplay(backgroundImageRequired: imageRequired,prepareHandler:preparePaywallHandler)
+                    } else {
+                        NamiPaywallManager.preparePaywallForDisplay(backgroundImageRequired: imageRequired, imageFetchTimeout:Double(timeout!),prepareHandler: preparePaywallHandler)
+                    }
+                } else {
+                    if(timeout == nil) {
+                        NamiPaywallManager.preparePaywallForDisplay(developerPaywallID: developerPaywallId!, backgroundImageRequired: imageRequired, prepareHandler: preparePaywallHandler)
+                    } else {
+                        NamiPaywallManager.preparePaywallForDisplay(developerPaywallID: developerPaywallId!, backgroundImageRequired: imageRequired, imageFetchTimeout:Double(timeout!),prepareHandler: preparePaywallHandler)
+                    }
+                }
+            }
         case "raisePaywall":
             // https://github.com/flutter/flutter/issues/9961
             // https://github.com/flutter/flutter/issues/44764
@@ -155,7 +176,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
         case "blockPaywallAutoRaise":
             let blockPaywallFromRaising = call.arguments as? Bool ?? false
-            NamiPaywallManager.registerAutoRaisePaywallBlocker { () -> Bool in
+            NamiPaywallManager.registerAllowAutoRaisePaywallHandler { () -> Bool in
                 return !blockPaywallFromRaising
             }
         case "clearBypassStorePurchases":
@@ -212,6 +233,29 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
         default:
             result("iOS " + UIDevice.current.systemVersion)
+        }
+        
+        func handlePreparePaywallHandler(success: Bool, error: Error?) -> [String: Any?] {
+            var map = [String: Any?]()
+            map["success"] = success
+            if let error = error as NSError? {
+                if(error.code == 0) {
+                    map["error"] = "paywall_already_displayed"
+                } else if(error.code == 1) {
+                    map["error"] = "data_not_available"
+                } else if(error.code == 2) {
+                    map["error"] = "no_live_campaign"
+                } else if(error.code == 3) {
+                    map["error"] = "image_load_failed"
+                } else if(error.code == 4) {
+                    map["error"] = "developer_paywall_id_not_found"
+                } else if(error.code == 5) {
+                    map["error"] = "sdk_not_initialized"
+                } else {
+                    map["error"] = nil
+                }
+            }
+            return map
         }
     }
     
@@ -290,7 +334,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     
     class PaywallRaiseEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiPaywallManager.registerPaywallHandler { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
+            NamiPaywallManager.registerPaywallRaiseHandler  { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
                 var eventMap = [String : Any]()
                 eventMap["namiPaywall"] = namiPaywall.convertToMap()
                 var list = [[String: Any]]()
@@ -305,7 +349,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiPaywallManager.registerPaywallHandler(nil)
+            NamiPaywallManager.registerPaywallRaiseHandler(nil)
             return nil
         }
     }
