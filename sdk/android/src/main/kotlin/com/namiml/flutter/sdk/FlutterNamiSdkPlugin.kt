@@ -45,8 +45,6 @@ import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.logging.StreamHandler
 
-private const val LOG_TAG = "NAMI"
-
 /** FlutterNamiSdkPlugin */
 class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     /// The MethodChannel that will the communication between Flutter and native Android
@@ -363,11 +361,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         if (platformId == null) {
             return
         }
-        io.flutter.Log.d(LOG_TAG, "appPlatformIDGoogle $platformId")
-        io.flutter.Log.d(LOG_TAG, "bypassMode $bypass")
-        io.flutter.Log.d(LOG_TAG, "developmentMode $developmentMode")
-        io.flutter.Log.d(LOG_TAG, "namiLogLevel $namiLogLevel")
-        io.flutter.Log.d(LOG_TAG, "extraDataList $extraDataList")
         val configuration = NamiConfiguration.build(context, platformId) {
             this.logLevel = namiLogLevel
             this.bypassStore = bypass ?: false

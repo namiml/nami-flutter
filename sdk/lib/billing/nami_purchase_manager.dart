@@ -52,7 +52,6 @@ class NamiPurchaseManager {
   /// [skuId] from a [NamiSKU]
   static Future<NamiPurchaseCompleteResult> buySKU(String skuId) async {
     Map<dynamic, dynamic?> map = await channel.invokeMethod("buySKU", skuId);
-    print("buySKU returned $map");
     return NamiPurchaseCompleteResult(
         (map['purchaseState'] as String)._toNamiPurchaseState(), map['error']);
   }
