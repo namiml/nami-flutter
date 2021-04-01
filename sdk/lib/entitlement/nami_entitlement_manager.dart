@@ -20,7 +20,9 @@ class NamiEntitlementManager {
   /// Returns [true] if a Nami Control Center defined Entitlement has at
   /// least one backing purchase and it's not expired.
   static Future<bool> isEntitlementActive(String referenceId) {
-    return channel.invokeMethod("isEntitlementActive", referenceId);
+    return channel
+        .invokeMethod<bool>("isEntitlementActive", referenceId)
+        .then<bool>((bool? value) => value ?? false);
   }
 
   /// Returns a list of [NamiEntitlement] that are currently active
@@ -46,16 +48,12 @@ class NamiEntitlementManager {
 
   static Future<void> setEntitlements(
       List<NamiEntitlementSetter> entitlements) async {
-    List<Map<String, dynamic>> list = List();
+    List<Map<String, dynamic>> list = List.empty(growable: true);
     entitlements.forEach((element) {
-      var platform = describeEnum(NamiPlatformType.other);
-      if (element.platform != null) {
-        platform = describeEnum(element.platform);
-      }
       var variableMap = {
         'referenceId': element.referenceId,
         "expires": element.expires?.millisecondsSinceEpoch,
-        "platform": platform,
+        "platform": describeEnum(element.platform),
         "purchasedSKUid": element.purchasedSKUid,
       };
       list.add(variableMap);
@@ -64,7 +62,7 @@ class NamiEntitlementManager {
   }
 
   static List<NamiEntitlement> _mapToNamiEntitlementList(List<dynamic> list) {
-    List<NamiEntitlement> namiEntitlements = List();
+    List<NamiEntitlement> namiEntitlements = List.empty(growable: true);
     list.forEach((element) {
       NamiEntitlement namiEntitlement = NamiEntitlement.fromMap(element);
       namiEntitlements.add(namiEntitlement);

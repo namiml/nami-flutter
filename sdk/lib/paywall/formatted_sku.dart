@@ -1,9 +1,7 @@
 class FormattedSku {
   final String skuId;
   final bool featured;
-
-  /// iOS only
-  final int presentationPosition;
+  final int? presentationPosition; /// iOS only
 
   FormattedSku(this.skuId, this.featured, this.presentationPosition);
 
@@ -14,6 +12,7 @@ class FormattedSku {
 
   @override
   String toString() {
-    return 'FormattedSku{skuId: $skuId, featured: $featured, presentationPosition: $presentationPosition}';
+    return 'FormattedSku{skuId: $skuId, featured: $featured, '
+        'presentationPosition: $presentationPosition}';
   }
 }

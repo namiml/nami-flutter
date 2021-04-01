@@ -5,17 +5,17 @@ import '../channel.dart';
 /// Manager class which providing functionality related to managing customer/user information
 class NamiCustomerManager {
   /// returns current customer's journey state
-  static Future<CustomerJourneyState> currentCustomerJourneyState() async {
-    Map<dynamic, dynamic> map = await channel.invokeMethod("currentCustomerJourneyState");
-    if (map == null || map.isEmpty) {
+  static Future<CustomerJourneyState?> currentCustomerJourneyState() async {
+    Map<dynamic, dynamic>? map =
+        await channel.invokeMethod("currentCustomerJourneyState");
+    if (map == null) {
       return null;
-    } else {
-      return CustomerJourneyState(
-          map['former_subscriber'],
-          map['in_grace_period'],
-          map['in_trial_period'],
-          map['in_intro_offer_period']);
     }
+    return CustomerJourneyState(
+        map['former_subscriber'],
+        map['in_grace_period'],
+        map['in_trial_period'],
+        map['in_intro_offer_period']);
   }
 }
 

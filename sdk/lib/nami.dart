@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import 'channel.dart';
@@ -10,7 +11,7 @@ class Nami {
   /// called as the first thing before interacting with the SDK.
   static Future<bool> configure(NamiConfiguration namiConfiguration) {
     var extraDataList = ["extendedClientInfo:flutter:0.0.1"];
-    extraDataList.addAll(namiConfiguration.extraData);
+    extraDataList.addAll(namiConfiguration.extraData ?? []);
     var variableMap = {
       'appPlatformIDApple': namiConfiguration.appPlatformIDApple,
       "appPlatformIDGoogle": namiConfiguration.appPlatformIDGoogle,
@@ -20,7 +21,9 @@ class Nami {
       "namiLogLevel": describeEnum(namiConfiguration.namiLogLevel),
       "extraDataList": extraDataList
     };
-    return channel.invokeMethod("configure", variableMap);
+    return channel
+        .invokeMethod<bool>("configure", variableMap)
+        .then<bool>((bool? value) => value ?? false);
   }
 
   /// Provide a unique identifier that can be used to link different devices
@@ -37,24 +40,24 @@ class Nami {
   /// use [NamiExternalIdentifierType.uuid] to set the value then it will get
   /// rejected
   static Future<void> setExternalIdentifier(
-      String externalIdentifier, NamiExternalIdentifierType type) async {
+      String externalIdentifier, NamiExternalIdentifierType type) {
     var variableMap = {
       'externalIdentifier': externalIdentifier,
       "type": describeEnum(type)
     };
-    return await channel.invokeMethod("setExternalIdentifier", variableMap);
+    return channel.invokeMethod("setExternalIdentifier", variableMap);
   }
 
   /// A string of the external identifier that Nami has stored. Returns [null]
   /// if no id has been stored, including if a string was passed to
   /// [setExternalIdentifier] that was not valid.
-  static Future<String> getExternalIdentifier() {
+  static Future<String?> getExternalIdentifier() {
     return channel.invokeMethod("getExternalIdentifier");
   }
 
   /// Clears out any external identifiers set
-  static Future<void> clearExternalIdentifier() async {
-    return await channel.invokeMethod("clearExternalIdentifier");
+  static Future<void> clearExternalIdentifier() {
+    return channel.invokeMethod("clearExternalIdentifier");
   }
 }
 

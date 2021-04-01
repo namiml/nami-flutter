@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     print('--------- initState ---------');
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance?.addObserver(this);
     initPlatformState();
     _printCustomerJourneyState();
     _handleActiveEntitlementsFuture(
@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance?.removeObserver(this);
     super.dispose();
   }
 
@@ -142,9 +142,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    var namiConfiguration =
-        NamiConfiguration(_iosAppPlatformId, _androidAppPlatformId);
-    namiConfiguration.namiLogLevel = NamiLogLevel.debug;
+    var namiConfiguration = NamiConfiguration(
+        appPlatformIDApple: _iosAppPlatformId,
+        appPlatformIDGoogle: _androidAppPlatformId,
+        namiLogLevel: NamiLogLevel.debug);
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -187,7 +188,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       onPressed: () async {
                         NamiMLManager.coreAction("subscribe");
                         print('Subscribe clicked!');
-                        if (await NamiPaywallManager.canRaisePaywall()) {
+                        var preparePaywallResult =
+                            await NamiPaywallManager.preparePaywallForDisplay();
+                        if (preparePaywallResult.success) {
                           NamiPaywallManager.raisePaywall();
                         }
                       },

@@ -8,15 +8,16 @@ class NamiEntitlementSetter {
   final NamiPlatformType platform;
 
   /// The skuID of the backing purchase
-  final String purchasedSKUid;
+  final String? purchasedSKUid;
 
   /// Indicates when will this entitlement expire. Null if expiration date is not known or navailable.
-  final DateTime expires;
+  final DateTime? expires;
 
-  NamiEntitlementSetter(this.referenceId,
-      [this.platform = NamiPlatformType.other,
+  NamiEntitlementSetter(
+      {required this.referenceId,
+      this.platform = NamiPlatformType.other,
       this.purchasedSKUid,
-      this.expires]);
+      this.expires});
 }
 
 /// Platforms that may own a purchased SKU that grants an entitlement

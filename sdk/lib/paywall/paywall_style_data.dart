@@ -140,6 +140,31 @@ class PaywallStyleData {
 
   @override
   String toString() {
-    return 'PaywallStyleData{bodyFontSize: $bodyFontSize, bodyTextColor: $bodyTextColor, titleFontSize: $titleFontSize, backgroundColor: $backgroundColor, skuButtonColor: $skuButtonColor, skuButtonTextColor: $skuButtonTextColor, termsLinkColor: $termsLinkColor, titleTextColor: $titleTextColor, bodyShadowColor: $bodyShadowColor, bodyShadowRadius: $bodyShadowRadius, titleShadowColor: $titleShadowColor, titleShadowRadius: $titleShadowRadius, bottomOverlayColor: $bottomOverlayColor, bottomOverlayCornerRadius: $bottomOverlayCornerRadius, closeButtonFontSize: $closeButtonFontSize, closeButtonTextColor: $closeButtonTextColor, closeButtonShadowColor: $closeButtonShadowColor, closeButtonShadowRadius: $closeButtonShadowRadius, signInButtonFontSize: $signInButtonFontSize, signInButtonTextColor: $signInButtonTextColor, signInButtonShadowColor: $signInButtonShadowColor, signInButtonShadowRadius: $signInButtonShadowRadius, purchaseTermsFontSize: $purchaseTermsFontSize, purchaseTermsTextColor: $purchaseTermsTextColor, purchaseTermsShadowColor: $purchaseTermsShadowColor, purchaseTermsShadowRadius: $purchaseTermsShadowRadius, restoreButtonFontSize: $restoreButtonFontSize, restoreButtonTextColor: $restoreButtonTextColor, restoreButtonShadowColor: $restoreButtonShadowColor, restoreButtonShadowRadius: $restoreButtonShadowRadius, featuredSkuButtonColor: $featuredSkuButtonColor, featuredSkuButtonTextColor: $featuredSkuButtonTextColor}';
+    return 'PaywallStyleData{bodyFontSize: $bodyFontSize, bodyTextColor: '
+        '$bodyTextColor, titleFontSize: $titleFontSize, backgroundColor: '
+        '$backgroundColor, skuButtonColor: $skuButtonColor, '
+        'skuButtonTextColor: $skuButtonTextColor, termsLinkColor: '
+        '$termsLinkColor, titleTextColor: $titleTextColor, bodyShadowColor: '
+        '$bodyShadowColor, bodyShadowRadius: $bodyShadowRadius, '
+        'titleShadowColor: $titleShadowColor, titleShadowRadius: '
+        '$titleShadowRadius, bottomOverlayColor: $bottomOverlayColor, '
+        'bottomOverlayCornerRadius: $bottomOverlayCornerRadius, '
+        'closeButtonFontSize: $closeButtonFontSize, closeButtonTextColor: '
+        '$closeButtonTextColor, closeButtonShadowColor: '
+        '$closeButtonShadowColor, closeButtonShadowRadius: '
+        '$closeButtonShadowRadius, signInButtonFontSize: '
+        '$signInButtonFontSize, signInButtonTextColor: $signInButtonTextColor, '
+        'signInButtonShadowColor: $signInButtonShadowColor, '
+        'signInButtonShadowRadius: $signInButtonShadowRadius, '
+        'purchaseTermsFontSize: $purchaseTermsFontSize, '
+        'purchaseTermsTextColor: $purchaseTermsTextColor, '
+        'purchaseTermsShadowColor: $purchaseTermsShadowColor, '
+        'purchaseTermsShadowRadius: $purchaseTermsShadowRadius, '
+        'restoreButtonFontSize: $restoreButtonFontSize, '
+        'restoreButtonTextColor: $restoreButtonTextColor, '
+        'restoreButtonShadowColor: $restoreButtonShadowColor, '
+        'restoreButtonShadowRadius: $restoreButtonShadowRadius, '
+        'featuredSkuButtonColor: $featuredSkuButtonColor, '
+        'featuredSkuButtonTextColor: $featuredSkuButtonTextColor}';
   }
 }

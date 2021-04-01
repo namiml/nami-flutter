@@ -73,8 +73,29 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
         case "getExternalIdentifier":
             result(Nami.getExternalIdentifier())
-        case "canRaisePaywall":
-            result(NamiPaywallManager.canRaisePaywall())
+        case "preparePaywallForDisplay":
+            let args = call.arguments as? [String: Any]
+            if let data = args {
+                let developerPaywallId = data["developerPaywallId"] as? String
+                let imageRequired = data["backgroundImageRequired"] as? Bool ?? false
+                let timeout = data["imageFetchTimeout"] as? Int
+                let preparePaywallHandler = { (success: Bool, error: Error?) in
+                    result(handlePreparePaywallHandler(success: success, error: error))
+                }
+                if(developerPaywallId == nil) {
+                    if(timeout == nil) {
+                        NamiPaywallManager.preparePaywallForDisplay(backgroundImageRequired: imageRequired,prepareHandler:preparePaywallHandler)
+                    } else {
+                        NamiPaywallManager.preparePaywallForDisplay(backgroundImageRequired: imageRequired, imageFetchTimeout:Double(timeout!),prepareHandler: preparePaywallHandler)
+                    }
+                } else {
+                    if(timeout == nil) {
+                        NamiPaywallManager.preparePaywallForDisplay(developerPaywallID: developerPaywallId!, backgroundImageRequired: imageRequired, prepareHandler: preparePaywallHandler)
+                    } else {
+                        NamiPaywallManager.preparePaywallForDisplay(developerPaywallID: developerPaywallId!, backgroundImageRequired: imageRequired, imageFetchTimeout:Double(timeout!),prepareHandler: preparePaywallHandler)
+                    }
+                }
+            }
         case "raisePaywall":
             // https://github.com/flutter/flutter/issues/9961
             // https://github.com/flutter/flutter/issues/44764
@@ -91,13 +112,16 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 result(true)
             }
         case "currentCustomerJourneyState":
-            let state = NamiCustomerManager.currentCustomerJourneyState()
-            var eventMap = [String : Any?]()
-            eventMap["former_subscriber"] = state?.formerSubscriber
-            eventMap["in_grace_period"] = state?.formerSubscriber
-            eventMap["in_trial_period"] = state?.formerSubscriber
-            eventMap["in_intro_offer_period"] = state?.formerSubscriber
-            result(eventMap)
+            if let state = NamiCustomerManager.currentCustomerJourneyState() {
+                var eventMap = [String : Any]()
+                eventMap["former_subscriber"] = state.formerSubscriber
+                eventMap["in_grace_period"] = state.formerSubscriber
+                eventMap["in_trial_period"] = state.formerSubscriber
+                eventMap["in_intro_offer_period"] = state.formerSubscriber
+                result(eventMap)
+            } else {
+                result(nil)
+            }
         case "clearAllEntitlements":
             NamiEntitlementManager.clearAllEntitlements()
         case "isEntitlementActive":
@@ -152,7 +176,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
         case "blockPaywallAutoRaise":
             let blockPaywallFromRaising = call.arguments as? Bool ?? false
-            NamiPaywallManager.registerAutoRaisePaywallBlocker { () -> Bool in
+            NamiPaywallManager.registerAllowAutoRaisePaywallHandler { () -> Bool in
                 return !blockPaywallFromRaising
             }
         case "clearBypassStorePurchases":
@@ -210,6 +234,29 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }
+        
+        func handlePreparePaywallHandler(success: Bool, error: Error?) -> [String: Any?] {
+            var map = [String: Any?]()
+            map["success"] = success
+            if let error = error as NSError? {
+                if(error.code == 0) {
+                    map["error"] = "paywall_already_displayed"
+                } else if(error.code == 1) {
+                    map["error"] = "data_not_available"
+                } else if(error.code == 2) {
+                    map["error"] = "no_live_campaign"
+                } else if(error.code == 3) {
+                    map["error"] = "image_load_failed"
+                } else if(error.code == 4) {
+                    map["error"] = "developer_paywall_id_not_found"
+                } else if(error.code == 5) {
+                    map["error"] = "sdk_not_initialized"
+                } else {
+                    map["error"] = nil
+                }
+            }
+            return map
+        }
     }
     
     class SignInEventHandler: NSObject, FlutterStreamHandler {
@@ -229,7 +276,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     class AnalyticsEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiAnalyticsSupport.registerAnalyticsHandler { (type: NamiAnalyticsActionType, data: [String : Any]) in
-                var eventMap = [String : Any]()
+                var eventMap = [String : Any?]()
                 let typeString: String
                 if(type == NamiAnalyticsActionType.paywallRaise) {
                     typeString = "paywall_raise"
@@ -287,7 +334,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     
     class PaywallRaiseEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiPaywallManager.registerPaywallHandler { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
+            NamiPaywallManager.registerPaywallRaiseHandler  { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
                 var eventMap = [String : Any]()
                 eventMap["namiPaywall"] = namiPaywall.convertToMap()
                 var list = [[String: Any]]()
@@ -302,7 +349,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiPaywallManager.registerPaywallHandler(nil)
+            NamiPaywallManager.registerPaywallRaiseHandler(nil)
             return nil
         }
     }
@@ -357,9 +404,13 @@ public extension NamiEntitlement {
 
 public extension NamiPurchase {
     func convertToMap() -> [String: Any] {
+        var expiry: Int? = nil
+        if let timeSince = self.expires?.timeIntervalSince1970 {
+            expiry = Int.init(timeSince)
+        }
         var map = [String: Any]()
         map["purchaseInitiatedTimestamp"] = Int.init(self.purchaseInitiatedTimestamp.timeIntervalSince1970)
-        map["expires"] = Int.init(self.expires?.timeIntervalSince1970 ?? 0)
+        map["expires"] = expiry
         map["fromNami"] = false
         if(self.purchaseSource == NamiPurchaseSource.application) {
             map["purchaseSource"] = "application"
@@ -372,7 +423,6 @@ public extension NamiPurchase {
             map["purchaseSource"] = "unknown"
         }
         map["transactionIdentifier"] = self.transactionIdentifier
-        map["localizedDescription"] = self.description
         map["skuId"] = self.skuID
         return map
     }
@@ -392,6 +442,13 @@ public extension NamiSKU {
         map["priceLanguage"] = self.product?.priceLocale.languageCode
         map["priceCurrency"] = self.product?.priceLocale.currencyCode
         map["priceCountry"] = self.product?.priceLocale.regionCode
+        if(self.type == NamiSKUType.one_time_purchase) {
+            map["type"] = "one_time_purchase"
+        } else if (self.type == NamiSKUType.subscription) {
+            map["type"] = "subscription"
+        } else {
+            map["type"] = "unknown"
+        }
         let period = self.product?.subscriptionPeriod?.unit
         if(period == SKProduct.PeriodUnit.day) {
             map["periodUnit"] = "day"
