@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'nami_flutter'
-  s.version          = '0.1.0'
+  s.version          = '0.2.0'
   s.summary          = 'Subscription and in-app purchase (IAP) marketing platform for Flutter.'
   s.description      = <<-DESC
 Integrate with a few lines of code. Analytics, CRM, and create customized purchase experiences in the cloud. Generous free usage tier. 
@@ -15,7 +15,7 @@ Integrate with a few lines of code. Analytics, CRM, and create customized purcha
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
-  s.dependency 'Nami', '2.6.0'
+  s.dependency 'Nami', '2.7.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

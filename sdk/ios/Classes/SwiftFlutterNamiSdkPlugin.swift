@@ -96,6 +96,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     }
                 }
             }
+        case "processSmartText":
+        let args = call.arguments as? [String: Any]
+        if let data = args {
+            let text = data["text"] as? String
+            let dataStores = data["dataStores"] as? Array<Any>
+            result(NamiPaywallManager.processSmartText(text: text, dataStores: dataStores))
+        }
         case "raisePaywall":
             // https://github.com/flutter/flutter/issues/9961
             // https://github.com/flutter/flutter/issues/44764
@@ -433,11 +440,13 @@ public extension NamiSKU {
         var map = [String: Any]()
         map["description"] = self.product?.localizedDescription
         map["title"] = self.product?.localizedTitle
+        map["displayText"] = self.namiDisplayText
+        map["displaySubText"] = self.namiSubDisplayText
         map["localizedMultipliedPrice"] = self.product?.localizedMultipliedPrice
         map["price"] = self.product?.price.stringValue
         map["subscriptionGroupIdentifier"] = self.product?.subscriptionGroupIdentifier
         map["skuId"] = self.skuID
-        map["localizedPrice"] = self.product?.localizedPrice
+        map["localizedPrice"] = self.localizedCurrentPrice
         map["numberOfUnits"] = self.product?.subscriptionPeriod?.numberOfUnits
         map["priceLanguage"] = self.product?.priceLocale.languageCode
         map["priceCurrency"] = self.product?.priceLocale.currencyCode
@@ -474,7 +483,7 @@ public extension NamiPaywall {
         map["name"] = self.paywallValue(forKey: NamiPaywallKeys.name)
         map["title"] = self.title
         map["body"] = self.body
-        map["purchaseTerms"] = self.paywallValue(forKey: NamiPaywallKeys.purchase_terms)
+        map["purchaseTerms"] = self.purchaseTerms
         map["privacyPolicy"] = self.paywallValue(forKey: NamiPaywallKeys.privacy_policy)
         map["tosLink"] = self.paywallValue(forKey: NamiPaywallKeys.tos_link)
         map["restoreControl"] = self.paywallValue(forKey: NamiPaywallKeys.restore_control)
