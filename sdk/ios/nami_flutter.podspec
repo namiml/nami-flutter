@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'nami_flutter'
-  s.version          = '0.2.0'
+  s.version          = '1.0.0'
   s.summary          = 'Subscription and in-app purchase (IAP) marketing platform for Flutter.'
   s.description      = <<-DESC
 Integrate with a few lines of code. Analytics, CRM, and create customized purchase experiences in the cloud. Generous free usage tier. 
