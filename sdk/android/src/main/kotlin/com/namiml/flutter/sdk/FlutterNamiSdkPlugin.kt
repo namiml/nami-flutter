@@ -244,7 +244,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             "processSmartText" -> {
                 val text = call.argument<String>("text")
-                result.success(NamiPaywallManager.processSmartText(text)
+                result.success(NamiPaywallManager.processSmartText(text))
             }
             "currentCustomerJourneyState" -> {
                 val stateMap = NamiCustomerManager.currentCustomerJourneyState()?.let {
@@ -503,8 +503,8 @@ private fun NamiPaywall.convertToMap(): Map<String, Any?> {
         "name" to this.name,
         "title" to this.title,
         "body" to this.body,
-        "displayText" = this.displayText
-        "displaySubText" = this.displaySubText
+        "displayText" = this.displayText,
+        "displaySubText" = this.displaySubText,
         "purchaseTerms" to this.purchaseTerms,
         "privacyPolicy" to this.privacyPolicy,
         "tosLink" to this.tosLink,
