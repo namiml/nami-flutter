@@ -244,7 +244,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             "processSmartText" -> {
                 val text = call.argument<String>("text")
-                result.success(NamiPaywallManager.processSmartText(text))
+                val dataStores = call.argument<List<NamiSKU>>("dataStores")
+                result.success(NamiPaywallManager.processSmartText(text, dataStores as List<NamiSKU>))
             }
             "currentCustomerJourneyState" -> {
                 val stateMap = NamiCustomerManager.currentCustomerJourneyState()?.let {
@@ -453,6 +454,8 @@ private fun NamiSKU.convertToMap(): Map<String, Any?> {
         "type" to this.type.getFlutterString(),
         "price" to this.skuDetails.getFormattedPrice().toString(),
         "skuId" to this.skuId,
+        "displayText" to this.displayText,
+        "displaySubText" to this.displaySubText,
         "localizedPrice" to this.skuDetails.price,
         "numberOfUnits" to 1,
         "priceCurrency" to this.skuDetails.priceCurrencyCode,
@@ -484,12 +487,12 @@ private fun PreparePaywallError?.getFlutterString(): String? {
 
 private fun SubscriptionPeriod.getFlutterString(): String {
     return when (this) {
-        SubscriptionPeriod.DAY -> "day"
         SubscriptionPeriod.WEEKLY -> "week"
         SubscriptionPeriod.MONTHLY -> "month"
         SubscriptionPeriod.ANNUAL -> "year"
         SubscriptionPeriod.QUARTERLY -> "quarter"
         SubscriptionPeriod.HALF_YEAR -> "half_year"
+        SubscriptionPeriod.FOUR_WEEKS -> "four_weeks"
     }
 }
 
@@ -503,8 +506,6 @@ private fun NamiPaywall.convertToMap(): Map<String, Any?> {
         "name" to this.name,
         "title" to this.title,
         "body" to this.body,
-        "displayText" = this.displayText,
-        "displaySubText" = this.displaySubText,
         "purchaseTerms" to this.purchaseTerms,
         "privacyPolicy" to this.privacyPolicy,
         "tosLink" to this.tosLink,
