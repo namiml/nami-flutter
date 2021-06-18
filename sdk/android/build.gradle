@@ -3,7 +3,7 @@ version '1.0-SNAPSHOT'
 
 buildscript {
     ext.kotlin_version = '1.4.31'
-    ext.nami_sdk_version = '1.1.1'
+    ext.nami_sdk_version = '1.2.1'
     repositories {
         google()
         jcenter()
