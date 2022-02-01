@@ -6,27 +6,31 @@ import androidx.annotation.NonNull
 import com.namiml.Nami
 import com.namiml.NamiConfiguration
 import com.namiml.NamiExternalIdentifierType
+import com.namiml.NamiLanguageCode
 import com.namiml.NamiLogLevel
 import com.namiml.analytics.NamiAnalyticsActionType
 import com.namiml.analytics.NamiAnalyticsKeys
 import com.namiml.analytics.NamiAnalyticsPurchaseActivityType
 import com.namiml.analytics.NamiAnalyticsSupport
-import com.namiml.api.model.FormattedSku
 import com.namiml.billing.NamiPurchase
 import com.namiml.billing.NamiPurchaseCompleteResult
 import com.namiml.billing.NamiPurchaseManager
 import com.namiml.billing.NamiPurchaseState
+import com.namiml.customer.CustomerJourneyState
 import com.namiml.customer.NamiCustomerManager
 import com.namiml.entitlement.NamiEntitlement
 import com.namiml.entitlement.NamiEntitlementManager
 import com.namiml.entitlement.NamiEntitlementSetter
 import com.namiml.entitlement.NamiPlatformType
 import com.namiml.ml.NamiMLManager
+import com.namiml.paywall.LegalCitations
+import com.namiml.paywall.NamiLocaleConfig
 import com.namiml.paywall.NamiPaywall
 import com.namiml.paywall.NamiPaywallManager
 import com.namiml.paywall.NamiPurchaseSource
 import com.namiml.paywall.NamiSKU
 import com.namiml.paywall.NamiSKUType
+import com.namiml.paywall.PaywallDisplayOptions
 import com.namiml.paywall.PaywallStyleData
 import com.namiml.paywall.PreparePaywallError
 import com.namiml.paywall.SubscriptionPeriod
@@ -55,6 +59,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var signInListener: EventChannel
     private lateinit var analyticsListener: EventChannel
     private lateinit var entitlementChangeListener: EventChannel
+    private lateinit var customerJourneyChangeListener: EventChannel
     private lateinit var paywallRaiseListener: EventChannel
     private lateinit var purchaseChangeListener: EventChannel
     private lateinit var context: Context
@@ -72,6 +77,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel(flutterPluginBinding.binaryMessenger, "paywallRaiseEvent")
         purchaseChangeListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "purchaseChangeEvent")
+        customerJourneyChangeListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "customerJourneyChangeEvent")
 
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
@@ -80,6 +87,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         setEntitlementStreamHandler()
         setPaywallRaiseStreamHandler()
         setPurchaseChangeStreamHandler()
+        setCustomerJourneyChangeStreamHandler()
     }
 
     private fun setPurchaseChangeStreamHandler() {
@@ -174,6 +182,21 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
+    private fun setCustomerJourneyChangeStreamHandler() {
+        customerJourneyChangeListener.setStreamHandler(object : StreamHandler(),
+            EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiCustomerManager.registerCustomerJourneyChangedListener { journeyState ->
+                    events?.success(journeyState.convertToMap())
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                NamiCustomerManager.registerCustomerJourneyChangedListener(null)
+            }
+        })
+    }
+
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
             "getPlatformVersion" -> {
@@ -186,12 +209,14 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     "info" -> NamiLogLevel.INFO
                     else -> NamiLogLevel.ERROR
                 }
+                val namiLanguageCode = call.argument<String>("namiLanguageCode")
                 configure(
                     context,
                     call.argument<String>("appPlatformIDGoogle"),
                     call.argument<Boolean>("bypassStore"),
                     call.argument<Boolean>("developmentMode"),
                     namiLogLevel,
+                    NamiLanguageCode.values().find { it.code == namiLanguageCode },
                     call.argument<List<String>>("extraDataList")
                 )
                 result.success(true)
@@ -245,17 +270,15 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "processSmartText" -> {
                 val text = call.argument<String>("text")
                 val dataStores = call.argument<List<NamiSKU>>("dataStores")
-                result.success(NamiPaywallManager.processSmartText(text, dataStores as List<NamiSKU>))
+                result.success(
+                    NamiPaywallManager.processSmartText(
+                        text,
+                        dataStores as List<NamiSKU>
+                    )
+                )
             }
             "currentCustomerJourneyState" -> {
-                val stateMap = NamiCustomerManager.currentCustomerJourneyState()?.let {
-                    mapOf(
-                        "former_subscriber" to it.formerSubscriber,
-                        "in_grace_period" to it.inGracePeriod,
-                        "in_trial_period" to it.inTrialPeriod,
-                        "in_intro_offer_period" to it.inIntroOfferPeriod
-                    )
-                }
+                val stateMap = NamiCustomerManager.currentCustomerJourneyState()?.convertToMap()
                 result.success(stateMap)
             }
             "clearAllEntitlements" -> {
@@ -349,6 +372,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                 }
             }
+            "consumePurchasedSKU" -> {
+                // TODO Finish this since now we've available
+                result.notImplemented()
+            }
             else -> {
                 result.notImplemented()
             }
@@ -361,6 +388,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         bypass: Boolean?,
         developmentMode: Boolean?,
         namiLogLevel: NamiLogLevel,
+        namiLanguageCode: NamiLanguageCode?,
         extraDataList: List<String>?
     ) {
         if (platformId == null) {
@@ -371,6 +399,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             this.bypassStore = bypass ?: false
             this.developmentMode = developmentMode ?: false
             this.settingsList = extraDataList
+            this.namiLanguageCode = namiLanguageCode
         }
         Nami.configure(configuration)
     }
@@ -395,6 +424,18 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onDetachedFromActivity() {
         currentActivityWeakReference = null
     }
+}
+
+private fun CustomerJourneyState.convertToMap(): Map<String, Boolean> {
+    return mapOf(
+        "former_subscriber" to formerSubscriber,
+        "in_grace_period" to inGracePeriod,
+        "in_trial_period" to inTrialPeriod,
+        "in_intro_offer_period" to inIntroOfferPeriod,
+        "is_cancelled" to isCancelled,
+        "in_pause" to inPause,
+        "in_account_hold" to inAccountHold
+    )
 }
 
 private fun NamiPurchaseCompleteResult.convertToMap(): Map<String, Any?> {
@@ -454,6 +495,7 @@ private fun NamiSKU.convertToMap(): Map<String, Any?> {
         "type" to this.type.getFlutterString(),
         "price" to this.skuDetails.getFormattedPrice().toString(),
         "skuId" to this.skuId,
+        "featured" to this.featured,
         "displayText" to this.displayText,
         "displaySubText" to this.displaySubText,
         "localizedPrice" to this.skuDetails.price,
@@ -479,9 +521,8 @@ private fun PreparePaywallError?.getFlutterString(): String? {
         PreparePaywallError.NO_LIVE_CAMPAIGN -> "no_live_campaign"
         PreparePaywallError.PAYWALL_ALREADY_DISPLAYED -> "paywall_already_displayed"
         PreparePaywallError.DATA_NOT_AVAILABLE -> "data_not_available"
-        else -> {
-            null
-        }
+        PreparePaywallError.PLAY_BILLING_NOT_AVAILABLE -> "play_billing_not_available"
+        else -> null
     }
 }
 
@@ -500,27 +541,54 @@ private fun NamiPaywall.convertToMap(): Map<String, Any?> {
     return hashMapOf(
         "id" to this.id,
         "developerPaywallId" to this.developerPaywallId,
-        "allowClosing" to this.allowClosing,
         "backgroundImageUrlPhone" to this.backgroundImageUrlPhone,
         "backgroundImageUrlTablet" to this.backgroundImageUrlTablet,
         "name" to this.name,
         "title" to this.title,
         "body" to this.body,
+        "legalCitations" to (this.legalCitations?.convertToMap() ?: mapOf()),
+        "displayOptions" to this.displayOptions.convertToMap(),
         "purchaseTerms" to this.purchaseTerms,
-        "privacyPolicy" to this.privacyPolicy,
-        "tosLink" to this.tosLink,
-        "restoreControl" to this.restoreControl,
-        "signInControl" to this.signInControl,
         "type" to this.type,
         "extraData" to this.extraData,
-        "formattedSkus" to this.formattedSkus.map { it.convertToMap() },
-        "useBottomOverlay" to this.useBottomOverlay,
-        "styleData" to (this.styleData?.convertToMap() ?: mapOf())
+        "styleData" to (this.styleData?.convertToMap() ?: mapOf()),
+        "namiSkus" to this.namiSkus.map { it.skuId },
+        "localeConfig" to this.localeConfig.convertToMap(),
     )
 }
 
-private fun FormattedSku.convertToMap(): Map<String, Any> {
-    return hashMapOf("featured" to this.featured, "skuId" to this.skuId)
+private fun LegalCitations.convertToMap(): Map<String, Any?> {
+    return hashMapOf(
+        "id" to this.id,
+        "privacy_url" to this.privacyUrl,
+        "privacy_text" to this.privacyText,
+        "tos_url" to this.tosUrl,
+        "tos_text" to this.tosText,
+        "clickwrap_text" to this.clickWrapText,
+        "language" to this.language,
+    )
+}
+
+private fun PaywallDisplayOptions.convertToMap(): Map<String, Any> {
+    return hashMapOf(
+        "sign_in_control" to this.signInControl,
+        "allow_closing" to this.allowClosing,
+        "restore_control" to this.restoreControl,
+        "scrollable_region_size" to this.scrollableRegionSize,
+        "show_nami_purchase_success_message" to this.shouldShowNamiPurchaseSuccessMessage,
+        "skus_in_scrollable_region" to this.showSkusInScrollableRegion,
+        "use_bottom_overlay" to this.useBottomOverlay,
+    )
+}
+
+private fun NamiLocaleConfig.convertToMap(): Map<String, Any> {
+    return hashMapOf(
+        "close_button_text" to this.closeButtonText,
+        "sign_in_button_text" to this.signInButtonText,
+        "restore_purchase_button_text" to this.restorePurchaseButtonText,
+        "purchase_button_hint_text_to_speech" to this.purchaseButtonHintTextToSpeech,
+        "purchase_terms_prefix_hint_text_to_speech" to this.purchaseTermsPrefixHintTextToSpeech,
+    )
 }
 
 private fun PaywallStyleData.convertToMap(): Map<String, Any> {
@@ -531,6 +599,9 @@ private fun PaywallStyleData.convertToMap(): Map<String, Any> {
         "backgroundColor" to backgroundColor,
         "skuButtonColor" to skuButtonColor,
         "skuButtonTextColor" to skuButtonTextColor,
+        "skuSubDisplayTextColor" to skuSubDisplayTextColor,
+        "skuSubDisplayTextShadowColor" to skuSubDisplayTextShadowColor,
+        "skuSubDisplayTextShadowRadius" to skuSubDisplayTextShadowRadius,
         "termsLinkColor" to termsLinkColor,
         "titleTextColor" to titleTextColor,
         "bodyShadowColor" to bodyShadowColor,
@@ -565,6 +636,7 @@ private fun NamiPurchaseState.getFlutterString(): String {
         NamiPurchaseState.CANCELLED -> "cancelled"
         NamiPurchaseState.FAILED -> "failed"
         NamiPurchaseState.PURCHASED -> "purchased"
+        // TODO Add PENDING HERE
         else -> "unknown"
     }
 }

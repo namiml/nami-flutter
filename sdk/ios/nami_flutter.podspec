@@ -15,7 +15,7 @@ Integrate with a few lines of code. Analytics, CRM, and create customized purcha
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
-  s.dependency 'Nami', '2.7.0'
+  s.dependency 'Nami', '2.9.3'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

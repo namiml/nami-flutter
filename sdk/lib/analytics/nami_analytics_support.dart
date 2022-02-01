@@ -77,7 +77,6 @@ enum NamiAnalyticsPurchaseActivityType {
 class NamiAnalyticsKeys {
   static const String CAMPAIGN_ID = "campaign_id";
   static const String CAMPAIGN_NAME = "campaign_name";
-  static const String CAMPAIGN_TYPE = "campaign_type";
 
   /// Returned value for this key in map would be of type [bool]
   static const String NAMI_TRIGGERED = "nami_triggered";

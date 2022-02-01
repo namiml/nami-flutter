@@ -1,92 +1,81 @@
-import 'package:nami_flutter/paywall/formatted_sku.dart';
+import 'package:nami_flutter/paywall/legal_citations.dart';
+import 'package:nami_flutter/paywall/nami_locale_config.dart';
+import 'package:nami_flutter/paywall/paywall_display_options.dart';
 
 import 'paywall_style_data.dart';
 
 class NamiPaywall {
   final String id;
   final String? developerPaywallId;
-  final bool allowClosing;
+
   final String? backgroundImageUrlPhone;
   final String? backgroundImageUrlTablet;
   final String? name;
   final String? title;
   final String? body;
+  final LegalCitations? legalCitations;
+  final PaywallDisplayOptions displayOptions;
   final String? purchaseTerms;
-  final String? privacyPolicy;
-  final String? tosLink;
-  final bool restoreControl;
-  final bool signInControl;
   final String type;
   final Map<dynamic, dynamic>? extraData;
   final PaywallStyleData? styleData;
-
-  // formattedSku list associated with this paywall if any
-  final List<FormattedSku> formattedSkus;
-  final bool useBottomOverlay;
+  final List<String> namiSkus;
+  final NamiLocaleConfig localeConfig;
 
   NamiPaywall(
       this.id,
       this.developerPaywallId,
-      this.allowClosing,
       this.backgroundImageUrlPhone,
       this.backgroundImageUrlTablet,
       this.name,
       this.title,
       this.body,
+      this.legalCitations,
+      this.displayOptions,
       this.purchaseTerms,
-      this.privacyPolicy,
-      this.tosLink,
-      this.restoreControl,
-      this.signInControl,
       this.type,
       this.extraData,
       this.styleData,
-      this.formattedSkus,
-      this.useBottomOverlay);
+      this.namiSkus,
+      this.localeConfig);
 
   factory NamiPaywall.fromMap(Map<dynamic, dynamic?> map) {
-    List<dynamic> dynamicFormattedSkus = map['formattedSkus'];
-    List<FormattedSku> formattedSkus = List.empty(growable: true);
-    dynamicFormattedSkus.forEach((element) {
-      FormattedSku formattedSku = FormattedSku.fromMap(element);
-      formattedSkus.add(formattedSku);
+    List<dynamic> dynamicSkus = map['namiSkus'];
+    List<String> namiSkus = List.empty(growable: true);
+    dynamicSkus.forEach((element) {
+      namiSkus.add(element.toString());
     });
+
     dynamic? styleDataMap = map['styleData'];
     PaywallStyleData? styleData;
     if (styleDataMap != null) {
       styleData = PaywallStyleData.fromMap(styleDataMap);
     }
+    dynamic? legalCitationsMap = map['legalCitations'];
+    LegalCitations? legalCitation;
+    if (legalCitationsMap != null) {
+      legalCitation = LegalCitations.fromMap(legalCitationsMap);
+    }
+    dynamic? displayOptionsMap = map['displayOptions'];
+    PaywallDisplayOptions displayOptions =
+        PaywallDisplayOptions.fromMap(displayOptionsMap);
+    dynamic? localeConfigMap = map['localeConfig'];
+    NamiLocaleConfig localeConfig = NamiLocaleConfig.fromMap(localeConfigMap);
     return NamiPaywall(
         map['id'],
         map['developerPaywallId'],
-        map['allowClosing'],
         map['backgroundImageUrlPhone'],
         map['backgroundImageUrlTablet'],
         map['name'],
         map['title'],
         map['body'],
+        legalCitation,
+        displayOptions,
         map['purchaseTerms'],
-        map['privacyPolicy'],
-        map['tosLink'],
-        map['restoreControl'],
-        map['signInControl'],
         map['type'],
         map['extraData'],
         styleData,
-        formattedSkus,
-        map['useBottomOverlay']);
-  }
-
-  @override
-  String toString() {
-    return 'NamiPaywall{id: $id, developerPaywallId: $developerPaywallId, '
-        'allowClosing: $allowClosing, backgroundImageUrlPhone: '
-        '$backgroundImageUrlPhone, backgroundImageUrlTablet: '
-        '$backgroundImageUrlTablet, name: $name, title: $title, body: $body, '
-        'purchaseTerms: $purchaseTerms, privacyPolicy: $privacyPolicy, '
-        'tosLink: $tosLink, restoreControl: $restoreControl, signInControl: '
-        '$signInControl, type: $type, extraData: $extraData, styleData: '
-        '$styleData, formattedSkus: $formattedSkus, useBottomOverlay: '
-        'useBottomOverlay}';
+        namiSkus,
+        localeConfig);
   }
 }
