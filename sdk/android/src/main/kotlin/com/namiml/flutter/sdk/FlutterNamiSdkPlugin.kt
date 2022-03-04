@@ -2,6 +2,7 @@ package com.namiml.flutter.sdk
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.annotation.NonNull
 import com.namiml.Nami
 import com.namiml.NamiConfiguration
@@ -209,14 +210,26 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     "info" -> NamiLogLevel.INFO
                     else -> NamiLogLevel.ERROR
                 }
-                val namiLanguageCode = call.argument<String>("namiLanguageCode")
+                val namiLanguageCode = call.argument<String>("namiLanguageCode").let { code ->
+                    NamiLanguageCode.values().find { it.code == code }.let { namiLanguageCode ->
+                        if (namiLanguageCode == null) {
+                            Log.d(
+                                "NAMI",
+                                "Nami language code set in NamiConfiguration " +
+                                    "\"$namiLanguageCode\" not found in list of available Nami " +
+                                    "Language Codes:\n"
+                            )
+                        }
+                        namiLanguageCode
+                    }
+                }
                 configure(
                     context,
                     call.argument<String>("appPlatformIDGoogle"),
                     call.argument<Boolean>("bypassStore"),
                     call.argument<Boolean>("developmentMode"),
                     namiLogLevel,
-                    NamiLanguageCode.values().find { it.code == namiLanguageCode },
+                    namiLanguageCode,
                     call.argument<List<String>>("extraDataList")
                 )
                 result.success(true)
@@ -373,8 +386,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
             }
             "consumePurchasedSKU" -> {
-                // TODO Finish this since now we've available
-                result.notImplemented()
+                val skuRefId = call.arguments as? String
+                if (skuRefId != null) {
+                    NamiPurchaseManager.consumePurchasedSKU(skuRefId)
+                }
             }
             else -> {
                 result.notImplemented()
