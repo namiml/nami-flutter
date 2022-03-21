@@ -70,7 +70,7 @@ class NamiSKU {
       this.periodUnit,
       this.featured);
 
-  factory NamiSKU.fromMap(Map<dynamic, dynamic?> map) {
+  factory NamiSKU.fromMap(Map<dynamic, dynamic> map) {
     return NamiSKU(
         map['description'],
         map['title'],

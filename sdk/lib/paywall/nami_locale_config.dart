@@ -12,7 +12,7 @@ class NamiLocaleConfig {
       this.purchaseTermsPrefixHintTextToSpeech,
       this.purchaseButtonHintTextToSpeech);
 
-  factory NamiLocaleConfig.fromMap(Map<dynamic, dynamic?> map) {
+  factory NamiLocaleConfig.fromMap(Map<dynamic, dynamic> map) {
     return NamiLocaleConfig(
         map['close_button_text'],
         map['sign_in_button_text'],

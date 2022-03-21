@@ -80,7 +80,7 @@ class NamiPaywallManager {
     return data;
   }
 
-  static NamiPaywall _handleSignInClicked(Map<dynamic, dynamic?> map) {
+  static NamiPaywall _handleSignInClicked(Map<dynamic, dynamic> map) {
     return NamiPaywall.fromMap(map);
   }
 

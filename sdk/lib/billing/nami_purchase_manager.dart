@@ -51,7 +51,7 @@ class NamiPurchaseManager {
   /// Initiate a Google Play Billing or Apple StoreKit purchase using
   /// [skuId] from a [NamiSKU]
   static Future<NamiPurchaseCompleteResult> buySKU(String skuId) async {
-    Map<dynamic, dynamic?> map = await channel.invokeMethod("buySKU", skuId);
+    Map<dynamic, dynamic> map = await channel.invokeMethod("buySKU", skuId);
     return NamiPurchaseCompleteResult(
         (map['purchaseState'] as String)._toNamiPurchaseState(), map['error']);
   }

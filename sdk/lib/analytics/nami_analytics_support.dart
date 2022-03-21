@@ -19,7 +19,7 @@ class NamiAnalyticsSupport {
     return data;
   }
 
-  static NamiAnalyticsData _handleAnalyticsEvent(Map<dynamic, dynamic?> map) {
+  static NamiAnalyticsData _handleAnalyticsEvent(Map<dynamic, dynamic> map) {
     var type = NamiAnalyticsActionType.unknown;
     switch (map["type"]) {
       case "paywall_raise":
@@ -45,7 +45,7 @@ class NamiAnalyticsSupport {
 
 class NamiAnalyticsData {
   final NamiAnalyticsActionType type;
-  final Map<dynamic, dynamic?> eventData;
+  final Map<dynamic, dynamic> eventData;
 
   NamiAnalyticsData(this.type, this.eventData);
 }

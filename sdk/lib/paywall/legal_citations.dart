@@ -10,7 +10,7 @@ class LegalCitations {
   LegalCitations(this.id, this.tosText, this.tosUrl, this.privacyText,
       this.privacyUrl, this.language, this.clickWrapText);
 
-  factory LegalCitations.fromMap(Map<dynamic, dynamic?> map) {
+  factory LegalCitations.fromMap(Map<dynamic, dynamic> map) {
     return LegalCitations(
         map['id'],
         map['tos_text'],

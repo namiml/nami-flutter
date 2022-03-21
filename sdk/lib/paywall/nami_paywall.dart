@@ -39,27 +39,27 @@ class NamiPaywall {
       this.namiSkus,
       this.localeConfig);
 
-  factory NamiPaywall.fromMap(Map<dynamic, dynamic?> map) {
+  factory NamiPaywall.fromMap(Map<dynamic, dynamic> map) {
     List<dynamic> dynamicSkus = map['namiSkus'];
     List<String> namiSkus = List.empty(growable: true);
     dynamicSkus.forEach((element) {
       namiSkus.add(element.toString());
     });
 
-    dynamic? styleDataMap = map['styleData'];
+    dynamic styleDataMap = map['styleData'];
     PaywallStyleData? styleData;
     if (styleDataMap != null) {
       styleData = PaywallStyleData.fromMap(styleDataMap);
     }
-    dynamic? legalCitationsMap = map['legalCitations'];
+    dynamic legalCitationsMap = map['legalCitations'];
     LegalCitations? legalCitation;
     if (legalCitationsMap != null) {
       legalCitation = LegalCitations.fromMap(legalCitationsMap);
     }
-    dynamic? displayOptionsMap = map['displayOptions'];
+    dynamic displayOptionsMap = map['displayOptions'];
     PaywallDisplayOptions displayOptions =
         PaywallDisplayOptions.fromMap(displayOptionsMap);
-    dynamic? localeConfigMap = map['localeConfig'];
+    dynamic localeConfigMap = map['localeConfig'];
     NamiLocaleConfig localeConfig = NamiLocaleConfig.fromMap(localeConfigMap);
     return NamiPaywall(
         map['id'],

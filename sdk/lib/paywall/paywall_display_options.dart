@@ -16,7 +16,7 @@ class PaywallDisplayOptions {
       this.shouldShowNamiPurchaseSuccessMessage,
       this.showSkusInScrollableRegion);
 
-  factory PaywallDisplayOptions.fromMap(Map<dynamic, dynamic?> map) {
+  factory PaywallDisplayOptions.fromMap(Map<dynamic, dynamic> map) {
     return PaywallDisplayOptions(
         map['allow_closing'],
         map['restore_control'],

@@ -52,7 +52,7 @@ class CustomerJourneyState {
       this.inPause,
       this.inAccountHold);
 
-  factory CustomerJourneyState.fromMap(Map<dynamic, dynamic?> map) {
+  factory CustomerJourneyState.fromMap(Map<dynamic, dynamic> map) {
     return CustomerJourneyState(
         map['former_subscriber'],
         map['in_grace_period'],
