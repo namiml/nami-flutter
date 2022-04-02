@@ -39,7 +39,7 @@ class NamiEntitlement {
     return purchasedSKUs.isNotEmpty || activePurchases.isNotEmpty;
   }
 
-  factory NamiEntitlement.fromMap(Map<dynamic, dynamic?> map) {
+  factory NamiEntitlement.fromMap(Map<dynamic, dynamic> map) {
     List<dynamic> dynamicRelatedSkus = map['relatedSKUs'];
     List<NamiSKU> relatedSkus = List.empty(growable: true);
     dynamicRelatedSkus.forEach((element) {

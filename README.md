@@ -2,14 +2,12 @@
 
 # nami-flutter
 
-Nami SDK for Flutter. Built for the subscription and in-app purchase era, Nami is an end-to-end solution powered by on-device machine learning to accelerate your mobile app business.
+Nami is the #1 Subscription and IAP Marketing platform.
 
-More information on configuring and using the SDK is available in our docs at https://docs.namiml.com.
-
-## Two components
-
-- `sdk` folder contains the flutter plugin along with an example which represents `basic`
-
-- `samples` folder contains extra demo apps to help you get started with using the Nami ML platform
+No need to learn the complexities of the StoreKit and Play Billing frameworks.  Integrate our SDK in minutes into your Flutter app and start selling and growing your digital revenue today with our generous Free Tier.
 
 Create an account at https://app.namiml.com/join
+
+### Project Structure
+- `sdk` folder contains the flutter plugin along with a `basic` example app
+- `samples` folder contains extra demo apps to help you get started with using the Nami ML platform

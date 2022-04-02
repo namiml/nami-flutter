@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/billing/nami_purchase_manager.dart';
@@ -24,8 +23,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
-  static const _androidAppPlatformId = "e340101d-c581-4c32-acd1-af0f66184d92";
-  static const _iosAppPlatformId = "6a13d56b-540b-497f-9721-478b8b59fc0f";
+  static const _androidAppPlatformId = "a95cef52-35e0-4794-8755-577492c2d5d1";
+  static const _iosAppPlatformId = "54635e21-87ed-4ed6-9119-9abb493bc9b0";
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +52,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('--------- initState ---------');
     WidgetsBinding.instance?.addObserver(this);
     initPlatformState();
-    _printCustomerJourneyState();
+    NamiCustomerManager.customerJourneyChangeEvents().listen((journeyState) {
+      print("customerJourneyChange triggered");
+      _handleCustomerJourneyChanged(journeyState);
+    });
     _handleActiveEntitlementsFuture(
         NamiEntitlementManager.activeEntitlements());
     NamiEntitlementManager.entitlementChangeEvents()
@@ -86,7 +88,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       print('--------- ON RESUME ---------');
-      _printCustomerJourneyState();
       _handleActiveEntitlementsFuture(
           NamiEntitlementManager.activeEntitlements());
     }
@@ -125,18 +126,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _handleActiveEntitlements(await activeEntitlementsFuture);
   }
 
-  void _printCustomerJourneyState() async {
-    var state = await NamiCustomerManager.currentCustomerJourneyState();
+  void _handleCustomerJourneyChanged(CustomerJourneyState state) async {
     print('--------- Start ---------');
     print("currentCustomerJourneyState");
-    if (state != null) {
-      print("formerSubscriber ==> ${state.formerSubscriber}");
-      print("inGracePeriod ==> ${state.inGracePeriod}");
-      print("inIntroOfferPeriod ==> ${state.inIntroOfferPeriod}");
-      print("inTrialPeriod ==> ${state.inTrialPeriod}");
-    } else {
-      print("NULL");
-    }
+    print("formerSubscriber ==> ${state.formerSubscriber}");
+    print("inGracePeriod ==> ${state.inGracePeriod}");
+    print("inIntroOfferPeriod ==> ${state.inIntroOfferPeriod}");
+    print("inTrialPeriod ==> ${state.inTrialPeriod}");
+    print("isCancelled ==> ${state.isCancelled}");
+    print("inPause ==> ${state.inPause}");
+    print("inAccountHold ==> ${state.inAccountHold}");
     print('--------- End ---------');
   }
 

@@ -3,8 +3,10 @@
 class NamiSKU {
   /// description of the product
   final String description;
+
   /// title of the product
   final String title;
+
   /// The type of SKU.  Will tell you if it is a subscription or one-time
   /// purchase
   final NamiSKUType type;
@@ -17,6 +19,7 @@ class NamiSKU {
   /// example would be a weekly rate of $6.93 that comes from 7 units of
   /// $0.99 per day.
   final String? localizedMultipliedPrice;
+
   /// Price for the user's store locale as a decimal value
   final String price;
 
@@ -24,10 +27,13 @@ class NamiSKU {
   ///
   /// For subscription products, the identifier for the subscription group
   final String? subscriptionGroupIdentifier;
+
   /// The ID of the SKU, which will match what you set in the Control Center
   final String skuId;
+
   /// Formatted price of the item, including its currency sign
   final String localizedPrice;
+
   /// The number of times this product will occur in a single purchase term
   final int numberOfUnits;
 
@@ -35,6 +41,7 @@ class NamiSKU {
   ///
   /// Language and region code for the product from the user's store
   final String? priceLanguage;
+
   /// currency code for price
   final String priceCurrency;
 
@@ -42,8 +49,10 @@ class NamiSKU {
   ///
   /// Country code for the user's store
   final String? priceCountry;
+
   /// The time period for the unit of purchase
   final PeriodUnit periodUnit;
+  final bool featured;
 
   NamiSKU(
       this.description,
@@ -58,28 +67,36 @@ class NamiSKU {
       this.priceLanguage,
       this.priceCurrency,
       this.priceCountry,
-      this.periodUnit);
+      this.periodUnit,
+      this.featured);
 
-  factory NamiSKU.fromMap(Map<dynamic, dynamic?> map) {
+  factory NamiSKU.fromMap(Map<dynamic, dynamic> map) {
     return NamiSKU(
-        map['description'],
-        map['title'],
-        (map['type'] as String)._toNamiSKUType(),
+        (map['description'] as String?) ?? "",
+        (map['title'] as String?) ?? "",
+        (map['type'] as String?)._toNamiSKUType(),
         map['localizedMultipliedPrice'],
-        map['price'],
+        (map['price'] as String?) ?? "",
         map['subscriptionGroupIdentifier'],
         map['skuId'],
-        map['localizedPrice'],
+        (map['localizedPrice'] as String?) ?? "",
         map['numberOfUnits'],
-        map['priceLanguage'],
-        map['priceCurrency'],
-        map['priceCountry'],
-        (map['periodUnit'] as String?)._toPeriodUnit());
+        (map['priceLanguage'] as String?),
+        (map['priceCurrency'] as String?) ?? "",
+        (map['priceCountry'] as String?),
+        (map['periodUnit'] as String?)._toPeriodUnit(),
+        (map['featured'] as bool?) ?? false);
   }
 
   @override
   String toString() {
-    return 'NamiSKU{description: $description, title: $title, type: $type, localizedMultipliedPrice: $localizedMultipliedPrice, price: $price, subscriptionGroupIdentifier: $subscriptionGroupIdentifier, skuId: $skuId, localizedPrice: $localizedPrice, numberOfUnits: $numberOfUnits, priceLanguage: $priceLanguage, priceCurrency: $priceCurrency, priceCountry: $priceCountry, periodUnit: $periodUnit}';
+    return 'NamiSKU{description: $description, title: $title, type: $type, '
+        'localizedMultipliedPrice: $localizedMultipliedPrice, price: $price, '
+        'subscriptionGroupIdentifier: $subscriptionGroupIdentifier, '
+        'skuId: $skuId, localizedPrice: $localizedPrice, '
+        'numberOfUnits: $numberOfUnits, priceLanguage: $priceLanguage, '
+        'priceCurrency: $priceCurrency, priceCountry: $priceCountry, '
+        'periodUnit: $periodUnit, featured: $featured}';
   }
 }
 

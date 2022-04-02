@@ -19,7 +19,7 @@ class NamiAnalyticsSupport {
     return data;
   }
 
-  static NamiAnalyticsData _handleAnalyticsEvent(Map<dynamic, dynamic?> map) {
+  static NamiAnalyticsData _handleAnalyticsEvent(Map<dynamic, dynamic> map) {
     var type = NamiAnalyticsActionType.unknown;
     switch (map["type"]) {
       case "paywall_raise":
@@ -45,7 +45,7 @@ class NamiAnalyticsSupport {
 
 class NamiAnalyticsData {
   final NamiAnalyticsActionType type;
-  final Map<dynamic, dynamic?> eventData;
+  final Map<dynamic, dynamic> eventData;
 
   NamiAnalyticsData(this.type, this.eventData);
 }
@@ -77,7 +77,6 @@ enum NamiAnalyticsPurchaseActivityType {
 class NamiAnalyticsKeys {
   static const String CAMPAIGN_ID = "campaign_id";
   static const String CAMPAIGN_NAME = "campaign_name";
-  static const String CAMPAIGN_TYPE = "campaign_type";
 
   /// Returned value for this key in map would be of type [bool]
   static const String NAMI_TRIGGERED = "nami_triggered";
