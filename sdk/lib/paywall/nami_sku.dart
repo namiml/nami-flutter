@@ -72,20 +72,20 @@ class NamiSKU {
 
   factory NamiSKU.fromMap(Map<dynamic, dynamic> map) {
     return NamiSKU(
-        map['description'],
-        map['title'],
-        (map['type'] as String)._toNamiSKUType(),
+        (map['description'] as String?) ?? "",
+        (map['title'] as String?) ?? "",
+        (map['type'] as String?)._toNamiSKUType(),
         map['localizedMultipliedPrice'],
-        map['price'],
+        (map['price'] as String?) ?? "",
         map['subscriptionGroupIdentifier'],
         map['skuId'],
-        map['localizedPrice'],
+        (map['localizedPrice'] as String?) ?? "",
         map['numberOfUnits'],
-        map['priceLanguage'],
-        map['priceCurrency'],
-        map['priceCountry'],
+        (map['priceLanguage'] as String?),
+        (map['priceCurrency'] as String?) ?? "",
+        (map['priceCountry'] as String?),
         (map['periodUnit'] as String?)._toPeriodUnit(),
-        map['featured']);
+        (map['featured'] as bool?) ?? false);
   }
 
   @override
