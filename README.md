@@ -9,6 +9,8 @@ No need to learn the complexities of the StoreKit and Play Billing frameworks.  
 1. Create an account at https://app.namiml.com/join
 2. Follow our [Flutter Quickstart Guide](https://docs.namiml.com/docs/flutter-setup) to implement in minutes.
 
+Our Flutter package is available [here on pub.dev](https://pub.dev/packages/nami_flutter).
+
 ### Project Structure
 - `sdk` folder contains the flutter plugin along with a `basic` example app
 - `samples` folder contains extra demo apps to help you get started with using the Nami ML platform
