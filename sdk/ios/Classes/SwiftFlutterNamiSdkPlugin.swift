@@ -10,6 +10,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let entitlementChangeEventChannel = FlutterEventChannel(name: "entitlementChangeEvent", binaryMessenger: registrar.messenger())
         let paywallRaiseEventChannel = FlutterEventChannel(name: "paywallRaiseEvent", binaryMessenger: registrar.messenger())
         let purchaseChangeEventChannel = FlutterEventChannel(name: "purchaseChangeEvent", binaryMessenger: registrar.messenger())
+        let customerJourneyChangeEventChannel = FlutterEventChannel(name: "customerJourneyChangeEvent", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
@@ -17,11 +18,12 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         entitlementChangeEventChannel.setStreamHandler(EntitlementChangeEventHandler())
         paywallRaiseEventChannel.setStreamHandler(PaywallRaiseEventHandler())
         purchaseChangeEventChannel.setStreamHandler(PurchaseChangeEventHandler())
+        customerJourneyChangeEventChannel.setStreamHandler(CustomerJourneyChangeEventHandler())
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
-        
+            
         case "configure":
             guard let args = call.arguments else {
                 return
@@ -50,7 +52,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 Nami.configure(namiConfig: namiConfig)
             } else {
                 print(FlutterError(code: "-1", message: "iOS could not extract " +
-                                    "flutter arguments in method: (sendParams)", details: nil))
+                                   "flutter arguments in method: (sendParams)", details: nil))
             }
             result(true)
         case "clearExternalIdentifier":
@@ -69,7 +71,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 }
             } else {
                 print(FlutterError(code: "-1", message: "iOS could not extract " +
-                                    "flutter arguments in method: (sendParams)", details: nil))
+                                   "flutter arguments in method: (sendParams)", details: nil))
             }
         case "getExternalIdentifier":
             result(Nami.getExternalIdentifier())
@@ -96,6 +98,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     }
                 }
             }
+        case "processSmartText":
+            let args = call.arguments as? [String: Any]
+            if let data = args {
+                let text = data["text"] as? String
+                let dataStores = (data["dataStores"] as? Array<Any>)!
+                result(NamiPaywallManager.processSmartText(text: text!, dataStores: dataStores))
+            }
         case "raisePaywall":
             // https://github.com/flutter/flutter/issues/9961
             // https://github.com/flutter/flutter/issues/44764
@@ -113,12 +122,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
         case "currentCustomerJourneyState":
             if let state = NamiCustomerManager.currentCustomerJourneyState() {
-                var eventMap = [String : Any]()
-                eventMap["former_subscriber"] = state.formerSubscriber
-                eventMap["in_grace_period"] = state.formerSubscriber
-                eventMap["in_trial_period"] = state.formerSubscriber
-                eventMap["in_intro_offer_period"] = state.formerSubscriber
-                result(eventMap)
+                result(state.convertToMap())
             } else {
                 result(nil)
             }
@@ -332,6 +336,20 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
+    class CustomerJourneyChangeEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiCustomerManager.registerJourneyStateChangedHandler { newCustomerJourneyState in
+                events(newCustomerJourneyState.convertToMap())
+            }
+            return nil
+        }
+        
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            NamiCustomerManager.registerJourneyStateChangedHandler(nil)
+            return nil
+        }
+    }
+    
     class PaywallRaiseEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.registerPaywallRaiseHandler  { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
@@ -380,11 +398,35 @@ public extension NamiPurchaseState {
             return "cancelled"
         case NamiPurchaseState.failed:
             return "failed"
+        case NamiPurchaseState.pending:
+            return "pending"
+        case NamiPurchaseState.consumed:
+            return "consumed"
+        case NamiPurchaseState.deferred:
+            return "deferred"
+        case NamiPurchaseState.resubscribed:
+            return "resubscribed"
+        case NamiPurchaseState.unsubscribed:
+            return "unsubscribed"
         case NamiPurchaseState.purchased:
             return "purchased"
         default:
             return "unknown"
         }
+    }
+}
+
+public extension CustomerJourneyState {
+    func convertToMap() -> [String: Any] {
+        var map = [String: Any]()
+        map["former_subscriber"] = self.formerSubscriber
+        map["in_grace_period"] = self.inGracePeriod
+        map["in_trial_period"] = self.inTrialPeriod
+        map["in_intro_offer_period"] = self.inIntroOfferPeriod
+        map["is_cancelled"] = self.isCancelled
+        map["in_pause"] = self.inPause
+        map["in_account_hold"] = self.inAccountHold
+        return map
     }
 }
 
@@ -431,16 +473,19 @@ public extension NamiPurchase {
 public extension NamiSKU {
     func convertToMap() -> [String: Any] {
         var map = [String: Any]()
-        map["description"] = self.product?.localizedDescription
-        map["title"] = self.product?.localizedTitle
+        map["description"] = self.product?.localizedDescription ?? ""
+        map["title"] = self.product?.localizedTitle ?? ""
+        map["displayText"] = self.namiDisplayText
+        map["displaySubText"] = self.namiSubDisplayText
         map["localizedMultipliedPrice"] = self.product?.localizedMultipliedPrice
-        map["price"] = self.product?.price.stringValue
+        map["price"] = self.product?.price.stringValue ?? ""
         map["subscriptionGroupIdentifier"] = self.product?.subscriptionGroupIdentifier
         map["skuId"] = self.skuID
-        map["localizedPrice"] = self.product?.localizedPrice
-        map["numberOfUnits"] = self.product?.subscriptionPeriod?.numberOfUnits
+        map["featured"] = self.productMetadata?[NamiSKUKeys.featured.rawValue]
+        map["localizedPrice"] = self.localizedCurrentPrice
+        map["numberOfUnits"] = self.product?.subscriptionPeriod?.numberOfUnits ?? 0
         map["priceLanguage"] = self.product?.priceLocale.languageCode
-        map["priceCurrency"] = self.product?.priceLocale.currencyCode
+        map["priceCurrency"] = self.product?.priceLocale.currencyCode ?? ""
         map["priceCountry"] = self.product?.priceLocale.regionCode
         if(self.type == NamiSKUType.one_time_purchase) {
             map["type"] = "one_time_purchase"
@@ -468,33 +513,20 @@ public extension NamiPaywall {
         var map = [String: Any]()
         map["id"] = self.paywallID
         map["developerPaywallId"] = self.developerPaywallID
-        map["allowClosing"] = self.paywallValue(forKey: NamiPaywallKeys.allow_closing)
-        map["backgroundImageUrlPhone"] = self.paywallValue(forKey: NamiPaywallKeys.background_image_url_phone)
-        map["backgroundImageUrlTablet"] = self.paywallValue(forKey: NamiPaywallKeys.background_image_url_tablet)
+        let backgrounds: [String: Any]? = self.paywallValue(forKey: NamiPaywallKeys.backgrounds)
+        map["backgroundImageUrlPhone"] = backgrounds?[NamiPaywallBackgroundsKeys.phone.rawValue]
+        map["backgroundImageUrlTablet"] = backgrounds?[NamiPaywallBackgroundsKeys.tablet.rawValue]
         map["name"] = self.paywallValue(forKey: NamiPaywallKeys.name)
         map["title"] = self.title
         map["body"] = self.body
-        map["purchaseTerms"] = self.paywallValue(forKey: NamiPaywallKeys.purchase_terms)
-        map["privacyPolicy"] = self.paywallValue(forKey: NamiPaywallKeys.privacy_policy)
-        map["tosLink"] = self.paywallValue(forKey: NamiPaywallKeys.tos_link)
-        map["restoreControl"] = self.paywallValue(forKey: NamiPaywallKeys.restore_control)
-        map["signInControl"] = self.paywallValue(forKey: NamiPaywallKeys.sign_in_control)
+        map["legalCitations"] = self.paywallValue(forKey: NamiPaywallKeys.legal_citations)
+        map["displayOptions"] = self.paywallValue(forKey: NamiPaywallKeys.display_options)
+        map["purchaseTerms"] = self.purchaseTerms
         map["type"] = self.paywallValue(forKey: NamiPaywallKeys.type)
         map["extraData"] = self.paywallValue(forKey: NamiPaywallKeys.marketing_content)
         map["styleData"] = self.styleData.convertToMap()
-        map["formattedSkus"] = self.paywallValue(forKey: NamiPaywallKeys.sku_ordered_metadata)
-        var formattedSkuArray = [[String: Any]]()
-        if let formattedSkuDicts = map["formattedSkus"] as? [[String: Any]] {
-            for dicts in formattedSkuDicts {
-                var map = [String: Any]()
-                map["featured"] = dicts[NamiSKUKeys.featured.rawValue]
-                map["skuId"] = dicts[NamiSKUKeys.sku_system_id.rawValue]
-                map["presentationPosition"] = dicts[NamiSKUKeys.presentation_position.rawValue]
-                formattedSkuArray.append(map)
-            }
-        }
-        map["formattedSkus"] = formattedSkuArray
-        map["useBottomOverlay"] = self.paywallValue(forKey: NamiPaywallKeys.use_bottom_overlay)
+        map["namiSkus"] = self.paywallValue(forKey: NamiPaywallKeys.skus)
+        map["localeConfig"] = self.paywallValue(forKey: NamiPaywallKeys.locale_config)
         return map
     }
 }
@@ -508,6 +540,9 @@ public extension PaywallStyleData {
         map["backgroundColor"] = backgroundColor.toHexString()
         map["skuButtonColor"] = skuButtonColor.toHexString()
         map["skuButtonTextColor"] = skuButtonTextColor.toHexString()
+        map["skuSubDisplayTextColor"] = skuSubDisplayTextColor.toHexString()
+        map["skuSubDisplayTextShadowColor"] = skuSubDisplayShadowColor.toHexString()
+        map["skuSubDisplayTextShadowRadius"] = skuSubDisplayShadowRadius
         map["termsLinkColor"] = termsLinkColor.toHexString()
         map["titleTextColor"] = titleTextColor.toHexString()
         map["bodyShadowColor"] = bodyShadowColor.toHexString()

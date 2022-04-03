@@ -1,11 +1,11 @@
 name: nami_flutter
-description: Subscription and in-app purchase (IAP) marketing platform for Flutter. Integrate with a few lines of code. Analytics, CRM, and create customized purchase experiences in the cloud. Generous free usage tier.
-version: 0.1.0
+description: The Nami® platform helps you launch, grow, and optimize your app's revenue with subscription and in-app purchases (IAPs). Integrate with a few lines of code. No-code paywalls, A/B testing, campaigns, mobile CRM and more. 
+version: 1.0.0
 homepage: https://www.namiml.com/
 repository: https://github.com/namiml/nami-flutter/
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.13.0 <3.0.0"
   flutter: ">=1.20.0"
 
 dependencies:
@@ -15,6 +15,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^1.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

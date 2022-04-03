@@ -51,7 +51,7 @@ class NamiPurchaseManager {
   /// Initiate a Google Play Billing or Apple StoreKit purchase using
   /// [skuId] from a [NamiSKU]
   static Future<NamiPurchaseCompleteResult> buySKU(String skuId) async {
-    Map<dynamic, dynamic?> map = await channel.invokeMethod("buySKU", skuId);
+    Map<dynamic, dynamic> map = await channel.invokeMethod("buySKU", skuId);
     return NamiPurchaseCompleteResult(
         (map['purchaseState'] as String)._toNamiPurchaseState(), map['error']);
   }
@@ -86,6 +86,16 @@ extension on String {
       return NamiPurchaseState.failed;
     } else if (this == "cancelled") {
       return NamiPurchaseState.cancelled;
+    } else if (this == "pending") {
+      return NamiPurchaseState.pending;
+    } else if (this == "deferred") {
+      return NamiPurchaseState.deferred;
+    } else if (this == "resubscribed") {
+      return NamiPurchaseState.resubscribed;
+    } else if (this == "consumed") {
+      return NamiPurchaseState.consumed;
+    } else if (this == "pending") {
+      return NamiPurchaseState.pending;
     } else {
       return NamiPurchaseState.unknown;
     }
@@ -107,4 +117,14 @@ class NamiPurchaseCompleteResult {
   NamiPurchaseCompleteResult(this.purchaseState, this.error);
 }
 
-enum NamiPurchaseState { purchased, failed, cancelled, unknown }
+enum NamiPurchaseState {
+  purchased,
+  failed,
+  cancelled,
+  pending,
+  unknown,
+  deferred,
+  resubscribed,
+  unsubscribed,
+  consumed
+}

@@ -29,6 +29,8 @@ class NamiConfiguration {
   /// to [NamiLogLevel.warn]
   final NamiLogLevel namiLogLevel;
   final List<String>? extraData;
+  /// sets the language to be used for paywalls on the device
+  final String? namiLanguageCode;
 
   const NamiConfiguration({required this.appPlatformIDApple,
     required this.appPlatformIDGoogle,
@@ -36,6 +38,7 @@ class NamiConfiguration {
     this.developmentMode = false,
     this.passiveMode = false,
     this.namiLogLevel = NamiLogLevel.warn,
-    this.extraData
+    this.extraData,
+    this.namiLanguageCode
   });
 }

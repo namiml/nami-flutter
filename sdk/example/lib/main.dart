@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/analytics/nami_analytics_support.dart';
@@ -26,8 +25,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   static const _testExternalIdentifier = "9a9999a9-99aa-99a9-aa99-999a999999a8";
-  static const _androidAppPlatformId = "b1a6572f-b0fc-45cd-8561-110c039c7744";
-  static const _iosAppPlatformId = "db5e6672-ae5b-4a0e-b545-2b60d5fa9066";
+  static const _androidAppPlatformId = "3d062066-9d3c-430e-935d-855e2c56dd8e";
+  static const _iosAppPlatformId = "002e2c49-7f66-4d22-a05c-1dc9f2b7f2af";
 
   @override
   Widget build(BuildContext context) {
@@ -55,13 +54,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('--------- initState ---------');
     WidgetsBinding.instance?.addObserver(this);
     initPlatformState();
+    NamiCustomerManager.customerJourneyChangeEvents().listen((journeyState) {
+      print("customerJourneyChange triggered");
+      _handleCustomerJourneyChanged(journeyState);
+    });
     NamiPaywallManager.signInEvents().listen((namiPaywall) {
       Nami.clearExternalIdentifier();
       Nami.setExternalIdentifier(
           _testExternalIdentifier, NamiExternalIdentifierType.uuid);
       print('--------- Sign In Clicked ---------');
     });
-    _printCustomerJourneyState();
     _handleActiveEntitlementsFuture(
         NamiEntitlementManager.activeEntitlements());
     NamiEntitlementManager.entitlementChangeEvents()
@@ -89,7 +91,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
       print('--------- ON RESUME ---------');
-      _printCustomerJourneyState();
       _handleActiveEntitlementsFuture(
           NamiEntitlementManager.activeEntitlements());
     }
@@ -128,14 +129,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _handleActiveEntitlements(await activeEntitlementsFuture);
   }
 
-  void _printCustomerJourneyState() async {
-    var state = await NamiCustomerManager.currentCustomerJourneyState();
+  void _handleCustomerJourneyChanged(CustomerJourneyState state) async {
     print('--------- Start ---------');
     print("currentCustomerJourneyState");
-    print("formerSubscriber ==> ${state?.formerSubscriber}");
-    print("inGracePeriod ==> ${state?.inGracePeriod}");
-    print("inIntroOfferPeriod ==> ${state?.inIntroOfferPeriod}");
-    print("inTrialPeriod ==> ${state?.inTrialPeriod}");
+    print("formerSubscriber ==> ${state.formerSubscriber}");
+    print("inGracePeriod ==> ${state.inGracePeriod}");
+    print("inIntroOfferPeriod ==> ${state.inIntroOfferPeriod}");
+    print("inTrialPeriod ==> ${state.inTrialPeriod}");
+    print("isCancelled ==> ${state.isCancelled}");
+    print("inPause ==> ${state.inPause}");
+    print("inAccountHold ==> ${state.inAccountHold}");
     print('--------- End ---------');
   }
 
@@ -210,9 +213,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         analyticsData.eventData[NamiAnalyticsKeys.CAMPAIGN_ID]);
     print("CAMPAIGN_NAME " +
         analyticsData.eventData[NamiAnalyticsKeys.CAMPAIGN_NAME]);
-    dynamic campaignType =
-        analyticsData.eventData[NamiAnalyticsKeys.CAMPAIGN_TYPE];
-    print("CAMPAIGN_TYPE ${campaignType?.toString()}");
     bool namiTriggered =
         analyticsData.eventData[NamiAnalyticsKeys.NAMI_TRIGGERED];
     print("NAMI_TRIGGERED " + namiTriggered.toString());
