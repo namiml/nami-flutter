@@ -6,7 +6,8 @@ Nami is the #1 Subscription and IAP Marketing platform.
 
 No need to learn the complexities of the StoreKit and Play Billing frameworks.  Integrate our SDK in minutes into your Flutter app and start selling and growing your digital revenue today with our generous Free Tier.
 
-Create an account at https://app.namiml.com/join
+1. Create an account at https://app.namiml.com/join
+2. Follow our [Flutter Quickstart Guide](https://docs.namiml.com/docs/flutter-setup) to implement in minutes.
 
 ### Project Structure
 - `sdk` folder contains the flutter plugin along with a `basic` example app
