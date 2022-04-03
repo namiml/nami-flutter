@@ -2,7 +2,7 @@
 
 # nami-flutter
 
-Nami is the #1 Subscription and IAP Marketing platform.
+Nami is the top Subscription and IAP Marketing platform for Flutter.
 
 No need to learn the complexities of the StoreKit and Play Billing frameworks.  Integrate our SDK in minutes into your Flutter app and start selling and growing your digital revenue today with our generous Free Tier.
 
