@@ -1,9 +1,9 @@
 group 'com.namiml.flutter.sdk'
-version '1.0.0'
+version '3.0.0-alpha.01'
 
 buildscript {
     ext.kotlin_version = '1.5.31'
-    ext.nami_sdk_version = '2.0.0'
+    ext.nami_sdk_version = '3.0.0.alpha.07'
     repositories {
         mavenCentral()
         google()
@@ -21,7 +21,7 @@ rootProject.allprojects {
         google()
         mavenCentral()
         mavenLocal()
-        maven { url "https://nami-android.s3.amazonaws.com/"}
+        maven { url "https://packages.namiml.com/NamiSDK/Android/"}
     }
 }
 

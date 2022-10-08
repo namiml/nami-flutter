@@ -9,7 +9,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let analyticsEventChannel = FlutterEventChannel(name: "analyticsEvent", binaryMessenger: registrar.messenger())
         let entitlementChangeEventChannel = FlutterEventChannel(name: "entitlementChangeEvent", binaryMessenger: registrar.messenger())
         let paywallRaiseEventChannel = FlutterEventChannel(name: "paywallRaiseEvent", binaryMessenger: registrar.messenger())
-        let purchaseChangeEventChannel = FlutterEventChannel(name: "purchaseChangeEvent", binaryMessenger: registrar.messenger())
+        let purchasesChangeEventChannel = FlutterEventChannel(name: "purchasesResponseHandlerData", binaryMessenger: registrar.messenger())
         let customerJourneyChangeEventChannel = FlutterEventChannel(name: "customerJourneyChangeEvent", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
@@ -17,7 +17,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         analyticsEventChannel.setStreamHandler(AnalyticsEventHandler())
         entitlementChangeEventChannel.setStreamHandler(EntitlementChangeEventHandler())
         paywallRaiseEventChannel.setStreamHandler(PaywallRaiseEventHandler())
-        purchaseChangeEventChannel.setStreamHandler(PurchaseChangeEventHandler())
+        purchaseChangedEventChannel.setStreamHandler(PurchasesChangedEventHandler())
         customerJourneyChangeEventChannel.setStreamHandler(CustomerJourneyChangeEventHandler())
     }
     
@@ -31,11 +31,10 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             if let myArgs = args as? [String: Any],
                let appPlatformID = myArgs["appPlatformIDApple"] as? String,
                let bypassStore = myArgs["bypassStore"] as? Bool,
-               let developmentMode = myArgs["developmentMode"] as? Bool,
                let passiveMode = myArgs["passiveMode"] as? Bool,
                let namiLogLevel = myArgs["namiLogLevel"] as? String,
                let namiCommands = myArgs["extraDataList"] as? Array<String> {
-                let namiConfig = NamiConfiguration(appPlatformID: appPlatformID)
+                let namiConfig = NamiConfiguration(appPlatformId: appPlatformID)
                 namiConfig.bypassStore = bypassStore
                 namiConfig.developmentMode = developmentMode
                 namiConfig.passiveMode = passiveMode
@@ -49,7 +48,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 } else {
                     namiConfig.logLevel = NamiLogLevel.error
                 }
-                Nami.configure(namiConfig: namiConfig)
+                Nami.configure(with: namiConfig)
             } else {
                 print(FlutterError(code: "-1", message: "iOS could not extract " +
                                    "flutter arguments in method: (sendParams)", details: nil))
@@ -350,29 +349,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    class PaywallRaiseEventHandler: NSObject, FlutterStreamHandler {
-        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiPaywallManager.registerPaywallRaiseHandler  { (_, skus: [NamiSKU]?, developerPaywallId: String, namiPaywall: NamiPaywall) in
-                var eventMap = [String : Any]()
-                eventMap["namiPaywall"] = namiPaywall.convertToMap()
-                var list = [[String: Any]]()
-                skus?.forEach { (sku: NamiSKU) in
-                    list.append(sku.convertToMap())
-                }
-                eventMap["skus"] = list
-                eventMap["developerPaywallId"] = developerPaywallId
-                events(eventMap)
-            }
-            return nil
-        }
-        
-        func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiPaywallManager.registerPaywallRaiseHandler(nil)
-            return nil
-        }
-    }
-    
-    class PurchaseChangeEventHandler: NSObject, FlutterStreamHandler {
+    class PurchasesChangedHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPurchaseManager.registerPurchasesChangedHandler { (activePurchases: [NamiPurchase], namiPurchaseState: NamiPurchaseState, error: Error?) in
                 var eventMap = [String : Any]()
@@ -454,13 +431,10 @@ public extension NamiPurchase {
         map["purchaseInitiatedTimestamp"] = Int.init(self.purchaseInitiatedTimestamp.timeIntervalSince1970)
         map["expires"] = expiry
         map["fromNami"] = false
-        if(self.purchaseSource == NamiPurchaseSource.application) {
-            map["purchaseSource"] = "application"
-        } else if(self.purchaseSource == NamiPurchaseSource.external) {
-            map["purchaseSource"] = "external"
-        } else if(self.purchaseSource == NamiPurchaseSource.namiPaywall) {
-            map["purchaseSource"] = "nami_paywall"
-            map["fromNami"] = true
+        if(self.purchaseSource == NamiPurchaseSource.campaign) {
+            map["purchaseSource"] = "campaign"
+        } else if(self.purchaseSource == NamiPurchaseSource.marketplace) {
+            map["purchaseSource"] = "marketplace"
         } else {
             map["purchaseSource"] = "unknown"
         }
@@ -505,82 +479,5 @@ public extension NamiSKU {
             map["periodUnit"] = "year"
         }
         return map
-    }
-}
-
-public extension NamiPaywall {
-    func convertToMap() -> [String: Any] {
-        var map = [String: Any]()
-        map["id"] = self.paywallID
-        map["developerPaywallId"] = self.developerPaywallID
-        let backgrounds: [String: Any]? = self.paywallValue(forKey: NamiPaywallKeys.backgrounds)
-        map["backgroundImageUrlPhone"] = backgrounds?[NamiPaywallBackgroundsKeys.phone.rawValue]
-        map["backgroundImageUrlTablet"] = backgrounds?[NamiPaywallBackgroundsKeys.tablet.rawValue]
-        map["name"] = self.paywallValue(forKey: NamiPaywallKeys.name)
-        map["title"] = self.title
-        map["body"] = self.body
-        map["legalCitations"] = self.paywallValue(forKey: NamiPaywallKeys.legal_citations)
-        map["displayOptions"] = self.paywallValue(forKey: NamiPaywallKeys.display_options)
-        map["purchaseTerms"] = self.purchaseTerms
-        map["type"] = self.paywallValue(forKey: NamiPaywallKeys.type)
-        map["extraData"] = self.paywallValue(forKey: NamiPaywallKeys.marketing_content)
-        map["styleData"] = self.styleData.convertToMap()
-        map["namiSkus"] = self.paywallValue(forKey: NamiPaywallKeys.skus)
-        map["localeConfig"] = self.paywallValue(forKey: NamiPaywallKeys.locale_config)
-        return map
-    }
-}
-
-public extension PaywallStyleData {
-    func convertToMap() -> [String: Any] {
-        var map = [String: Any]()
-        map["bodyFontSize"] = bodyFontSize
-        map["bodyTextColor"] = bodyTextColor.toHexString()
-        map["titleFontSize"] = titleFontSize
-        map["backgroundColor"] = backgroundColor.toHexString()
-        map["skuButtonColor"] = skuButtonColor.toHexString()
-        map["skuButtonTextColor"] = skuButtonTextColor.toHexString()
-        map["skuSubDisplayTextColor"] = skuSubDisplayTextColor.toHexString()
-        map["skuSubDisplayTextShadowColor"] = skuSubDisplayShadowColor.toHexString()
-        map["skuSubDisplayTextShadowRadius"] = skuSubDisplayShadowRadius
-        map["termsLinkColor"] = termsLinkColor.toHexString()
-        map["titleTextColor"] = titleTextColor.toHexString()
-        map["bodyShadowColor"] = bodyShadowColor.toHexString()
-        map["bodyShadowRadius"] = bodyShadowRadius
-        map["titleShadowColor"] = titleShadowColor.toHexString()
-        map["titleShadowRadius"] = titleShadowRadius
-        map["bottomOverlayColor"] = bottomOverlayColor.toHexString()
-        map["bottomOverlayCornerRadius"] = bottomOverlayCornerRadius
-        map["closeButtonFontSize"] = closeButtonFontSize
-        map["closeButtonTextColor"] = closeButtonTextColor.toHexString()
-        map["closeButtonShadowColor"] = closeButtonShadowColor.toHexString()
-        map["closeButtonShadowRadius"] = closeButtonShadowRadius
-        map["signInButtonFontSize"] = signinButtonFontSize
-        map["signInButtonTextColor"] = signinButtonTextColor.toHexString()
-        map["signInButtonShadowColor"] = signinButtonShadowColor.toHexString()
-        map["signInButtonShadowRadius"] = signinButtonShadowRadius
-        map["purchaseTermsFontSize"] = purchaseTermsFontSize
-        map["purchaseTermsTextColor"] = purchaseTermsTextColor.toHexString()
-        map["purchaseTermsShadowColor"] = purchaseTermsShadowColor.toHexString()
-        map["purchaseTermsShadowRadius"] = purchaseTermsShadowRadius
-        map["restoreButtonFontSize"] = restoreButtonFontSize
-        map["restoreButtonTextColor"] = restoreButtonTextColor.toHexString()
-        map["restoreButtonShadowColor"] = restoreButtonShadowColor.toHexString()
-        map["restoreButtonShadowRadius"] = restoreButtonShadowRadius
-        map["featuredSkuButtonColor"] = featuredSkusButtonColor.toHexString()
-        map["featuredSkuButtonTextColor"] = featuredSkusButtonTextColor.toHexString()
-        return map
-    }
-}
-
-public extension UIColor {
-    func toHexString() -> String {
-        let components = self.cgColor.components
-        let r: CGFloat = components?[0] ?? 0.0
-        let g: CGFloat = components?[1] ?? 0.0
-        let b: CGFloat = components?[2] ?? 0.0
-        
-        let hexString = String.init(format: "#%02lX%02lX%02lX", lroundf(Float(r * 255)), lroundf(Float(g * 255)), lroundf(Float(b * 255)))
-        return hexString
     }
 }

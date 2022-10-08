@@ -54,27 +54,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('--------- initState ---------');
     WidgetsBinding.instance?.addObserver(this);
     initPlatformState();
-    NamiCustomerManager.customerJourneyChangeEvents().listen((journeyState) {
-      print("customerJourneyChange triggered");
+    NamiCustomerManager.registerJourneyStateHandler().listen((journeyState) {
+      print("JourneyStateHandler triggered");
       _handleCustomerJourneyChanged(journeyState);
     });
     NamiPaywallManager.signInEvents().listen((namiPaywall) {
-      Nami.clearExternalIdentifier();
-      Nami.setExternalIdentifier(
-          _testExternalIdentifier, NamiExternalIdentifierType.uuid);
+      NamiCustomerManager.logout();
+      NamiCustomerManager.login(
+          _testExternalIdentifier);
       print('--------- Sign In Clicked ---------');
     });
     _handleActiveEntitlementsFuture(
-        NamiEntitlementManager.activeEntitlements());
-    NamiEntitlementManager.entitlementChangeEvents()
+        NamiEntitlementManager.active());
+    NamiEntitlementManager.registerActiveEntitlementsHandler()
         .listen((activeEntitlements) {
-      print("EntitlementChangeListener triggered");
+      print("ActiveEntitlementsHandler triggered");
       _handleActiveEntitlements(activeEntitlements);
     });
-    NamiPurchaseManager.purchaseChangeEvents()
+    NamiPurchaseManager.registerPurchasesChangedHandler()
         .listen((purchaseChangeEventData) {
       print("PurchasesChangedHandler triggered");
-      _evaluateLastPurchaseEvent(purchaseChangeEventData);
     });
     NamiAnalyticsSupport.analyticsEvents().listen((analyticsData) {
       _printAnalyticsEventData(analyticsData);
@@ -92,7 +91,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       print('--------- ON RESUME ---------');
       _handleActiveEntitlementsFuture(
-          NamiEntitlementManager.activeEntitlements());
+          NamiEntitlementManager.active());
     }
   }
 
@@ -145,8 +144,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     var namiConfiguration = NamiConfiguration(
-        appPlatformIDApple: _iosAppPlatformId,
-        appPlatformIDGoogle: _androidAppPlatformId,
+        appPlatformIdApple: _iosAppPlatformId,
+        appPlatformIdGoogle: _androidAppPlatformId,
         namiLogLevel: NamiLogLevel.debug);
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform

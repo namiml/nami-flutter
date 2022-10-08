@@ -59,18 +59,16 @@ class NamiPurchase {
   }
 }
 
-/// The source a purchase comes from - either externally, through nami,
-/// or from your own paywall.
-enum NamiPurchaseSource { external, nami_paywall, application, unknown }
+/// The source a purchase comes from - either a campaign, through nami,
+/// or externally via the app marketplace..
+enum NamiPurchaseSource { campaign, marketplace, unknown }
 
 extension on String {
   NamiPurchaseSource _toNamiPurchaseSource() {
-    if (this == "external") {
-      return NamiPurchaseSource.external;
-    } else if (this == "nami_paywall") {
-      return NamiPurchaseSource.nami_paywall;
-    } else if (this == "application") {
-      return NamiPurchaseSource.application;
+    if (this == "campaign") {
+      return NamiPurchaseSource.campaign;
+    } else if (this == "marketplace") {
+      return NamiPurchaseSource.marketplace;
     } else {
       return NamiPurchaseSource.unknown;
     }

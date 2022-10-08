@@ -9,69 +9,17 @@ import 'nami_sku.dart';
 /// Class responsible for managing all aspects of a paywall in the Nami SDK
 class NamiPaywallManager {
   static const EventChannel _signInEvent = const EventChannel('signInEvent');
-  static const EventChannel _paywallRaiseEvent =
-      const EventChannel('paywallRaiseEvent');
 
   /// Will animate the closing of the paywall if [animated] is true. Returns
   /// [true] when paywall is dismissed, may be immediate if not presented
-  static Future<bool> dismissNamiPaywallIfOpen(bool animated) {
+  static Future<bool> dismiss(bool animated) {
     return channel
-        .invokeMethod<bool>("dismissNamiPaywallIfOpen", animated)
+        .invokeMethod<bool>("dismiss", animated)
         .then<bool>((bool? value) => value ?? false);
   }
 
-  /// Prepare paywall for display before calling [raisePaywall]. This method
-  /// ensure that all data is available for the paywall before displaying it
-  ///
-  /// Optionally you can provide,
-  /// - A [developerPaywallId] if you want to prepare a specific paywall before
-  /// raising it.
-  /// - An optional bool for [backgroundImageRequired] to force whether
-  /// background image is required to display paywall or not. By default it is
-  /// `false`. If passed as `true` then sdk would try to re-fetch the
-  /// background image and invoke callback based on image availability
-  /// - An optional timeout value for above image fetching operation
-  static Future<PreparePaywallResult> preparePaywallForDisplay(
-      {String? developerPaywallId,
-      bool backgroundImageRequired = false,
-      int? imageFetchTimeout}) async {
-    var variableMap = {
-      "developerPaywallId": developerPaywallId,
-      "backgroundImageRequired": backgroundImageRequired,
-      "imageFetchTimeout": imageFetchTimeout,
-    };
-    Map<dynamic, dynamic> result =
-        await channel.invokeMethod("preparePaywallForDisplay", variableMap);
-    var error = (result['error'] as String?)._toPreparePaywallError();
-    return PreparePaywallResult(result['success'], error);
-  }
 
-  /// Displays the current live paywall in the app. Optionally pass
-  /// [developerPaywallId] to display a particular paywall instead of live one
-  static Future<bool> raisePaywall({String? developerPaywallId}) {
-    return channel
-        .invokeMethod<bool>("raisePaywall", developerPaywallId)
-        .then<bool>((bool? value) => value ?? false);
-  }
-
-  /// Displays a particular paywall in the app
-
-  static Future<void> blockPaywallAutoRaise(bool blockRaise) {
-    return channel.invokeMethod("blockPaywallAutoRaise", blockRaise);
-  }
-
-  /// iOS Only
-  ///
-  /// When Nami does not control the paywall, manually create an impression
-  /// when the paywall is seen.
-  ///
-  /// NOTE: This call will only work when the SDK is set to Passive Mode.
-  static Future<void> paywallImpression(String developerPaywallId) {
-    return channel.invokeMethod("paywallImpression", developerPaywallId);
-  }
-
-  /// Stream for when user presses sign in button on a paywall raised by
-  /// Nami system
+  /// Stream for when user presses sign in button on a paywall
   static Stream<NamiPaywall> signInEvents() {
     var data = _signInEvent
         .receiveBroadcastStream()
@@ -84,26 +32,6 @@ class NamiPaywallManager {
     return NamiPaywall.fromMap(map);
   }
 
-  static Stream<PaywallRaiseRequestData> paywallRaiseEvents() {
-    var data = _paywallRaiseEvent
-        .receiveBroadcastStream()
-        .map((dynamic event) => _handlePaywallRaiseRequested(event));
-
-    return data;
-  }
-
-  static PaywallRaiseRequestData _handlePaywallRaiseRequested(
-      Map<dynamic, dynamic> map) {
-    List<dynamic> dynamicSkus = map['skus'];
-    List<NamiSKU> skus = List.empty(growable: true);
-    dynamicSkus.forEach((element) {
-      NamiSKU namiSKU = NamiSKU.fromMap(element);
-      skus.add(namiSKU);
-    });
-    return PaywallRaiseRequestData(NamiPaywall.fromMap(map['namiPaywall']),
-        skus, map['developerPaywallId']);
-  }
-}
 
 class PreparePaywallResult {
   final bool success;

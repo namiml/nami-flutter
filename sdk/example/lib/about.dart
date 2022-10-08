@@ -45,7 +45,6 @@ class _AboutState extends State<AboutPage> with WidgetsBindingObserver {
     WidgetsBinding.instance?.addObserver(this);
     print('--------- ABOUT INIT ---------');
     NamiMLManager.enterCoreContent([_label]);
-    NamiPaywallManager.blockPaywallAutoRaise(true);
   }
 
   @override
@@ -61,7 +60,6 @@ class _AboutState extends State<AboutPage> with WidgetsBindingObserver {
     print('--------- ABOUT EXIT ---------');
     NamiMLManager.exitCoreContent([_label]);
     WidgetsBinding.instance?.removeObserver(this);
-    NamiPaywallManager.blockPaywallAutoRaise(false);
     super.dispose();
   }
 }

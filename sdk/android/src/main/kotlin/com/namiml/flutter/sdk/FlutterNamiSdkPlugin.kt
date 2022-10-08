@@ -486,9 +486,8 @@ private fun NamiPurchase.convertToMap(): Map<String, Any?> {
 
 private fun NamiPurchaseSource.getFlutterString(): String {
     return when (this) {
-        NamiPurchaseSource.APPLICATION -> "application"
-        NamiPurchaseSource.NAMI_PAYWALL -> "nami_paywall"
-        NamiPurchaseSource.EXTERNAL -> "external"
+        NamiPurchaseSource.CAMPAIGN -> "campaign"
+        NamiPurchaseSource.MARKETPLACE -> "marketplace"
         NamiPurchaseSource.UNKNOWN -> "unknown"
         else -> ""
     }
@@ -550,100 +549,6 @@ private fun SubscriptionPeriod.getFlutterString(): String {
         SubscriptionPeriod.HALF_YEAR -> "half_year"
         SubscriptionPeriod.FOUR_WEEKS -> "four_weeks"
     }
-}
-
-private fun NamiPaywall.convertToMap(): Map<String, Any?> {
-    return hashMapOf(
-        "id" to this.id,
-        "developerPaywallId" to this.developerPaywallId,
-        "backgroundImageUrlPhone" to this.backgroundImageUrlPhone,
-        "backgroundImageUrlTablet" to this.backgroundImageUrlTablet,
-        "name" to this.name,
-        "title" to this.title,
-        "body" to this.body,
-        "legalCitations" to (this.legalCitations?.convertToMap() ?: mapOf()),
-        "displayOptions" to this.displayOptions.convertToMap(),
-        "purchaseTerms" to this.purchaseTerms,
-        "type" to this.type,
-        "extraData" to this.extraData,
-        "styleData" to (this.styleData?.convertToMap() ?: mapOf()),
-        "namiSkus" to this.namiSkus.map { it.skuId },
-        "localeConfig" to this.localeConfig.convertToMap(),
-    )
-}
-
-private fun LegalCitations.convertToMap(): Map<String, Any?> {
-    return hashMapOf(
-        "id" to this.id,
-        "privacy_url" to this.privacyUrl,
-        "privacy_text" to this.privacyText,
-        "tos_url" to this.tosUrl,
-        "tos_text" to this.tosText,
-        "clickwrap_text" to this.clickWrapText,
-        "language" to this.language,
-    )
-}
-
-private fun PaywallDisplayOptions.convertToMap(): Map<String, Any> {
-    return hashMapOf(
-        "sign_in_control" to this.signInControl,
-        "allow_closing" to this.allowClosing,
-        "restore_control" to this.restoreControl,
-        "scrollable_region_size" to this.scrollableRegionSize,
-        "show_nami_purchase_success_message" to this.shouldShowNamiPurchaseSuccessMessage,
-        "skus_in_scrollable_region" to this.showSkusInScrollableRegion,
-        "use_bottom_overlay" to this.useBottomOverlay,
-    )
-}
-
-private fun NamiLocaleConfig.convertToMap(): Map<String, Any> {
-    return hashMapOf(
-        "close_button_text" to this.closeButtonText,
-        "sign_in_button_text" to this.signInButtonText,
-        "restore_purchase_button_text" to this.restorePurchaseButtonText,
-        "purchase_button_hint_text_to_speech" to this.purchaseButtonHintTextToSpeech,
-        "purchase_terms_prefix_hint_text_to_speech" to this.purchaseTermsPrefixHintTextToSpeech,
-    )
-}
-
-private fun PaywallStyleData.convertToMap(): Map<String, Any> {
-    return hashMapOf(
-        "bodyFontSize" to bodyFontSize,
-        "bodyTextColor" to bodyTextColor,
-        "titleFontSize" to titleFontSize,
-        "backgroundColor" to backgroundColor,
-        "skuButtonColor" to skuButtonColor,
-        "skuButtonTextColor" to skuButtonTextColor,
-        "skuSubDisplayTextColor" to skuSubDisplayTextColor,
-        "skuSubDisplayTextShadowColor" to skuSubDisplayTextShadowColor,
-        "skuSubDisplayTextShadowRadius" to skuSubDisplayTextShadowRadius,
-        "termsLinkColor" to termsLinkColor,
-        "titleTextColor" to titleTextColor,
-        "bodyShadowColor" to bodyShadowColor,
-        "bodyShadowRadius" to bodyShadowRadius,
-        "titleShadowColor" to titleShadowColor,
-        "titleShadowRadius" to titleShadowRadius,
-        "bottomOverlayColor" to bottomOverlayColor,
-        "bottomOverlayCornerRadius" to bottomOverlayCornerRadius,
-        "closeButtonFontSize" to closeButtonFontSize,
-        "closeButtonTextColor" to closeButtonTextColor,
-        "closeButtonShadowColor" to closeButtonShadowColor,
-        "closeButtonShadowRadius" to closeButtonShadowRadius,
-        "signInButtonFontSize" to signInButtonFontSize,
-        "signInButtonTextColor" to signInButtonTextColor,
-        "signInButtonShadowColor" to signInButtonShadowColor,
-        "signInButtonShadowRadius" to signInButtonShadowRadius,
-        "purchaseTermsFontSize" to purchaseTermsFontSize,
-        "purchaseTermsTextColor" to purchaseTermsTextColor,
-        "purchaseTermsShadowColor" to purchaseTermsShadowColor,
-        "purchaseTermsShadowRadius" to purchaseTermsShadowRadius,
-        "restoreButtonFontSize" to restoreButtonFontSize,
-        "restoreButtonTextColor" to restoreButtonTextColor,
-        "restoreButtonShadowColor" to restoreButtonShadowColor,
-        "restoreButtonShadowRadius" to restoreButtonShadowRadius,
-        "featuredSkuButtonColor" to featuredSkuButtonColor,
-        "featuredSkuButtonTextColor" to this.featuredSkuButtonTextColor
-    )
 }
 
 private fun NamiPurchaseState.getFlutterString(): String {
