@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.annotation.NonNull
 import com.namiml.Nami
 import com.namiml.NamiConfiguration
-import com.namiml.NamiExternalIdentifierType
 import com.namiml.NamiLanguageCode
 import com.namiml.NamiLogLevel
 import com.namiml.analytics.NamiAnalyticsActionType
@@ -17,11 +16,12 @@ import com.namiml.billing.NamiPurchase
 import com.namiml.billing.NamiPurchaseCompleteResult
 import com.namiml.billing.NamiPurchaseManager
 import com.namiml.billing.NamiPurchaseState
+import com.namiml.campaign.NamiCampaignManager
+import com.namiml.campaign.LaunchCampaignError
 import com.namiml.customer.CustomerJourneyState
 import com.namiml.customer.NamiCustomerManager
 import com.namiml.entitlement.NamiEntitlement
 import com.namiml.entitlement.NamiEntitlementManager
-import com.namiml.entitlement.NamiEntitlementSetter
 import com.namiml.entitlement.NamiPlatformType
 import com.namiml.ml.NamiMLManager
 import com.namiml.paywall.LegalCitations
@@ -61,7 +61,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var analyticsListener: EventChannel
     private lateinit var entitlementChangeListener: EventChannel
     private lateinit var customerJourneyChangeListener: EventChannel
-    private lateinit var paywallRaiseListener: EventChannel
     private lateinit var purchaseChangeListener: EventChannel
     private lateinit var context: Context
     private lateinit var moshi: Moshi
@@ -70,12 +69,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         moshi = Moshi.Builder().build()
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
-        signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
+        // TODO: reimplement
+//        signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
         analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
         entitlementChangeListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "entitlementChangeEvent")
-        paywallRaiseListener =
-            EventChannel(flutterPluginBinding.binaryMessenger, "paywallRaiseEvent")
         purchaseChangeListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "purchaseChangeEvent")
         customerJourneyChangeListener =
@@ -83,10 +81,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
-        setSignInStreamHandler()
+        // TODO: reimplement
+//        setSignInStreamHandler()
         setAnalyticsStreamHandler()
         setEntitlementStreamHandler()
-        setPaywallRaiseStreamHandler()
         setPurchaseChangeStreamHandler()
         setCustomerJourneyChangeStreamHandler()
     }
@@ -95,7 +93,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         purchaseChangeListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                NamiPurchaseManager.registerPurchasesChangedListener { activePurchases, namiPurchaseState, errorMsg ->
+                NamiPurchaseManager.registerPurchasesChangedHandler { activePurchases, namiPurchaseState, errorMsg ->
                     val eventMap = mutableMapOf<String, Any?>()
                     eventMap["activePurchases"] = activePurchases.map { it.convertToMap() }
                     eventMap["purchaseState"] = namiPurchaseState.getFlutterString()
@@ -105,48 +103,30 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             override fun onCancel(arguments: Any?) {
-                NamiPurchaseManager.registerPurchasesChangedListener(null)
+                NamiPurchaseManager.registerPurchasesChangedHandler(null)
             }
         })
     }
 
-    private fun setPaywallRaiseStreamHandler() {
-        paywallRaiseListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                NamiPaywallManager.registerPaywallRaiseListener { _, namiPaywall, skus, developerPaywallId ->
-                    val eventMap = mutableMapOf<String, Any?>()
-                    eventMap["namiPaywall"] = namiPaywall.convertToMap()
-                    eventMap["skus"] = skus?.map { it.convertToMap() }
-                        ?: listOf<Map<String, Any?>>()
-                    eventMap["developerPaywallId"] = developerPaywallId
-                    events?.success(eventMap)
-                }
-            }
-
-            override fun onCancel(arguments: Any?) {
-                NamiPaywallManager.registerPaywallRaiseListener(null)
-            }
-        })
-    }
-
-    private fun setSignInStreamHandler() {
-        signInListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                NamiPaywallManager.registerSignInListener { _, namiPaywall, _ ->
-                    events?.success(namiPaywall.convertToMap())
-                }
-            }
-
-            override fun onCancel(arguments: Any?) {
-                NamiPaywallManager.registerSignInListener(null)
-            }
-        })
-    }
+    // TODO: reimplement for 3.0.0 SDK
+//    private fun setSignInStreamHandler() {
+//        signInListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+//            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+//                NamiPaywallManager.registerSignInHandler { (context) ->
+//                    events?.success(context)
+//                }
+//            }
+//
+//            override fun onCancel(arguments: Any?) {
+//                NamiPaywallManager.registerSignInHandler(null)
+//            }
+//        })
+//    }
 
     private fun setAnalyticsStreamHandler() {
         analyticsListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                NamiAnalyticsSupport.registerAnalyticsListener { namiAnalyticsActionType, map ->
+                NamiAnalyticsSupport.registerAnalyticsHandler { namiAnalyticsActionType, map ->
                     val finalMap = HashMap(map)
                     finalMap["type"] = namiAnalyticsActionType.getFlutterString()
                     @Suppress("UNCHECKED_CAST")
@@ -163,7 +143,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             override fun onCancel(arguments: Any?) {
-                NamiAnalyticsSupport.registerAnalyticsListener(null)
+                NamiAnalyticsSupport.registerAnalyticsHandler(null)
             }
         })
     }
@@ -172,13 +152,13 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         entitlementChangeListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                NamiEntitlementManager.registerEntitlementChangeListener { namiEntitlements ->
+                NamiEntitlementManager.registerActiveEntitlementsHandler { namiEntitlements ->
                     events?.success(namiEntitlements.map { it.convertToMap() })
                 }
             }
 
             override fun onCancel(arguments: Any?) {
-                NamiEntitlementManager.registerEntitlementChangeListener(null)
+                NamiEntitlementManager.registerActiveEntitlementsHandler(null)
             }
         })
     }
@@ -187,13 +167,13 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         customerJourneyChangeListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                NamiCustomerManager.registerCustomerJourneyChangedListener { journeyState ->
+                NamiCustomerManager.registerJourneyStateHandler { journeyState ->
                     events?.success(journeyState.convertToMap())
                 }
             }
 
             override fun onCancel(arguments: Any?) {
-                NamiCustomerManager.registerCustomerJourneyChangedListener(null)
+                NamiCustomerManager.registerJourneyStateHandler(null)
             }
         })
     }
@@ -227,110 +207,55 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     context,
                     call.argument<String>("appPlatformIDGoogle"),
                     call.argument<Boolean>("bypassStore"),
-                    call.argument<Boolean>("developmentMode"),
                     namiLogLevel,
                     namiLanguageCode,
                     call.argument<List<String>>("extraDataList")
                 )
                 result.success(true)
             }
-            "setExternalIdentifier" -> {
-                val externalIdentifier = call.argument<String>("externalIdentifier")
-                val type = call.argument<String>("type")
-                val namiExternalIdentifierType = if (type == "uuid") {
-                    NamiExternalIdentifierType.UUID
-                } else {
-                    NamiExternalIdentifierType.SHA_256
-                }
-                Nami.setExternalIdentifier(externalIdentifier ?: "", namiExternalIdentifierType)
+            "login" -> {
+                val externalIdentifier = call.argument<String>("withId")
+                NamiCustomerManager.login(externalIdentifier)
             }
-            "clearExternalIdentifier" -> {
-                Nami.clearExternalIdentifier()
+            "logout" -> {
+                NamiCustomerManager.logout()
             }
-            "getExternalIdentifier" -> {
-                result.success(Nami.getExternalIdentifier())
+            "loggedInId" -> {
+                result.success(NamiCustomerManager.loggedInId())
             }
-            "preparePaywallForDisplay" -> {
-                val callback = { success: Boolean, error: PreparePaywallError? ->
+            "launch" -> {
+                val callback = { success: Boolean, error: LaunchCampaignError? ->
                     with(hashMapOf("success" to success, "error" to error?.getFlutterString())) {
                         result.success(this)
                     }
                 }
-                val developerPaywallId = call.argument<String>("developerPaywallId")
-                val backgroundImageRequired = call.argument<Boolean>("backgroundImageRequired")
+                val label = call.argument<String>("label")
                     ?: false
-                val imageFetchTimeout = call.argument<Long>("imageFetchTimeout")
-                if (developerPaywallId != null) {
-                    NamiPaywallManager.preparePaywallForDisplay(
-                        developerPaywallId,
-                        backgroundImageRequired,
-                        imageFetchTimeout,
-                        callback
-                    )
-                } else {
-                    NamiPaywallManager.preparePaywallForDisplay(
-                        backgroundImageRequired,
-                        imageFetchTimeout,
-                        callback
-                    )
-                }
-            }
-            "raisePaywall" -> {
                 currentActivityWeakReference?.get()?.let { activity ->
-                    NamiPaywallManager.raisePaywall(activity)
+                    if (label != null) {
+                        NamiCampaignManager.launch(
+                            activity,
+                            label,
+                            callback
+                        )
+                    } else {
+                        NamiCampaignManager.launch(
+                            activity,
+                            callback
+                        )
+                    }
                 }
             }
-            "processSmartText" -> {
-                val text = call.argument<String>("text")
-                val dataStores = call.argument<List<NamiSKU>>("dataStores")
-                result.success(
-                    NamiPaywallManager.processSmartText(
-                        text,
-                        dataStores as List<NamiSKU>
-                    )
-                )
-            }
-            "currentCustomerJourneyState" -> {
-                val stateMap = NamiCustomerManager.currentCustomerJourneyState()?.convertToMap()
+            "journeyState" -> {
+                val stateMap = NamiCustomerManager.journeyState()?.convertToMap()
                 result.success(stateMap)
-            }
-            "clearAllEntitlements" -> {
-                NamiEntitlementManager.clearAllEntitlements()
             }
             "isEntitlementActive" -> {
                 result.success(NamiEntitlementManager.isEntitlementActive(call.arguments as String))
             }
-            "activeEntitlements" -> {
+            "active" -> {
                 result.success(
-                    NamiEntitlementManager.activeEntitlements().map { it.convertToMap() })
-            }
-            "getEntitlements" -> {
-                result.success(NamiEntitlementManager.getEntitlements().map { it.convertToMap() })
-            }
-            "setEntitlements" -> {
-                val argument = call.arguments as List<*>
-                val entitlementSetters = mutableListOf<NamiEntitlementSetter>()
-                argument.forEach { item ->
-                    @Suppress("UNCHECKED_CAST")
-                    val itemMap = item as Map<String, Any>
-                    val expireTime: Long? = itemMap["expires"] as? Long
-                    val platformType = when (itemMap["platform"]) {
-                        "android" -> NamiPlatformType.ANDROID
-                        "apple" -> NamiPlatformType.APPLE
-                        "web" -> NamiPlatformType.WEB
-                        "roku" -> NamiPlatformType.ROKU
-                        else -> NamiPlatformType.OTHER
-                    }
-                    entitlementSetters.add(
-                        NamiEntitlementSetter(
-                            referenceId = itemMap["referenceId"] as? String ?: "",
-                            expires = expireTime?.let { Date(it) },
-                            platform = platformType,
-                            purchasedSKUid = itemMap["purchasedSKUid"] as? String
-                        )
-                    )
-                }
-                NamiEntitlementManager.setEntitlements(entitlementSetters)
+                    NamiEntitlementManager.active().map { it.convertToMap() })
             }
             "coreAction" -> {
                 @Suppress("UNCHECKED_CAST")
@@ -352,10 +277,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 labels?.let {
                     NamiMLManager.exitCoreContent(it)
                 }
-            }
-            "blockPaywallAutoRaise" -> {
-                val allowAutoRaisingPaywall = !(call.arguments as? Boolean ?: false)
-                NamiPaywallManager.registerApplicationAutoRaisePaywallBlocker { allowAutoRaisingPaywall }
             }
             "clearBypassStorePurchases" -> {
                 NamiPurchaseManager.clearBypassStorePurchases()
@@ -401,7 +322,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         context: Context,
         platformId: String?,
         bypass: Boolean?,
-        developmentMode: Boolean?,
         namiLogLevel: NamiLogLevel,
         namiLanguageCode: NamiLanguageCode?,
         extraDataList: List<String>?
@@ -412,7 +332,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val configuration = NamiConfiguration.build(context, platformId) {
             this.logLevel = namiLogLevel
             this.bypassStore = bypass ?: false
-            this.developmentMode = developmentMode ?: false
             this.settingsList = extraDataList
             this.namiLanguageCode = namiLanguageCode
         }
@@ -477,7 +396,6 @@ private fun NamiPurchase.convertToMap(): Map<String, Any?> {
         "purchaseInitiatedTimestamp" to purchaseInitiatedTimestamp,
         "expires" to expires?.time,
         "purchaseSource" to purchaseSource.getFlutterString(),
-        "fromNami" to fromNami,
         "skuId" to skuId,
         "transactionIdentifier" to transactionIdentifier,
         "localizedDescription" to localizedDescription
@@ -511,7 +429,6 @@ private fun NamiSKU.convertToMap(): Map<String, Any?> {
         "skuId" to this.skuId,
         "featured" to this.featured,
         "displayText" to this.displayText,
-        "displaySubText" to this.displaySubText,
         "localizedPrice" to this.skuDetails.price,
         "numberOfUnits" to 1,
         "priceCurrency" to this.skuDetails.priceCurrencyCode,
@@ -529,12 +446,10 @@ private fun NamiSKUType.getFlutterString(): String {
 
 private fun PreparePaywallError?.getFlutterString(): String? {
     return when (this) {
-        PreparePaywallError.SDK_NOT_INITIALIZED -> "sdk_not_initialized"
-        PreparePaywallError.DEVELOPER_PAYWALL_ID_NOT_FOUND -> "developer_paywall_id_not_found"
-        PreparePaywallError.IMAGE_LOAD_FAILED -> "image_load_failed"
+        PreparePaywallError.PAYWALL_DATA_NOT_FOUND -> "paywall_data_not_found"
+        PreparePaywallError.PAYWALL_IMAGE_LOAD_FAILED -> "image_load_failed"
+        PreparePaywallError.PAYWALL_DATA_NOT_AVAILABLE -> "paywall_data_not_available"
         PreparePaywallError.NO_LIVE_CAMPAIGN -> "no_live_campaign"
-        PreparePaywallError.PAYWALL_ALREADY_DISPLAYED -> "paywall_already_displayed"
-        PreparePaywallError.DATA_NOT_AVAILABLE -> "data_not_available"
         PreparePaywallError.PLAY_BILLING_NOT_AVAILABLE -> "play_billing_not_available"
         else -> null
     }
@@ -566,5 +481,17 @@ private fun NamiAnalyticsActionType.getFlutterString(): String {
         NamiAnalyticsActionType.PAYWALL_RAISE -> "paywall_raise"
         NamiAnalyticsActionType.PAYWALL_RAISE_BLOCKED -> "paywall_raise_blocked"
         NamiAnalyticsActionType.PURCHASE_ACTIVITY -> "purchase_activity"
+    }
+}
+
+
+private fun LaunchCampaignError?.getFlutterString(): String? {
+    return when (this) {
+        LaunchCampaignError.SDK_NOT_INITIALIZED -> "sdk_not_initialized"
+        LaunchCampaignError.DEFAULT_CAMPAIGN_NOT_FOUND -> "default_campaign_not_found"
+        LaunchCampaignError.LABELED_CAMPAIGN_NOT_FOUND -> "labeled_campaign_not_found"
+        LaunchCampaignError.PAYWALL_ALREADY_DISPLAYED -> "paywall_already_displayed"
+        LaunchCampaignError.CAMPAIGN_DATA_NOT_FOUND -> "campaign_data_not_found"
+        else -> null
     }
 }

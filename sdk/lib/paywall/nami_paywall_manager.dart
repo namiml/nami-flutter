@@ -20,18 +20,19 @@ class NamiPaywallManager {
 
 
   /// Stream for when user presses sign in button on a paywall
-  static Stream<NamiPaywall> signInEvents() {
-    var data = _signInEvent
-        .receiveBroadcastStream()
-        .map((dynamic event) => _handleSignInClicked(event));
-
-    return data;
-  }
-
-  static NamiPaywall _handleSignInClicked(Map<dynamic, dynamic> map) {
-    return NamiPaywall.fromMap(map);
-  }
-
+  /// TODO: Re-implemented for 3.0.0 SDKs
+  // static Stream<NamiPaywall> signInEvents() {
+  //   var data = _signInEvent
+  //       .receiveBroadcastStream()
+  //       .map((dynamic event) => _handleSignInClicked(event));
+  //
+  //   return data;
+  // }
+  //
+  // static NamiPaywall _handleSignInClicked(Map<dynamic, dynamic> map) {
+  //   return NamiPaywall.fromMap(map);
+  // }
+}
 
 class PreparePaywallResult {
   final bool success;
@@ -41,61 +42,38 @@ class PreparePaywallResult {
 }
 
 enum PreparePaywallError {
-  /// SDK must be initialized via [Nami.configure] before preparing paywall
-  /// for display
-  SDK_NOT_INITIALIZED,
+  /// Paywall id provided by campaign is not valid
+  PAYWALL_DATA_NOT_FOUND,
 
-  /// Developer paywall id provided via
-  /// [NamiPaywallManager.preparePaywallForDisplay] must be valid and
-  /// associated with a paywall
-  DEVELOPER_PAYWALL_ID_NOT_FOUND,
-
-  /// In case of Nami type paywall, if paywall is already being displayed on
-  /// screen then prepare results in error
-  PAYWALL_ALREADY_DISPLAYED,
-
-  /// Image loading failed. You may try calling `prepare` again depending on
-  /// your application requirements
-  IMAGE_LOAD_FAILED,
+  /// Image loading failed. Make sure you are uploading compressed
+  /// files to the Nami Control Center.
+  PAYWALL_IMAGE_LOAD_FAILED,
 
   /// Crucial data is not available, or not yet available which is required to
   /// display and populate paywall on screen. Paywall cannot be shown without
-  /// required data. You may try calling `prepare` again
-  DATA_NOT_AVAILABLE,
+  /// required data.
+  PAYWALL_DATA_NOT_AVAILABLE,
 
   /// A paywall must be attached to a live campaign when requested via
-  /// [NamiPaywallManager.preparePaywallForDisplay] without `developerPaywallId`
-  NO_LIVE_CAMPAIGN
-}
+  /// [NamiCampaignManager.launch]
+  NO_LIVE_CAMPAIGN,
 
-class PaywallRaiseRequestData {
-  final NamiPaywall namiPaywall;
-  final List<NamiSKU> skus;
-  final String developerPaywallId;
-
-  PaywallRaiseRequestData(this.namiPaywall, this.skus, this.developerPaywallId);
-
-  @override
-  String toString() {
-    return 'PaywallRaiseRequestData{namiPaywall: $namiPaywall, skus: $skus, '
-        'developerPaywallId: $developerPaywallId}';
-  }
+  /// Connection to Google Play Billing is not available (Android only)
+  PLAY_BILLING_NOT_AVAILABLE
 }
 
 extension on String? {
   PreparePaywallError? _toPreparePaywallError() {
-    if (this == "data_not_available") {
-      return PreparePaywallError.DATA_NOT_AVAILABLE;
-    } else if (this == "developer_paywall_id_not_found") {
-      return PreparePaywallError.DEVELOPER_PAYWALL_ID_NOT_FOUND;
+    if (this == "paywall_data_not_found") {
+      return PreparePaywallError.PAYWALL_DATA_NOT_FOUND;
     } else if (this == "image_load_failed") {
-      return PreparePaywallError.IMAGE_LOAD_FAILED;
+      return PreparePaywallError.PAYWALL_IMAGE_LOAD_FAILED;
+    } else if (this == "paywall_data_not_available") {
+      return PreparePaywallError.PAYWALL_DATA_NOT_AVAILABLE;
     } else if (this == "no_live_campaign") {
       return PreparePaywallError.NO_LIVE_CAMPAIGN;
-    } else if (this == "paywall_already_displayed") {
-      return PreparePaywallError.PAYWALL_ALREADY_DISPLAYED;
-    } else if (this == "sdk_not_initialized") {
-      return PreparePaywallError.SDK_NOT_INITIALIZED;
+    } else if (this == "play_billing_not_available") {
+      return PreparePaywallError.PLAY_BILLING_NOT_AVAILABLE;
     } else {
       return null;
     }

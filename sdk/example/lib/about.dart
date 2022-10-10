@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/ml/nami_ml_manager.dart';
-import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
 
 import 'main.dart';
 

@@ -36,7 +36,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                let namiCommands = myArgs["extraDataList"] as? Array<String> {
                 let namiConfig = NamiConfiguration(appPlatformId: appPlatformID)
                 namiConfig.bypassStore = bypassStore
-                namiConfig.developmentMode = developmentMode
                 namiConfig.passiveMode = passiveMode
                 namiConfig.namiCommands = namiCommands
                 if(namiLogLevel == "debug") {
@@ -54,65 +53,33 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                                    "flutter arguments in method: (sendParams)", details: nil))
             }
             result(true)
-        case "clearExternalIdentifier":
-            Nami.clearExternalIdentifier()
-        case "setExternalIdentifier":
+        case "logout":
+            NamiCustomerManager.logout()
+        case "login":
             guard let args = call.arguments else {
                 return
             }
             if let myArgs = args as? [String: Any],
-               let externalIdentifier = myArgs["externalIdentifier"] as? String,
-               let type = myArgs["type"] as? String {
-                if(type == "uuid") {
-                    Nami.setExternalIdentifier(externalIdentifier: externalIdentifier, type: NamiExternalIdentifierType.uuid)
-                } else {
-                    Nami.setExternalIdentifier(externalIdentifier: externalIdentifier, type: NamiExternalIdentifierType.sha256)
-                }
+               let externalIdentifier = myArgs["withId"] as? String,
+                NamiCustomerManager.login(withId: externalIdentifier)
             } else {
                 print(FlutterError(code: "-1", message: "iOS could not extract " +
                                    "flutter arguments in method: (sendParams)", details: nil))
             }
-        case "getExternalIdentifier":
-            result(Nami.getExternalIdentifier())
-        case "preparePaywallForDisplay":
+        case "loggedInId":
+            result(NamiCustomerManager.loggedInId())
+        case "launch":
             let args = call.arguments as? [String: Any]
             if let data = args {
-                let developerPaywallId = data["developerPaywallId"] as? String
-                let imageRequired = data["backgroundImageRequired"] as? Bool ?? false
-                let timeout = data["imageFetchTimeout"] as? Int
-                let preparePaywallHandler = { (success: Bool, error: Error?) in
-                    result(handlePreparePaywallHandler(success: success, error: error))
+                let label = data["label"] as? String
+                let campaignLaunchHandler = { (success: Bool, error: Error?) in
+                    result(handleLaunchCampaignResult(success: success, error: error))
                 }
-                if(developerPaywallId == nil) {
-                    if(timeout == nil) {
-                        NamiPaywallManager.preparePaywallForDisplay(backgroundImageRequired: imageRequired,prepareHandler:preparePaywallHandler)
-                    } else {
-                        NamiPaywallManager.preparePaywallForDisplay(backgroundImageRequired: imageRequired, imageFetchTimeout:Double(timeout!),prepareHandler: preparePaywallHandler)
-                    }
+                if(label == nil) {
+                    NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler)
                 } else {
-                    if(timeout == nil) {
-                        NamiPaywallManager.preparePaywallForDisplay(developerPaywallID: developerPaywallId!, backgroundImageRequired: imageRequired, prepareHandler: preparePaywallHandler)
-                    } else {
-                        NamiPaywallManager.preparePaywallForDisplay(developerPaywallID: developerPaywallId!, backgroundImageRequired: imageRequired, imageFetchTimeout:Double(timeout!),prepareHandler: preparePaywallHandler)
-                    }
+                    NamiCampaignManager.launch(launchHandler: campaignLaunchHandler)
                 }
-            }
-        case "processSmartText":
-            let args = call.arguments as? [String: Any]
-            if let data = args {
-                let text = data["text"] as? String
-                let dataStores = (data["dataStores"] as? Array<Any>)!
-                result(NamiPaywallManager.processSmartText(text: text!, dataStores: dataStores))
-            }
-        case "raisePaywall":
-            // https://github.com/flutter/flutter/issues/9961
-            // https://github.com/flutter/flutter/issues/44764
-            let viewController = UIApplication.shared.delegate!.window!!.rootViewController!
-            let developerPaywallID = call.arguments as? String
-            if(developerPaywallID == nil) {
-                NamiPaywallManager.raisePaywall(fromVC: viewController)
-            } else {
-                NamiPaywallManager.raisePaywall(developerPaywallID: developerPaywallID!, fromVC: viewController)
             }
         case "dismissNamiPaywallIfOpen":
             let animated = call.arguments as? Bool ?? false
@@ -125,8 +92,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             } else {
                 result(nil)
             }
-        case "clearAllEntitlements":
-            NamiEntitlementManager.clearAllEntitlements()
         case "isEntitlementActive":
             result(NamiEntitlementManager.isEntitlementActive(call.arguments as! String))
         case "activeEntitlements":
@@ -137,31 +102,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let allEntitlements = NamiEntitlementManager.getEntitlements()
             let listofMaps = allEntitlements.map({ (namiEntitlement: NamiEntitlement) in namiEntitlement.convertToMap()})
             result(listofMaps)
-        case "setEntitlements":
-            let myArgs = call.arguments as? [[String: Any]]
-            var setters = [NamiEntitlementSetter]()
-            myArgs?.forEach({ (setterMap:[String : Any]) in
-                let setter = NamiEntitlementSetter(id: setterMap["referenceId"] as? String ?? "")
-                let expiry = setterMap["expires"] as? Int
-                if let date = expiry {
-                    setter.expires = Date(timeIntervalSince1970: Double.init(date))
-                }
-                let platformType = setterMap["platform"] as? String
-                if(platformType == "android") {
-                    setter.platform = NamiPlatformType.android
-                } else if(platformType == "apple") {
-                    setter.platform = NamiPlatformType.apple
-                } else if(platformType == "web") {
-                    setter.platform = NamiPlatformType.web
-                }else if(platformType == "roku") {
-                    setter.platform = NamiPlatformType.roku
-                } else {
-                    setter.platform = NamiPlatformType.other
-                }
-                setter.purchasedSKUid = setterMap["purchasedSKUid"] as? String
-                setters.append(setter)
-            })
-            NamiEntitlementManager.setEntitlements(setters)
         case "coreAction":
             let args = call.arguments as? String
             if let label = args {
@@ -176,11 +116,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let args = call.arguments as? [String]
             if let labels = args {
                 NamiMLManager.exitCoreContent(labels: labels)
-            }
-        case "blockPaywallAutoRaise":
-            let blockPaywallFromRaising = call.arguments as? Bool ?? false
-            NamiPaywallManager.registerAllowAutoRaisePaywallHandler { () -> Bool in
-                return !blockPaywallFromRaising
             }
         case "clearBypassStorePurchases":
             NamiPurchaseManager.clearBypassStorePurchases()
@@ -202,11 +137,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let args = call.arguments as? String
             if let skuId = args {
                 NamiPurchaseManager.consumePurchasedSKU(skuID: skuId)
-            }
-        case "paywallImpression":
-            let args = call.arguments as? String
-            if let developerPaywallId = args {
-                NamiPaywallManager.paywallImpression(developerID: developerPaywallId)
             }
         case "buySKU":
             let args = call.arguments as? String
@@ -238,21 +168,19 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             result("iOS " + UIDevice.current.systemVersion)
         }
         
-        func handlePreparePaywallHandler(success: Bool, error: Error?) -> [String: Any?] {
+        func handleLaunchCampaignResult(success: Bool, error: Error?) -> [String: Any?] {
             var map = [String: Any?]()
             map["success"] = success
             if let error = error as NSError? {
                 if(error.code == 0) {
-                    map["error"] = "paywall_already_displayed"
+                    map["error"] = "default_campaign_not_found"
                 } else if(error.code == 1) {
-                    map["error"] = "data_not_available"
+                    map["error"] = "labeled_campaign_not_found"
                 } else if(error.code == 2) {
-                    map["error"] = "no_live_campaign"
+                    map["error"] = "campaign_data_not_found"
                 } else if(error.code == 3) {
-                    map["error"] = "image_load_failed"
+                    map["error"] = "paywall_already_displayed"
                 } else if(error.code == 4) {
-                    map["error"] = "developer_paywall_id_not_found"
-                } else if(error.code == 5) {
                     map["error"] = "sdk_not_initialized"
                 } else {
                     map["error"] = nil

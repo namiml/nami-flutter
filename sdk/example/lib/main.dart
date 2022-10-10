@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/analytics/nami_analytics_support.dart';
 import 'package:nami_flutter/billing/nami_purchase_manager.dart';
+import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
 import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:nami_flutter/entitlement/nami_entitlement_manager.dart';
 import 'package:nami_flutter/ml/nami_ml_manager.dart';
@@ -58,12 +59,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       print("JourneyStateHandler triggered");
       _handleCustomerJourneyChanged(journeyState);
     });
-    NamiPaywallManager.signInEvents().listen((namiPaywall) {
-      NamiCustomerManager.logout();
-      NamiCustomerManager.login(
-          _testExternalIdentifier);
-      print('--------- Sign In Clicked ---------');
-    });
+    // TODO: Re-implement for 3.0.0 SDK
+    // NamiPaywallManager.signInEvents().listen((namiPaywall) {
+    //   NamiCustomerManager.logout();
+    //   NamiCustomerManager.login(
+    //       _testExternalIdentifier);
+    //   print('--------- Sign In Clicked ---------');
+    // });
     _handleActiveEntitlementsFuture(
         NamiEntitlementManager.active());
     NamiEntitlementManager.registerActiveEntitlementsHandler()
@@ -72,7 +74,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       _handleActiveEntitlements(activeEntitlements);
     });
     NamiPurchaseManager.registerPurchasesChangedHandler()
-        .listen((purchaseChangeEventData) {
+        .listen((purchasesResponseHandlerData) {
       print("PurchasesChangedHandler triggered");
     });
     NamiAnalyticsSupport.analyticsEvents().listen((analyticsData) {
@@ -96,16 +98,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   void _evaluateLastPurchaseEvent(
-      PurchaseChangeEventData purchaseChangeEventData) {
+      NamiPurchaseResponseHandlerData purchasesResponseHandlerData) {
     print('--------- Start ---------');
-    print("Purchase State ${purchaseChangeEventData.purchaseState}");
-    if (purchaseChangeEventData.purchaseState == NamiPurchaseState.purchased) {
+    print("Purchase State ${purchasesResponseHandlerData.purchaseState}");
+    if (purchasesResponseHandlerData.purchaseState == NamiPurchaseState.purchased) {
       print("\nActive Purchases: ");
-      purchaseChangeEventData.activePurchases.forEach((element) {
+      purchasesResponseHandlerData.purchases.forEach((element) {
         print("\tSkuId: ${element.skuId}");
       });
     } else {
-      print("Reason : ${purchaseChangeEventData.error}");
+      print("Reason : ${purchasesResponseHandlerData.error}");
     }
     print('--------- End ---------');
   }
@@ -180,25 +182,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   buildHeaderBodyContainer("Introduction",
                       "This application demonstrates common calls used in a Nami enabled application."),
                   buildHeaderBodyContainer("Instructions",
-                      "If you suspend and resume this app three times in the simulator, an example paywall will be raised - or you can use the [Subscribe] button below to raise the same paywall."),
-                  buildHeaderBodyContainer("Important info",
-                      "Any Purchase will be remembered while the application is [Active, Suspended, Resume] but cleared when the application is launched.\nExamine the application source code for more details on calls used to respond and monitor purchases."),
+                      "Use the one of the [Campaign] buttons below show a paywall"),
                   Container(
                     margin: const EdgeInsets.only(top: 48),
                     child: ElevatedButton(
                       onPressed: () async {
                         NamiMLManager.coreAction("subscribe");
-                        print('Subscribe clicked!');
-                        var preparePaywallResult =
-                            await NamiPaywallManager.preparePaywallForDisplay();
-                        if (preparePaywallResult.success) {
-                          NamiPaywallManager.raisePaywall();
-                        } else {
-                          print('preparePaywallForDisplay Error -> '
-                              '${preparePaywallResult.error}');
-                        }
+                        print('Launch campaign tapped!');
+                        NamiCampaignManager.launch();
                       },
-                      child: Text('Subscribe'),
+                      child: Text('Default Campaign'),
                     ),
                   )
                 ])));
