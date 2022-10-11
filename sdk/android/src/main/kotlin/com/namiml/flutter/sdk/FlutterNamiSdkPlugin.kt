@@ -218,35 +218,27 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val callback = { launchResult: LaunchCampaignResult ->
                     when (launchResult) {
                         is LaunchCampaignResult.Success -> {
-                            with(hashMapOf("success" to true, "error" to null) {
+                            with(hashMapOf("success" to true, "error" to null)) {
                                 result.success(this)
-                            })
+                            }
                         }
                         is LaunchCampaignResult.Failure -> {
                             val error = launchResult.error as LaunchCampaignError
-                            with(hashMapOf("success" to false, "error" to error.getFlutterString()) {
+                            with(hashMapOf("success" to false, "error" to error.getFlutterString())) {
                                 result.success(this)
-                            })
+                            }
                         }
                     }
                 }
 
-                val label = call.argument<String>("label")
+                val label = call.argument<String>("label") ?: ""
 
                 currentActivityWeakReference?.get()?.let { activity ->
-                    if (label != null) {
-                        NamiCampaignManager.launch(
-                            activity,
-                            label,
-                            callback
-                        )
-                    } else {
-                        NamiCampaignManager.launch(
-                            activity,
-                            "",
-                            callback
-                        )
-                    }
+                    NamiCampaignManager.launch(
+                        activity,
+                        label,
+                        callback
+                    )
                 }
             }
             "journeyState" -> {
