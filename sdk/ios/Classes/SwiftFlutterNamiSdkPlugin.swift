@@ -60,7 +60,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 return
             }
             if let myArgs = args as? [String: Any],
-               let externalIdentifier = myArgs["withId"] as? String,
+               let externalIdentifier = myArgs["withId"] as! String,
                 NamiCustomerManager.login(withId: externalIdentifier)
             } else {
                 print(FlutterError(code: "-1", message: "iOS could not extract " +

@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 import '../channel.dart';
-import 'nami_paywall.dart';
-import 'nami_sku.dart';
+
 
 /// Class responsible for managing all aspects of a paywall in the Nami SDK
 class NamiPaywallManager {
-  static const EventChannel _signInEvent = const EventChannel('signInEvent');
+  // TODO: reimplement
+  // static const EventChannel _signInEvent = const EventChannel('signInEvent');
 
   /// Will animate the closing of the paywall if [animated] is true. Returns
   /// [true] when paywall is dismissed, may be immediate if not presented

@@ -5,12 +5,17 @@ import '../channel.dart';
 class NamiCampaignManager {
 
   /// Launch a campaign to raise a paywall
-  static Future<LaunchCampaignResult> launch({String? label}) async {
+  ///
+  /// Optionally you can provide,
+  /// - A [label] to identify a specific campaign
+  static Future<LaunchCampaignResult> launch(
+      {String? label = ""}) async {
     var variableMap = {
-      "label": label
+      "label": label,
     };
     Map<dynamic, dynamic> result =
-    await channel.invokeMethod("launch", variableMap);
+      await channel.invokeMethod("launch", variableMap);
+
     var error = (result['error'] as String?)._toLaunchCampaignError();
     return LaunchCampaignResult(result['success'], error);
   }
@@ -48,7 +53,7 @@ extension on String? {
       return LaunchCampaignError.DEFAULT_CAMPAIGN_NOT_FOUND;
     } else if (this == "labeled_campaign_not_found") {
       return LaunchCampaignError.LABELED_CAMPAIGN_NOT_FOUND;
-    } else if (this == "campaign_data_not_foubd") {
+    } else if (this == "campaign_data_not_found") {
       return LaunchCampaignError.CAMPAIGN_DATA_NOT_FOUND;
     } else if (this == "paywall_already_displayed") {
       return LaunchCampaignError.PAYWALL_ALREADY_DISPLAYED;

@@ -43,12 +43,8 @@ class NamiCustomerManager {
   /// Note that [Nami] platform will reject the [withId], and it
   /// will not get saved in case where [withId] value doesn't match
   /// a supported format.
-  static Future<void> login(
-      String withId) {
-    var variableMap = {
-      'withId': withId,
-    };
-    return channel.invokeMethod("login", variableMap);
+  static Future<void> login(String withId) {
+    return channel.invokeMethod("login", withId);
   }
 
   /// A string of the external identifier that Nami has stored. Returns [null]

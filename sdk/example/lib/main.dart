@@ -10,7 +10,6 @@ import 'package:nami_flutter/ml/nami_ml_manager.dart';
 import 'package:nami_flutter/nami.dart';
 import 'package:nami_flutter/nami_configuration.dart';
 import 'package:nami_flutter/nami_log_level.dart';
-import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
 import 'package:nami_flutter/paywall/nami_sku.dart';
 
 import 'about.dart';
@@ -26,7 +25,10 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   static const _testExternalIdentifier = "9a9999a9-99aa-99a9-aa99-999a999999a8";
-  static const _androidAppPlatformId = "3d062066-9d3c-430e-935d-855e2c56dd8e";
+  // TODO: uncomment release
+  // static const _androidAppPlatformId = "3d062066-9d3c-430e-935d-855e2c56dd8e";
+  // TODO: delete this before release
+  static const _androidAppPlatformId = "aaf69dba-ef67-40f5-82ec-c7623a2848a6";
   static const _iosAppPlatformId = "002e2c49-7f66-4d22-a05c-1dc9f2b7f2af";
 
   @override
@@ -57,7 +59,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     initPlatformState();
     NamiCustomerManager.registerJourneyStateHandler().listen((journeyState) {
       print("JourneyStateHandler triggered");
-      _handleCustomerJourneyChanged(journeyState);
+      _handleJourneyState(journeyState);
     });
     // TODO: Re-implement for 3.0.0 SDK
     // NamiPaywallManager.signInEvents().listen((namiPaywall) {
@@ -130,7 +132,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _handleActiveEntitlements(await activeEntitlementsFuture);
   }
 
-  void _handleCustomerJourneyChanged(CustomerJourneyState state) async {
+  void _handleJourneyState(CustomerJourneyState state) async {
     print('--------- Start ---------');
     print("currentCustomerJourneyState");
     print("formerSubscriber ==> ${state.formerSubscriber}");
@@ -143,12 +145,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('--------- End ---------');
   }
 
+  void _handleCampaignLaunch(LaunchCampaignResult) async {
+    print('--------- Start ---------');
+
+    print('--------- End ---------');
+  }
+
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     var namiConfiguration = NamiConfiguration(
         appPlatformIdApple: _iosAppPlatformId,
         appPlatformIdGoogle: _androidAppPlatformId,
-        namiLogLevel: NamiLogLevel.debug);
+        namiLogLevel: NamiLogLevel.debug,
+        extraData: ["useStagingAPI"]);
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -182,16 +191,41 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   buildHeaderBodyContainer("Introduction",
                       "This application demonstrates common calls used in a Nami enabled application."),
                   buildHeaderBodyContainer("Instructions",
-                      "Use the one of the [Campaign] buttons below show a paywall"),
+                      "Use the one of the Campaign buttons below show a paywall"),
                   Container(
                     margin: const EdgeInsets.only(top: 48),
                     child: ElevatedButton(
                       onPressed: () async {
-                        NamiMLManager.coreAction("subscribe");
-                        print('Launch campaign tapped!');
-                        NamiCampaignManager.launch();
-                      },
+                          NamiMLManager.coreAction("subscribe");
+                          print('Launch default campaign tapped!');
+                          var launchCampaignResult =
+                          await NamiCampaignManager.launch();
+                          if (launchCampaignResult.success) {
+                            print('Campaign Launch success -> ');
+                          } else {
+                            print('Campaign Launch error -> '
+                                '${launchCampaignResult.error}');
+                          }
+                        },
                       child: Text('Default Campaign'),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        NamiMLManager.coreAction("subscribe");
+                        print('Launch campaign tapped with label');
+                        var launchCampaignResult =
+                          await NamiCampaignManager.launch(label: "your_campaign_label");
+                        if (launchCampaignResult.success) {
+                          print('Campaign Launch success -> ');
+                        } else {
+                          print('Campaign Launch error -> '
+                              '${launchCampaignResult.error}');
+                        }
+                      },
+                      child: Text('Labeled Campaign'),
                     ),
                   )
                 ])));

@@ -18,6 +18,7 @@ import com.namiml.billing.NamiPurchaseManager
 import com.namiml.billing.NamiPurchaseState
 import com.namiml.campaign.NamiCampaignManager
 import com.namiml.campaign.LaunchCampaignError
+import com.namiml.campaign.LaunchCampaignResult
 import com.namiml.customer.CustomerJourneyState
 import com.namiml.customer.NamiCustomerManager
 import com.namiml.entitlement.NamiEntitlement
@@ -73,11 +74,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 //        signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
         analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
         entitlementChangeListener =
-            EventChannel(flutterPluginBinding.binaryMessenger, "entitlementChangeEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "activeEntitlementEvent")
         purchaseChangeListener =
-            EventChannel(flutterPluginBinding.binaryMessenger, "purchaseChangeEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "purchasesResponseHandlerData")
         customerJourneyChangeListener =
-            EventChannel(flutterPluginBinding.binaryMessenger, "customerJourneyChangeEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "journeyStateEvent")
 
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
@@ -153,7 +154,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiEntitlementManager.registerActiveEntitlementsHandler { namiEntitlements ->
-                    events?.success(namiEntitlements.map { it.convertToMap() })
+                    print("${namiEntitlements}")
+//                    events?.success(namiEntitlements.map { it.convertToMap() })
                 }
             }
 
@@ -168,7 +170,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiCustomerManager.registerJourneyStateHandler { journeyState ->
-                    events?.success(journeyState.convertToMap())
+//                    events?.success(journeyState.convertToMap())
                 }
             }
 
@@ -190,47 +192,47 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     "info" -> NamiLogLevel.INFO
                     else -> NamiLogLevel.ERROR
                 }
-                val namiLanguageCode = call.argument<String>("namiLanguageCode").let { code ->
-                    NamiLanguageCode.values().find { it.code == code }.let { namiLanguageCode ->
-                        if (namiLanguageCode == null) {
-                            Log.d(
-                                "NAMI",
-                                "Nami language code set in NamiConfiguration " +
-                                    "\"$namiLanguageCode\" not found in list of available Nami " +
-                                    "Language Codes:\n"
-                            )
-                        }
-                        namiLanguageCode
-                    }
-                }
                 configure(
                     context,
-                    call.argument<String>("appPlatformIDGoogle"),
+                    call.argument<String>("appPlatformIdGoogle"),
                     call.argument<Boolean>("bypassStore"),
                     namiLogLevel,
-                    namiLanguageCode,
                     call.argument<List<String>>("extraDataList")
                 )
                 result.success(true)
             }
             "login" -> {
-                val externalIdentifier = call.argument<String>("withId")
-                NamiCustomerManager.login(externalIdentifier)
+                val externalId = call.argument<String>("withId") as String
+
+                NamiCustomerManager.login(externalId)
+                result.success(true)
             }
             "logout" -> {
                 NamiCustomerManager.logout()
+                result.success(true)
             }
             "loggedInId" -> {
                 result.success(NamiCustomerManager.loggedInId())
             }
             "launch" -> {
-                val callback = { success: Boolean, error: LaunchCampaignError? ->
-                    with(hashMapOf("success" to success, "error" to error?.getFlutterString())) {
-                        result.success(this)
+                val callback = { launchResult: LaunchCampaignResult ->
+                    when (launchResult) {
+                        is LaunchCampaignResult.Success -> {
+                            with(hashMapOf("success" to true, "error" to null) {
+                                result.success(this)
+                            })
+                        }
+                        is LaunchCampaignResult.Failure -> {
+                            val error = launchResult.error as LaunchCampaignError
+                            with(hashMapOf("success" to false, "error" to error.getFlutterString()) {
+                                result.success(this)
+                            })
+                        }
                     }
                 }
+
                 val label = call.argument<String>("label")
-                    ?: false
+
                 currentActivityWeakReference?.get()?.let { activity ->
                     if (label != null) {
                         NamiCampaignManager.launch(
@@ -241,6 +243,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     } else {
                         NamiCampaignManager.launch(
                             activity,
+                            "",
                             callback
                         )
                     }
@@ -323,7 +326,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         platformId: String?,
         bypass: Boolean?,
         namiLogLevel: NamiLogLevel,
-        namiLanguageCode: NamiLanguageCode?,
         extraDataList: List<String>?
     ) {
         if (platformId == null) {
@@ -333,7 +335,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             this.logLevel = namiLogLevel
             this.bypassStore = bypass ?: false
             this.settingsList = extraDataList
-            this.namiLanguageCode = namiLanguageCode
         }
         Nami.configure(configuration)
     }
@@ -382,13 +383,14 @@ private fun NamiPurchaseCompleteResult.convertToMap(): Map<String, Any?> {
 }
 
 private fun NamiEntitlement.convertToMap(): Map<String, Any?> {
-    return hashMapOf("name" to name,
-        "description" to desc,
+    return hashMapOf(
+        "name" to name,
+        "desc" to desc,
         "namiId" to namiId,
-        "referenceId" to referenceId,
-        "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
-        "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
-        "activePurchases" to activePurchases.map { it.convertToMap() })
+        "referenceId" to referenceId)
+//        "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
+//        "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
+//        "activePurchases" to activePurchases.map { it.convertToMap() })
 }
 
 private fun NamiPurchase.convertToMap(): Map<String, Any?> {
@@ -427,8 +429,6 @@ private fun NamiSKU.convertToMap(): Map<String, Any?> {
         "type" to this.type.getFlutterString(),
         "price" to this.skuDetails.getFormattedPrice().toString(),
         "skuId" to this.skuId,
-        "featured" to this.featured,
-        "displayText" to this.displayText,
         "localizedPrice" to this.skuDetails.price,
         "numberOfUnits" to 1,
         "priceCurrency" to this.skuDetails.priceCurrencyCode,
@@ -485,13 +485,13 @@ private fun NamiAnalyticsActionType.getFlutterString(): String {
 }
 
 
-private fun LaunchCampaignError?.getFlutterString(): String? {
+private fun LaunchCampaignError.getFlutterString(): String {
     return when (this) {
         LaunchCampaignError.SDK_NOT_INITIALIZED -> "sdk_not_initialized"
         LaunchCampaignError.DEFAULT_CAMPAIGN_NOT_FOUND -> "default_campaign_not_found"
         LaunchCampaignError.LABELED_CAMPAIGN_NOT_FOUND -> "labeled_campaign_not_found"
         LaunchCampaignError.PAYWALL_ALREADY_DISPLAYED -> "paywall_already_displayed"
         LaunchCampaignError.CAMPAIGN_DATA_NOT_FOUND -> "campaign_data_not_found"
-        else -> null
+        else -> "unknown"
     }
 }

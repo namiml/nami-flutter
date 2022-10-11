@@ -52,7 +52,6 @@ class NamiSKU {
 
   /// The time period for the unit of purchase
   final PeriodUnit periodUnit;
-  final bool featured;
 
   NamiSKU(
       this.description,
@@ -67,8 +66,7 @@ class NamiSKU {
       this.priceLanguage,
       this.priceCurrency,
       this.priceCountry,
-      this.periodUnit,
-      this.featured);
+      this.periodUnit);
 
   factory NamiSKU.fromMap(Map<dynamic, dynamic> map) {
     return NamiSKU(
@@ -84,8 +82,7 @@ class NamiSKU {
         (map['priceLanguage'] as String?),
         (map['priceCurrency'] as String?) ?? "",
         (map['priceCountry'] as String?),
-        (map['periodUnit'] as String?)._toPeriodUnit(),
-        (map['featured'] as bool?) ?? false);
+        (map['periodUnit'] as String?)._toPeriodUnit());
   }
 
   @override
@@ -96,7 +93,7 @@ class NamiSKU {
         'skuId: $skuId, localizedPrice: $localizedPrice, '
         'numberOfUnits: $numberOfUnits, priceLanguage: $priceLanguage, '
         'priceCurrency: $priceCurrency, priceCountry: $priceCountry, '
-        'periodUnit: $periodUnit, featured: $featured}';
+        'periodUnit: $periodUnit}';
   }
 }
 
