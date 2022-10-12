@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-import '../channel.dart';
+import 'package:nami_flutter/nami_error.dart';
+import 'package:nami_flutter/channel.dart';
 
 /// Manager class which providing functionality related to managing customer/user information
 class NamiCustomerManager {
@@ -30,6 +31,22 @@ class NamiCustomerManager {
       return null;
     }
     return CustomerJourneyState.fromMap(map);
+  }
+
+  static const EventChannel _accountStateEvent =
+  const EventChannel('accountStateEvent');
+
+  static Stream<AccountState> registerAccountStateHandler() {
+    var data = _accountStateEvent
+        .receiveBroadcastStream()
+        .map((dynamic event) => _mapToAccountState(event));
+
+    return data;
+  }
+
+  static AccountState _mapToAccountState(
+      Map<dynamic, dynamic> map) {
+    return AccountState.fromMap(map);
   }
 
 
@@ -90,3 +107,31 @@ class CustomerJourneyState {
         map['in_account_hold']);
   }
 }
+
+// This class represents possible account state related to login/logout
+class AccountState {
+  final AccountStateAction accountStateAction;
+  final bool success;
+  final NamiError? error;
+
+  AccountState(this.accountStateAction, this.success, this.error);
+
+  factory AccountState.fromMap(Map<dynamic, dynamic> map) {
+    return AccountState(
+        map['accountStateAction'],
+        map['success'],
+        map['error']);
+  }
+}
+
+enum AccountStateAction {
+  /// The account state being required relates to [NamiCustomerManager.login]
+  login,
+
+  /// The account state being required relates to [NamiCustomerManager.logout]
+  logout,
+
+  /// Unknown account state
+  unknown
+}
+

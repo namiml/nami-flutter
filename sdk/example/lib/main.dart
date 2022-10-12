@@ -6,6 +6,7 @@ import 'package:nami_flutter/billing/nami_purchase_manager.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
 import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:nami_flutter/entitlement/nami_entitlement_manager.dart';
+import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
 import 'package:nami_flutter/ml/nami_ml_manager.dart';
 import 'package:nami_flutter/nami.dart';
 import 'package:nami_flutter/nami_configuration.dart';
@@ -61,13 +62,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       print("JourneyStateHandler triggered");
       _handleJourneyState(journeyState);
     });
-    // TODO: Re-implement for 3.0.0 SDK
-    // NamiPaywallManager.signInEvents().listen((namiPaywall) {
-    //   NamiCustomerManager.logout();
-    //   NamiCustomerManager.login(
-    //       _testExternalIdentifier);
-    //   print('--------- Sign In Clicked ---------');
-    // });
+    NamiPaywallManager.signInEvents().listen((signInClicked) {
+      NamiCustomerManager.logout();
+      NamiCustomerManager.login(
+          _testExternalIdentifier);
+      print('--------- Sign In Clicked ---------');
+    });
     _handleActiveEntitlementsFuture(
         NamiEntitlementManager.active());
     NamiEntitlementManager.registerActiveEntitlementsHandler()

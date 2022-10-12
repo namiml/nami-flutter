@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:nami_flutter/paywall/nami_paywall.dart';
 
 import '../channel.dart';
 
 
 /// Class responsible for managing all aspects of a paywall in the Nami SDK
 class NamiPaywallManager {
-  // TODO: reimplement
-  // static const EventChannel _signInEvent = const EventChannel('signInEvent');
+  static const EventChannel _signInEvent = const EventChannel('signInEvent');
 
   /// Will animate the closing of the paywall if [animated] is true. Returns
   /// [true] when paywall is dismissed, may be immediate if not presented
@@ -20,18 +20,13 @@ class NamiPaywallManager {
 
 
   /// Stream for when user presses sign in button on a paywall
-  /// TODO: Re-implemented for 3.0.0 SDKs
-  // static Stream<NamiPaywall> signInEvents() {
-  //   var data = _signInEvent
-  //       .receiveBroadcastStream()
-  //       .map((dynamic event) => _handleSignInClicked(event));
-  //
-  //   return data;
-  // }
-  //
-  // static NamiPaywall _handleSignInClicked(Map<dynamic, dynamic> map) {
-  //   return NamiPaywall.fromMap(map);
-  // }
+  static Stream<NamiSignInClicked> signInEvents() {
+    var data = _signInEvent
+        .receiveBroadcastStream()
+        .map((dynamic event) => NamiSignInClicked(event));
+
+    return data;
+  }
 }
 
 class PreparePaywallResult {
@@ -39,6 +34,13 @@ class PreparePaywallResult {
   final PreparePaywallError? error;
 
   PreparePaywallResult(this.success, this.error);
+}
+
+
+class NamiSignInClicked {
+  final bool clicked;
+
+  NamiSignInClicked(this.clicked);
 }
 
 enum PreparePaywallError {

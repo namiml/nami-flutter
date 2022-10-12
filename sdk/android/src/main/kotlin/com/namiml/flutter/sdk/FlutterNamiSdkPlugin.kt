@@ -70,8 +70,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         moshi = Moshi.Builder().build()
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
-        // TODO: reimplement
-//        signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
+        signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
         analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
         entitlementChangeListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "activeEntitlementEvent")
@@ -82,8 +81,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
-        // TODO: reimplement
-//        setSignInStreamHandler()
+        setSignInStreamHandler()
         setAnalyticsStreamHandler()
         setEntitlementStreamHandler()
         setPurchaseChangeStreamHandler()
@@ -109,20 +107,20 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
-    // TODO: reimplement for 3.0.0 SDK
-//    private fun setSignInStreamHandler() {
-//        signInListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
-//            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-//                NamiPaywallManager.registerSignInHandler { (context) ->
-//                    events?.success(context)
-//                }
-//            }
-//
-//            override fun onCancel(arguments: Any?) {
-//                NamiPaywallManager.registerSignInHandler(null)
-//            }
-//        })
-//    }
+    private fun setSignInStreamHandler() {
+        signInListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiPaywallManager.registerSignInHandler { context ->
+                    // TODO: Figure out what the right thing to do here is.
+                    events?.success(true)
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                NamiPaywallManager.registerSignInHandler(null)
+            }
+        })
+    }
 
     private fun setAnalyticsStreamHandler() {
         analyticsListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
@@ -379,10 +377,10 @@ private fun NamiEntitlement.convertToMap(): Map<String, Any?> {
         "name" to name,
         "desc" to desc,
         "namiId" to namiId,
-        "referenceId" to referenceId)
-//        "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
-//        "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
-//        "activePurchases" to activePurchases.map { it.convertToMap() })
+        "referenceId" to referenceId,
+        "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
+        "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
+        "activePurchases" to activePurchases.map { it.convertToMap() })
 }
 
 private fun NamiPurchase.convertToMap(): Map<String, Any?> {
