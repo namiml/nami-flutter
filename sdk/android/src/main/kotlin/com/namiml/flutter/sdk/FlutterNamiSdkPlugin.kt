@@ -200,14 +200,13 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 result.success(true)
             }
             "login" -> {
-                val externalId = call.argument<String>("withId") as String
-
-                NamiCustomerManager.login(externalId)
-                result.success(true)
+                val withId = call.arguments as? String
+                if (withId != null) {
+                    NamiCustomerManager.login(withId)
+                }
             }
             "logout" -> {
                 NamiCustomerManager.logout()
-                result.success(true)
             }
             "loggedInId" -> {
                 result.success(NamiCustomerManager.loggedInId())
