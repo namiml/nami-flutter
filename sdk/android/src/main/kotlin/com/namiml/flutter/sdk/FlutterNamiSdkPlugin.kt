@@ -60,8 +60,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var channel: MethodChannel
     private lateinit var signInListener: EventChannel
     private lateinit var analyticsListener: EventChannel
-    private lateinit var entitlementChangeListener: EventChannel
-    private lateinit var customerJourneyChangeListener: EventChannel
+    private lateinit var activeEntitlementsListener: EventChannel
+    private lateinit var journeyStateListener: EventChannel
     private lateinit var purchaseChangeListener: EventChannel
     private lateinit var context: Context
     private lateinit var moshi: Moshi
