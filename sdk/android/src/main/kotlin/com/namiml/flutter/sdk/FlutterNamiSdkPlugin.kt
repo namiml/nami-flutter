@@ -50,6 +50,9 @@ import io.flutter.plugin.common.MethodChannel.Result
 import java.lang.ref.WeakReference
 import java.util.Date
 import java.util.logging.StreamHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /** FlutterNamiSdkPlugin */
 class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -152,7 +155,9 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiEntitlementManager.registerActiveEntitlementsHandler { namiEntitlements ->
-                    events?.success(namiEntitlements.map { it.convertToMap() })
+                    CoroutineScope(Dispatchers.Main).launch {
+                        events?.success(namiEntitlements.map { it.convertToMap() })
+                    }
                 }
             }
 
@@ -167,7 +172,9 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiCustomerManager.registerJourneyStateHandler { journeyState ->
-                    events?.success(journeyState.convertToMap())
+                    CoroutineScope(Dispatchers.Main).launch {
+                        events?.success(journeyState.convertToMap())
+                    }
                 }
             }
 
