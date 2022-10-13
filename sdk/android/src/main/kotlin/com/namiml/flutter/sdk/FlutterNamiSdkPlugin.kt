@@ -72,20 +72,20 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
         signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
         analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
-        entitlementChangeListener =
-            EventChannel(flutterPluginBinding.binaryMessenger, "activeEntitlementEvent")
+        activeEntitlementsListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "activeEntitlementsEvent")
         purchaseChangeListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "purchasesResponseHandlerData")
-        customerJourneyChangeListener =
+        journeyStateListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "journeyStateEvent")
 
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
         setAnalyticsStreamHandler()
-        setEntitlementStreamHandler()
+        setActiveEntitlementsStreamHandler()
         setPurchaseChangeStreamHandler()
-        setCustomerJourneyChangeStreamHandler()
+        setCustomerJourneyStateSHandler()
     }
 
     private fun setPurchaseChangeStreamHandler() {
@@ -147,8 +147,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
-    private fun setEntitlementStreamHandler() {
-        entitlementChangeListener.setStreamHandler(object : StreamHandler(),
+    private fun setActiveEntitlementsStreamHandler() {
+        activeEntitlementsListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiEntitlementManager.registerActiveEntitlementsHandler { namiEntitlements ->
@@ -162,8 +162,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
-    private fun setCustomerJourneyChangeStreamHandler() {
-        customerJourneyChangeListener.setStreamHandler(object : StreamHandler(),
+    private fun setCustomerJourneyStateSHandler() {
+        journeyStateListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiCustomerManager.registerJourneyStateHandler { journeyState ->

@@ -8,7 +8,7 @@ export 'package:nami_flutter/entitlement/nami_entitlement.dart';
 /// This class contains all methods and objects to work with entitlements in the SDK.
 class NamiEntitlementManager {
   static const EventChannel _activeEntitlementEvent =
-      const EventChannel('activeEntitlementEvent');
+      const EventChannel('activeEntitlementsEvent');
 
   /// Returns [true] if a Nami Control Center defined Entitlement has at
   /// least one backing purchase and it's not expired.

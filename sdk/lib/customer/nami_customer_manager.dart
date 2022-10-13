@@ -7,11 +7,11 @@ import 'package:nami_flutter/channel.dart';
 
 /// Manager class which providing functionality related to managing customer/user information
 class NamiCustomerManager {
-  static const EventChannel _journeyChangeEvent =
+  static const EventChannel _journeyStateEvent =
       const EventChannel('journeyStateEvent');
 
   static Stream<CustomerJourneyState> registerJourneyStateHandler() {
-    var data = _journeyChangeEvent
+    var data = _journeyStateEvent
         .receiveBroadcastStream()
         .map((dynamic event) => _mapToCustomerJourneyState(event));
 
