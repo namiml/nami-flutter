@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     initPlatformState();
     NamiCustomerManager.registerJourneyStateHandler().listen((journeyState) {
       print("JourneyStateHandler triggered");
-      _handleJourneyState(journeyState);
+      // _handleJourneyState(journeyState);
     });
     NamiPaywallManager.signInEvents().listen((signInClicked) {
       NamiCustomerManager.logout();
@@ -145,12 +145,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('--------- End ---------');
   }
 
-  void _handleCampaignLaunch(LaunchCampaignResult) async {
-    print('--------- Start ---------');
-
-    print('--------- End ---------');
-  }
-
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     var namiConfiguration = NamiConfiguration(
@@ -226,6 +220,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         }
                       },
                       child: Text('Labeled Campaign'),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        print('Refresh button pressed');
+                        NamiEntitlementManager.refresh();
+                      },
+                      child: Text('Refresh Active Entitlements'),
                     ),
                   )
                 ])));

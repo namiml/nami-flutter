@@ -31,6 +31,12 @@ class NamiEntitlementManager {
     return _mapToNamiEntitlementList(list);
   }
 
+  /// Manually ask the Nami server for the latest active entitlements
+  static Future<List<NamiEntitlement>> refresh() async {
+    List<dynamic> list = await channel.invokeMethod("refresh");
+    return _mapToNamiEntitlementList(list);
+  }
+
   static Stream<List<NamiEntitlement>> registerActiveEntitlementsHandler() {
     var data = _activeEntitlementEvent
         .receiveBroadcastStream()

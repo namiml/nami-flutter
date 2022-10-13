@@ -152,8 +152,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiEntitlementManager.registerActiveEntitlementsHandler { namiEntitlements ->
-                    print("${namiEntitlements}")
-//                    events?.success(namiEntitlements.map { it.convertToMap() })
+                    events?.success(namiEntitlements.map { it.convertToMap() })
                 }
             }
 
@@ -168,7 +167,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiCustomerManager.registerJourneyStateHandler { journeyState ->
-//                    events?.success(journeyState.convertToMap())
+                    events?.success(journeyState.convertToMap())
                 }
             }
 
@@ -248,6 +247,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "active" -> {
                 result.success(
                     NamiEntitlementManager.active().map { it.convertToMap() })
+            }
+            "refresh" -> {
+                NamiEntitlementManager.refresh() {
+                    result.success(it)
+                }
             }
             "coreAction" -> {
                 @Suppress("UNCHECKED_CAST")
