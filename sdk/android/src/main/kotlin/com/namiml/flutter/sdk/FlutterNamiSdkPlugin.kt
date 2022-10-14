@@ -459,16 +459,10 @@ private fun NamiAnalyticsPurchaseActivityType.getFlutterString(): String? {
 
 private fun NamiSKU.convertToMap(): Map<String, Any?> {
     return hashMapOf(
-        "description" to this.skuDetails.description,
-        "title" to this.skuDetails.title,
-        "type" to this.type.getFlutterString(),
-        "price" to this.skuDetails.getFormattedPrice().toString(),
+        "name" to this.skuDetails.name,
         "skuId" to this.skuId,
-        "localizedPrice" to this.skuDetails.price,
-        "numberOfUnits" to 1,
-        "priceCurrency" to this.skuDetails.priceCurrencyCode,
-        "periodUnit" to (this.skuDetails.getSubscriptionPeriodEnum()?.getFlutterString())
-    )
+        "type" to this.type.getFlutterString(),
+        )
 }
 
 private fun NamiSKUType.getFlutterString(): String {
