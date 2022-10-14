@@ -1,9 +1,9 @@
 PODS:
   - Flutter (1.0.0)
-  - Nami (2.9.3)
-  - nami_flutter (1.0.0):
+  - Nami (3.0.0-rc.03)
+  - nami_flutter (3.0.0-alpha.01):
     - Flutter
-    - Nami (= 2.9.3)
+    - Nami (= 3.0.0-rc.03)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -20,10 +20,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/nami_flutter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
-  Nami: 65926f3a18c836faffcc7eb1ed103ff076bbb7cc
-  nami_flutter: dc2fb5802766b013161b434dd480913c63229abc
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Nami: 2668736ea8003575ce29ea9afa328b65c5a31674
+  nami_flutter: 8072cba2622342f446726f483628b8f5e5576926
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: ef19549a9bc3046e7bb7d2fab4d021637c0c58a3
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.3

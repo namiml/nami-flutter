@@ -8,8 +8,8 @@ import '../channel.dart';
 /// whether it's done via the remote Google Play Billing service or Apple
 /// StoreKit or local Nami Bypass Store service
 class NamiPurchaseManager {
-  static const EventChannel _purchaseChangeEvent =
-      const EventChannel('purchaseChangeEvent');
+  static const EventChannel _purchasesResponseHandlerData =
+      const EventChannel('purchasesResponseHandlerData');
 
   /// Clears out any purchases made while bypassStore was enabled. This clears
   /// out bypassStore purchases only, it cannot clear out production purchases
@@ -30,41 +30,41 @@ class NamiPurchaseManager {
   }
 
   /// Check if a specific product SKU has been purchased
-  static Future<bool> isSKUIDPurchased(String skuID) {
+  static Future<bool> skuPurchased(String skuID) {
     return channel
-        .invokeMethod<bool>("isSKUIDPurchased", skuID)
+        .invokeMethod<bool>("skuPurchased", skuID)
         .then<bool>((bool? value) => value ?? false);
   }
 
   /// Ask Nami if it knows if a set of product SKU IDs has been purchased
-  static Future<bool> anySKUIDPurchased(List<String> skuIDs) {
+  static Future<bool> anySkuPurchased(List<String> skuIDs) {
     return channel
-        .invokeMethod<bool>("anySKUIDPurchased", skuIDs)
+        .invokeMethod<bool>("anySkuPurchased", skuIDs)
         .then<bool>((bool? value) => value ?? false);
   }
 
   /// Mark a consumable IAP as processed so it can be purchased again
-  static Future<void> consumePurchasedSKU(String skuID) {
-    return channel.invokeMethod("consumePurchasedSKU", skuID);
+  static Future<void> consumePurchasedSku(String skuID) {
+    return channel.invokeMethod("consumePurchasedSku", skuID);
   }
 
   /// Initiate a Google Play Billing or Apple StoreKit purchase using
-  /// [skuId] from a [NamiSKU]
-  static Future<NamiPurchaseCompleteResult> buySKU(String skuId) async {
-    Map<dynamic, dynamic> map = await channel.invokeMethod("buySKU", skuId);
+  /// [skuId] from a [NamiSKU]. Used by the linked paywall use case only.
+  static Future<NamiPurchaseCompleteResult> buySku(String skuId) async {
+    Map<dynamic, dynamic> map = await channel.invokeMethod("buySku", skuId);
     return NamiPurchaseCompleteResult(
         (map['purchaseState'] as String)._toNamiPurchaseState(), map['error']);
   }
 
-  static Stream<PurchaseChangeEventData> purchaseChangeEvents() {
-    var data = _purchaseChangeEvent
+  static Stream<NamiPurchaseResponseHandlerData> registerPurchasesChangedHandler() {
+    var data = _purchasesResponseHandlerData
         .receiveBroadcastStream()
-        .map((dynamic event) => _mapToPurchaseChangeEventData(event));
+        .map((dynamic event) => _mapToPurchaseResponseHandlerData(event));
 
     return data;
   }
 
-  static PurchaseChangeEventData _mapToPurchaseChangeEventData(
+  static NamiPurchaseResponseHandlerData _mapToPurchaseResponseHandlerData(
       Map<dynamic, dynamic> map) {
     List<dynamic> dynamicPurchases = map['activePurchases'];
     List<NamiPurchase> activePurchases = List.empty(growable: true);
@@ -73,7 +73,7 @@ class NamiPurchaseManager {
       activePurchases.add(namiPurchase);
     });
     var purchaseState = (map['purchaseState'] as String)._toNamiPurchaseState();
-    return PurchaseChangeEventData(
+    return NamiPurchaseResponseHandlerData(
         activePurchases, purchaseState, map['error']);
   }
 }
@@ -102,12 +102,12 @@ extension on String {
   }
 }
 
-class PurchaseChangeEventData {
-  final List<NamiPurchase> activePurchases;
+class NamiPurchaseResponseHandlerData {
+  final List<NamiPurchase> purchases;
   final NamiPurchaseState purchaseState;
   final String? error;
 
-  PurchaseChangeEventData(this.activePurchases, this.purchaseState, this.error);
+  NamiPurchaseResponseHandlerData(this.purchases, this.purchaseState, this.error);
 }
 
 class NamiPurchaseCompleteResult {

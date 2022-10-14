@@ -1,19 +1,21 @@
-# 1.0.0
+# 3.0.0-alpha.01
 
 ## Changelog
 
-Updates Nami Flutter to the latest iOS and Android releases.
+The first Nami Flutter release incorporating the 3.x series of iOS and Android SDKs.
 
-- Apple SDK v2.9.3 - [Release Notes](https://github.com/namiml/nami-apple/releases/tag/2.9.3)
-- Android SDK v2.0.0 - [Release Notes](https://github.com/namiml/nami-android/wiki/Nami-SDK-Releases#v200-march-4-2022)
+- Apple SDK v3.0.0-rc.03 - [Release Notes](https://github.com/namiml/nami-apple/wiki/Nami-SDK-Early-Access-Releases#v300-rc03-sep-30-2022)
+- Android SDK v3.0.0-alpha.07 - [Release Notes](https://github.com/namiml/nami-android/wiki/Nami-SDK-Early-Access-Releases#v300-alpha07-september-30-2022)
 
 ### New Features
 
-- Create paywalls in multiple languages
-- Improved support for upgrades and downgrades on Android
-- One-time purchase support on iOS and Android
+- Support for a growing library of native paywall templates
+- Support for paywall A/B testing
 - and much more!  See iOS and Android release notes for more details
 
-# 0.1.0
+## Enhancements
 
-- Initial release
+- Improved support for registered users
+- Simplified API interfaces, error handling, and more
+- Implements Nami's V3 API specification
+

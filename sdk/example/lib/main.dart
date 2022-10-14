@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/analytics/nami_analytics_support.dart';
 import 'package:nami_flutter/billing/nami_purchase_manager.dart';
+import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
 import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:nami_flutter/entitlement/nami_entitlement_manager.dart';
+import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
 import 'package:nami_flutter/ml/nami_ml_manager.dart';
 import 'package:nami_flutter/nami.dart';
 import 'package:nami_flutter/nami_configuration.dart';
 import 'package:nami_flutter/nami_log_level.dart';
-import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
 import 'package:nami_flutter/paywall/nami_sku.dart';
 
 import 'about.dart';
@@ -25,8 +26,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   static const _testExternalIdentifier = "9a9999a9-99aa-99a9-aa99-999a999999a8";
-  static const _androidAppPlatformId = "3d062066-9d3c-430e-935d-855e2c56dd8e";
-  static const _iosAppPlatformId = "002e2c49-7f66-4d22-a05c-1dc9f2b7f2af";
+  // prod
+  // static const _androidAppPlatformId = "3d062066-9d3c-430e-935d-855e2c56dd8e";
+  // static const _iosAppPlatformId = "002e2c49-7f66-4d22-a05c-1dc9f2b7f2af";
+  // nami staging
+  static const _androidAppPlatformId = "aaf69dba-ef67-40f5-82ec-c7623a2848a6";
+  static const _iosAppPlatformId = "1b3f8f1f-c471-448e-b5c1-23059ee65bac";
 
   @override
   Widget build(BuildContext context) {
@@ -54,27 +59,45 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('--------- initState ---------');
     WidgetsBinding.instance?.addObserver(this);
     initPlatformState();
-    NamiCustomerManager.customerJourneyChangeEvents().listen((journeyState) {
-      print("customerJourneyChange triggered");
-      _handleCustomerJourneyChanged(journeyState);
+    NamiCustomerManager.registerJourneyStateHandler().listen((journeyState) {
+      print("JourneyStateHandler triggered");
+      _handleJourneyState(journeyState);
     });
-    NamiPaywallManager.signInEvents().listen((namiPaywall) {
-      Nami.clearExternalIdentifier();
-      Nami.setExternalIdentifier(
-          _testExternalIdentifier, NamiExternalIdentifierType.uuid);
+    NamiPaywallManager.signInEvents().listen((signInClicked) {
+      NamiCustomerManager.logout();
+      NamiCustomerManager.login(withId: _testExternalIdentifier);
       print('--------- Sign In Clicked ---------');
     });
     _handleActiveEntitlementsFuture(
-        NamiEntitlementManager.activeEntitlements());
-    NamiEntitlementManager.entitlementChangeEvents()
+        NamiEntitlementManager.active());
+    NamiEntitlementManager.registerActiveEntitlementsHandler()
         .listen((activeEntitlements) {
-      print("EntitlementChangeListener triggered");
+      print("ActiveEntitlementsHandler triggered");
       _handleActiveEntitlements(activeEntitlements);
     });
-    NamiPurchaseManager.purchaseChangeEvents()
-        .listen((purchaseChangeEventData) {
+    NamiPurchaseManager.registerPurchasesChangedHandler()
+        .listen((purchasesResponseHandlerData) {
       print("PurchasesChangedHandler triggered");
-      _evaluateLastPurchaseEvent(purchaseChangeEventData);
+    });
+    NamiCustomerManager.registerAccountStateHandler()
+        .listen((accountState) {
+      print("AccountStateHandler triggered");
+
+      if (accountState.success) {
+        if (accountState.accountStateAction == AccountStateAction.login) {
+          print("Login success");
+        } else
+        if (accountState.accountStateAction == AccountStateAction.logout) {
+          print("Logout success");
+        }
+      } else {
+        if (accountState.accountStateAction == AccountStateAction.login) {
+          print("Login error - ${accountState.error}");
+        } else
+        if (accountState.accountStateAction == AccountStateAction.logout) {
+          print("Logout error - ${accountState.error}");
+        }
+      }
     });
     NamiAnalyticsSupport.analyticsEvents().listen((analyticsData) {
       _printAnalyticsEventData(analyticsData);
@@ -92,21 +115,21 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       print('--------- ON RESUME ---------');
       _handleActiveEntitlementsFuture(
-          NamiEntitlementManager.activeEntitlements());
+          NamiEntitlementManager.active());
     }
   }
 
   void _evaluateLastPurchaseEvent(
-      PurchaseChangeEventData purchaseChangeEventData) {
+      NamiPurchaseResponseHandlerData purchasesResponseHandlerData) {
     print('--------- Start ---------');
-    print("Purchase State ${purchaseChangeEventData.purchaseState}");
-    if (purchaseChangeEventData.purchaseState == NamiPurchaseState.purchased) {
+    print("Purchase State ${purchasesResponseHandlerData.purchaseState}");
+    if (purchasesResponseHandlerData.purchaseState == NamiPurchaseState.purchased) {
       print("\nActive Purchases: ");
-      purchaseChangeEventData.activePurchases.forEach((element) {
+      purchasesResponseHandlerData.purchases.forEach((element) {
         print("\tSkuId: ${element.skuId}");
       });
     } else {
-      print("Reason : ${purchaseChangeEventData.error}");
+      print("Reason : ${purchasesResponseHandlerData.error}");
     }
     print('--------- End ---------');
   }
@@ -129,7 +152,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _handleActiveEntitlements(await activeEntitlementsFuture);
   }
 
-  void _handleCustomerJourneyChanged(CustomerJourneyState state) async {
+  void _handleJourneyState(CustomerJourneyState state) async {
     print('--------- Start ---------');
     print("currentCustomerJourneyState");
     print("formerSubscriber ==> ${state.formerSubscriber}");
@@ -145,9 +168,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
     var namiConfiguration = NamiConfiguration(
-        appPlatformIDApple: _iosAppPlatformId,
-        appPlatformIDGoogle: _androidAppPlatformId,
-        namiLogLevel: NamiLogLevel.debug);
+        appPlatformIdApple: _iosAppPlatformId,
+        appPlatformIdGoogle: _androidAppPlatformId,
+        namiLogLevel: NamiLogLevel.debug,
+        extraData: ["useStagingAPI"]);
     Nami.configure(namiConfiguration);
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -181,25 +205,73 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   buildHeaderBodyContainer("Introduction",
                       "This application demonstrates common calls used in a Nami enabled application."),
                   buildHeaderBodyContainer("Instructions",
-                      "If you suspend and resume this app three times in the simulator, an example paywall will be raised - or you can use the [Subscribe] button below to raise the same paywall."),
-                  buildHeaderBodyContainer("Important info",
-                      "Any Purchase will be remembered while the application is [Active, Suspended, Resume] but cleared when the application is launched.\nExamine the application source code for more details on calls used to respond and monitor purchases."),
+                      "Use the one of the Campaign buttons below show a paywall"),
                   Container(
                     margin: const EdgeInsets.only(top: 48),
                     child: ElevatedButton(
                       onPressed: () async {
+                          NamiMLManager.coreAction("subscribe");
+                          print('Launch default campaign tapped!');
+                          var launchCampaignResult =
+                          await NamiCampaignManager.launch();
+                          if (launchCampaignResult.success) {
+                            print('Campaign Launch success -> ');
+                          } else {
+                            print('Campaign Launch error -> '
+                                '${launchCampaignResult.error}');
+                          }
+                        },
+                      child: Text('Default Campaign'),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton(
+                      onPressed: () async {
                         NamiMLManager.coreAction("subscribe");
-                        print('Subscribe clicked!');
-                        var preparePaywallResult =
-                            await NamiPaywallManager.preparePaywallForDisplay();
-                        if (preparePaywallResult.success) {
-                          NamiPaywallManager.raisePaywall();
+                        print('Launch campaign tapped with label');
+                        var launchCampaignResult =
+                          await NamiCampaignManager.launch(label: "your_campaign_label");
+                        if (launchCampaignResult.success) {
+                          print('Campaign Launch success -> ');
                         } else {
-                          print('preparePaywallForDisplay Error -> '
-                              '${preparePaywallResult.error}');
+                          print('Campaign Launch error -> '
+                              '${launchCampaignResult.error}');
                         }
                       },
-                      child: Text('Subscribe'),
+                      child: Text('Labeled Campaign'),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        print('Refresh button pressed');
+                        var activeEntitlements = await NamiEntitlementManager.refresh();
+                        print ('Active Entitlements -> '
+                            '${activeEntitlements}');
+                      },
+                      child: Text('Refresh Active Entitlements'),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        print('Login button pressed');
+                        NamiCustomerManager.login(withId: _testExternalIdentifier);
+                      },
+                      child: Text('Login'),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        print('Logout button pressed');
+                        NamiCustomerManager.logout();
+                      },
+                      child: Text('Logout'),
                     ),
                   )
                 ])));
@@ -259,3 +331,4 @@ Container buildHeaderBodyContainer(String header, String body) {
         ],
       ));
 }
+
