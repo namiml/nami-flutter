@@ -7,19 +7,20 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let channel = FlutterMethodChannel(name: "nami", binaryMessenger: registrar.messenger())
         let signInEventChannel = FlutterEventChannel(name: "signInEvent", binaryMessenger: registrar.messenger())
         let analyticsEventChannel = FlutterEventChannel(name: "analyticsEvent", binaryMessenger: registrar.messenger())
-        let entitlementChangeEventChannel = FlutterEventChannel(name: "entitlementChangeEvent", binaryMessenger: registrar.messenger())
-        let paywallRaiseEventChannel = FlutterEventChannel(name: "paywallRaiseEvent", binaryMessenger: registrar.messenger())
+        let activeEntitlementsEventChannel = FlutterEventChannel(name: "activeEntitlementsEvent", binaryMessenger: registrar.messenger())
         let purchasesChangeEventChannel = FlutterEventChannel(name: "purchasesResponseHandlerData", binaryMessenger: registrar.messenger())
-        let customerJourneyChangeEventChannel = FlutterEventChannel(name: "customerJourneyChangeEvent", binaryMessenger: registrar.messenger())
+        let journeyStateEventChannel = FlutterEventChannel(name: "journeyStateEvent", binaryMessenger: registrar.messenger())
+        let accountStateEventChannel = FlutterEventChannel(name: "accountStateEvent", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
         analyticsEventChannel.setStreamHandler(AnalyticsEventHandler())
-        entitlementChangeEventChannel.setStreamHandler(EntitlementChangeEventHandler())
-        paywallRaiseEventChannel.setStreamHandler(PaywallRaiseEventHandler())
-        purchaseChangedEventChannel.setStreamHandler(PurchasesChangedEventHandler())
-        customerJourneyChangeEventChannel.setStreamHandler(CustomerJourneyChangeEventHandler())
+        activeEntitlementsEventChannel.setStreamHandler(ActiveEntitlementsEventHandler())
+        purchasesChangeEventChannel.setStreamHandler(PurchasesChangedEventHandler())
+        journeyStateEventChannel.setStreamHandler(JourneyStateEventHandler())
+        accountStateEventChannel.setStreamHandler(AccountStateEventHandler())
     }
+
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
@@ -29,14 +30,12 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 return
             }
             if let myArgs = args as? [String: Any],
-               let appPlatformID = myArgs["appPlatformIDApple"] as? String,
+               let appPlatformId = myArgs["appPlatformIdApple"] as? String,
                let bypassStore = myArgs["bypassStore"] as? Bool,
-               let passiveMode = myArgs["passiveMode"] as? Bool,
                let namiLogLevel = myArgs["namiLogLevel"] as? String,
                let namiCommands = myArgs["extraDataList"] as? Array<String> {
-                let namiConfig = NamiConfiguration(appPlatformId: appPlatformID)
+               let namiConfig = NamiConfiguration(appPlatformId: appPlatformId)
                 namiConfig.bypassStore = bypassStore
-                namiConfig.passiveMode = passiveMode
                 namiConfig.namiCommands = namiCommands
                 if(namiLogLevel == "debug") {
                     namiConfig.logLevel = NamiLogLevel.debug
@@ -56,18 +55,14 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         case "logout":
             NamiCustomerManager.logout()
         case "login":
-            guard let args = call.arguments else {
-                return
-            }
-            if let myArgs = args as? [String: Any],
-               let externalIdentifier = myArgs["withId"] as! String,
-                NamiCustomerManager.login(withId: externalIdentifier)
-            } else {
-                print(FlutterError(code: "-1", message: "iOS could not extract " +
-                                   "flutter arguments in method: (sendParams)", details: nil))
+            let args = call.arguments as? String
+            if let externalIdentifier = args {
+                    NamiCustomerManager.login(withId: externalIdentifier)
             }
         case "loggedInId":
             result(NamiCustomerManager.loggedInId())
+        case "isLoggedIn":
+            result(NamiCustomerManager.isLoggedIn())
         case "launch":
             let args = call.arguments as? [String: Any]
             if let data = args {
@@ -81,27 +76,29 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     NamiCampaignManager.launch(launchHandler: campaignLaunchHandler)
                 }
             }
-        case "dismissNamiPaywallIfOpen":
+        case "dismiss":
             let animated = call.arguments as? Bool ?? false
-            NamiPaywallManager.dismissNamiPaywallIfOpen(animated: animated) {
+            NamiPaywallManager.dismiss(animated: animated) {
                 result(true)
             }
-        case "currentCustomerJourneyState":
-            if let state = NamiCustomerManager.currentCustomerJourneyState() {
+        case "journeyState":
+            if let state = NamiCustomerManager.journeyState() {
                 result(state.convertToMap())
             } else {
                 result(nil)
             }
         case "isEntitlementActive":
             result(NamiEntitlementManager.isEntitlementActive(call.arguments as! String))
-        case "activeEntitlements":
-            let activeEntitlements = NamiEntitlementManager.activeEntitlements()
+        case "active":
+            let activeEntitlements = NamiEntitlementManager.active()
             let listofMaps = activeEntitlements.map({ (namiEntitlement: NamiEntitlement) in namiEntitlement.convertToMap()})
             result(listofMaps)
-        case "getEntitlements":
-            let allEntitlements = NamiEntitlementManager.getEntitlements()
-            let listofMaps = allEntitlements.map({ (namiEntitlement: NamiEntitlement) in namiEntitlement.convertToMap()})
-            result(listofMaps)
+        case "refresh":
+            let refreshHandler = { (activeEntitlements: [NamiEntitlement]) in
+                let listofMaps = activeEntitlements.map({ (namiEntitlement: NamiEntitlement) in namiEntitlement.convertToMap()})
+                result(listofMaps)
+            }
+            NamiEntitlementManager.refresh(refreshHandler)
         case "coreAction":
             let args = call.arguments as? String
             if let label = args {
@@ -126,43 +123,17 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         case "isSKUIDPurchased":
             let args = call.arguments as? String
             if let skuId = args {
-                result(NamiPurchaseManager.isSKUIDPurchased(skuId))
+                result(NamiPurchaseManager.skuPurchased(skuId))
             }
         case "anySKUIDPurchased":
             let args = call.arguments as? [String]
             if let skuIds = args {
-                result(NamiPurchaseManager.anySKUIDPurchased(skuIds))
+                result(NamiPurchaseManager.anySkuPurchased(skuIds))
             }
         case "consumePurchasedSKU":
             let args = call.arguments as? String
             if let skuId = args {
-                NamiPurchaseManager.consumePurchasedSKU(skuID: skuId)
-            }
-        case "buySKU":
-            let args = call.arguments as? String
-            if let skuRefId = args {
-                NamiPurchaseManager.skusForSKUIDs(skuIDs: [skuRefId]) { (success: Bool, skus: [NamiSKU]?, invalidSKUIDs: [String]?, error: Error?) in
-                    if let sku = skus?.first {
-                        NamiPurchaseManager.buySKU(sku) { (purchases: [NamiPurchase], state: NamiPurchaseState, error: Error?) in
-                            if(state != NamiPurchaseState.pending) {
-                                var eventMap = [String : Any?]()
-                                eventMap["error"] = error?.localizedDescription
-                                // Delete this once buySKU is working on iOS
-                                eventMap["original_state"] = state.readableString()
-                                // Delete this once buySKU is working on iOS
-                                eventMap["purchases"] = purchases.count
-                                // react to the state of the purchase
-                                if state == .purchased {
-                                    eventMap["purchaseState"] = "purchased"
-                                }
-                                else {
-                                    eventMap["purchaseState"] = "failed"
-                                }
-                                result(eventMap)
-                            }
-                        }
-                    }
-                }
+                NamiPurchaseManager.consumePurchasedSku(skuId: skuId)
             }
         default:
             result("iOS " + UIDevice.current.systemVersion)
@@ -192,8 +163,9 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     
     class SignInEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiPaywallManager.registerSignInHandler { (_, id: String, paywall: NamiPaywall) in
-                events(paywall.convertToMap())
+            NamiPaywallManager.registerSignInHandler { (fromvc) in
+                // TODO: Figure out what the right thing to do here is.
+                events(true)
             }
             return nil
         }
@@ -215,12 +187,21 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     typeString = "purchase_activity"
                 }
                 eventMap["type"] = typeString
-                eventMap["campaign_id"] = data[NamiAnalyticsKeys.campaignID]
-                eventMap["campaign_name"] = data[NamiAnalyticsKeys.campaignName]
-                eventMap["nami_triggered"] = data[NamiAnalyticsKeys.namiTriggered]
-                eventMap["paywall_id"] = data[NamiAnalyticsKeys.paywallID]
-                eventMap["paywall_name"] = data[NamiAnalyticsKeys.paywallName]
+                eventMap["campaign_rule"] = data[NamiAnalyticsKeys.campaignRule]
+                eventMap["campaign_segment"] = data[NamiAnalyticsKeys.campaignSegment]
+                eventMap["campaign_type"] = data[NamiAnalyticsKeys.campaignType]
+                eventMap["campaign_value"] = data[NamiAnalyticsKeys.campaignValue]
+
+                eventMap["paywall"] = data[NamiAnalyticsKeys.paywall]
                 eventMap["paywall_type"] = data[NamiAnalyticsKeys.paywallType]
+
+                eventMap["purchased_sku"] = data[NamiAnalyticsKeys.purchasedSKU]
+                eventMap["purchased_sku_id"] = data[NamiAnalyticsKeys.purchasedSKUIdentifier]
+                eventMap["purchased_sku_price"] = data[NamiAnalyticsKeys.purchasedSKUPrice]
+                eventMap["purchased_sku_store_locale"] = data[NamiAnalyticsKeys.purchasedSKUStoreLocale]
+                eventMap["purchased_sku_locale"] = data[NamiAnalyticsKeys.purchasedSKULocale]
+                eventMap["purchase_timestamp"] = data[NamiAnalyticsKeys.purchasedSKUPurchaseTimestamp_Date]
+
                 let activityType = data[NamiAnalyticsKeys.purchaseActivityType_ActivityType] as? NamiAnalyticsPurchaseActivityType
                 if(activityType == NamiAnalyticsPurchaseActivityType.cancelled) {
                     eventMap["purchase_activity_type"] = "cancelled"
@@ -231,12 +212,15 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 } else {
                     eventMap["purchase_activity_type"] = "resubscribe"
                 }
-                let skus = data[NamiAnalyticsKeys.paywallSKUs_NamiSKU] as? [NamiSKU]
+                let skus = data[NamiAnalyticsKeys.paywallSKUs] as? [NamiSKU]
                 var list = [[String: Any]]()
                 skus?.forEach { (sku: NamiSKU) in
                     list.append(sku.convertToMap())
                 }
-                eventMap["paywall_products"] = list
+                eventMap["paywall_skus"] = list
+
+                eventMap["paywall_raise_source"] = data[NamiAnalyticsKeys.paywallRaiseSource]
+
                 events(eventMap)
             }
             return nil
@@ -248,36 +232,36 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    class EntitlementChangeEventHandler: NSObject, FlutterStreamHandler {
+    class ActiveEntitlementsEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiEntitlementManager.registerEntitlementsChangedHandler { (namiEntitlements: [NamiEntitlement]) in
-                let listofMaps = namiEntitlements.map({ (namiEntitlement: NamiEntitlement) in namiEntitlement.convertToMap()})
+            NamiEntitlementManager.registerActiveEntitlementsHandler { (activeEntitlements: [NamiEntitlement]) in
+                let listofMaps = activeEntitlements.map({ (namiEntitlement: NamiEntitlement) in namiEntitlement.convertToMap()})
                 events(listofMaps)
             }
             return nil
         }
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiEntitlementManager.registerEntitlementsChangedHandler(nil)
+            NamiEntitlementManager.unregisterActiveEntitlementsHandler()
             return nil
         }
     }
     
-    class CustomerJourneyChangeEventHandler: NSObject, FlutterStreamHandler {
+    class JourneyStateEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiCustomerManager.registerJourneyStateChangedHandler { newCustomerJourneyState in
+            NamiCustomerManager.registerJourneyStateHandler { newCustomerJourneyState in
                 events(newCustomerJourneyState.convertToMap())
             }
             return nil
         }
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiCustomerManager.registerJourneyStateChangedHandler(nil)
+            NamiCustomerManager.registerJourneyStateHandler(nil)
             return nil
         }
     }
     
-    class PurchasesChangedHandler: NSObject, FlutterStreamHandler {
+    class PurchasesChangedEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPurchaseManager.registerPurchasesChangedHandler { (activePurchases: [NamiPurchase], namiPurchaseState: NamiPurchaseState, error: Error?) in
                 var eventMap = [String : Any]()
@@ -292,6 +276,38 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             NamiPurchaseManager.registerPurchasesChangedHandler(nil)
             return nil
+        }
+    }
+
+    class AccountStateEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiCustomerManager.registerAccountStateHandler { (accountStateAction: AccountStateAction, success: Bool, error: Error?) in
+                var eventMap = [String : Any]()
+                eventMap["accountStateAction"] = accountStateAction.toFlutterString()
+                eventMap["success"] = success
+                eventMap["error"] = error?.localizedDescription
+                events(eventMap)
+            }
+            return nil
+        }
+
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            NamiCustomerManager.registerAccountStateHandler(nil)
+            return nil
+        }
+    }
+}
+
+
+public extension AccountStateAction {
+    func toFlutterString() -> String {
+        switch self {
+        case AccountStateAction.login:
+            return "login"
+        case AccountStateAction.logout:
+            return "logout"
+        default:
+            return "unknown"
         }
     }
 }
@@ -339,11 +355,10 @@ public extension NamiEntitlement {
     func convertToMap() -> [String: Any] {
         var map = [String: Any]()
         map["name"] = self.name
-        map["description"] = self.description
-        map["namiId"] = self.namiID
-        map["referenceId"] = self.referenceID
-        map["relatedSKUs"] = self.relatedSKUs.map({ (namiSku: NamiSKU) in namiSku.convertToMap()})
-        map["purchasedSKUs"] = self.purchasedSKUs.map({ (namiSku: NamiSKU) in namiSku.convertToMap()})
+        map["description"] = self.desc
+        map["referenceId"] = self.referenceId
+        map["relatedSKUs"] = self.relatedSkus.map({ (namiSku: NamiSKU) in namiSku.convertToMap()})
+        map["purchasedSKUs"] = self.purchasedSkus.map({ (namiSku: NamiSKU) in namiSku.convertToMap()})
         map["activePurchases"] = self.activePurchases.map({ (namiPurchase: NamiPurchase) in namiPurchase.convertToMap()})
         return map
     }
@@ -358,7 +373,6 @@ public extension NamiPurchase {
         var map = [String: Any]()
         map["purchaseInitiatedTimestamp"] = Int.init(self.purchaseInitiatedTimestamp.timeIntervalSince1970)
         map["expires"] = expiry
-        map["fromNami"] = false
         if(self.purchaseSource == NamiPurchaseSource.campaign) {
             map["purchaseSource"] = "campaign"
         } else if(self.purchaseSource == NamiPurchaseSource.marketplace) {
@@ -367,7 +381,7 @@ public extension NamiPurchase {
             map["purchaseSource"] = "unknown"
         }
         map["transactionIdentifier"] = self.transactionIdentifier
-        map["skuId"] = self.skuID
+        map["skuId"] = self.skuId
         return map
     }
 }
@@ -375,36 +389,14 @@ public extension NamiPurchase {
 public extension NamiSKU {
     func convertToMap() -> [String: Any] {
         var map = [String: Any]()
-        map["description"] = self.product?.localizedDescription ?? ""
-        map["title"] = self.product?.localizedTitle ?? ""
-        map["displayText"] = self.namiDisplayText
-        map["displaySubText"] = self.namiSubDisplayText
-        map["localizedMultipliedPrice"] = self.product?.localizedMultipliedPrice
-        map["price"] = self.product?.price.stringValue ?? ""
-        map["subscriptionGroupIdentifier"] = self.product?.subscriptionGroupIdentifier
-        map["skuId"] = self.skuID
-        map["featured"] = self.productMetadata?[NamiSKUKeys.featured.rawValue]
-        map["localizedPrice"] = self.localizedCurrentPrice
-        map["numberOfUnits"] = self.product?.subscriptionPeriod?.numberOfUnits ?? 0
-        map["priceLanguage"] = self.product?.priceLocale.languageCode
-        map["priceCurrency"] = self.product?.priceLocale.currencyCode ?? ""
-        map["priceCountry"] = self.product?.priceLocale.regionCode
+        map["name"] = self.name
+        map["skuId"] = self.skuId
         if(self.type == NamiSKUType.one_time_purchase) {
             map["type"] = "one_time_purchase"
         } else if (self.type == NamiSKUType.subscription) {
             map["type"] = "subscription"
         } else {
             map["type"] = "unknown"
-        }
-        let period = self.product?.subscriptionPeriod?.unit
-        if(period == SKProduct.PeriodUnit.day) {
-            map["periodUnit"] = "day"
-        } else if(period == SKProduct.PeriodUnit.month) {
-            map["periodUnit"] = "month"
-        }else if(period == SKProduct.PeriodUnit.week) {
-            map["periodUnit"] = "week"
-        } else {
-            map["periodUnit"] = "year"
         }
         return map
     }

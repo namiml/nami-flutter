@@ -26,11 +26,12 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   static const _testExternalIdentifier = "9a9999a9-99aa-99a9-aa99-999a999999a8";
-  // TODO: uncomment release
+  // prod
   // static const _androidAppPlatformId = "3d062066-9d3c-430e-935d-855e2c56dd8e";
-  // TODO: delete this before release
+  // static const _iosAppPlatformId = "002e2c49-7f66-4d22-a05c-1dc9f2b7f2af";
+  // nami staging
   static const _androidAppPlatformId = "aaf69dba-ef67-40f5-82ec-c7623a2848a6";
-  static const _iosAppPlatformId = "002e2c49-7f66-4d22-a05c-1dc9f2b7f2af";
+  static const _iosAppPlatformId = "1b3f8f1f-c471-448e-b5c1-23059ee65bac";
 
   @override
   Widget build(BuildContext context) {

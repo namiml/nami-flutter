@@ -70,6 +70,13 @@ class NamiCustomerManager {
     return channel.invokeMethod("loggedInId");
   }
 
+  /// Returns whether the device is associated with an external identifier
+  static Future<bool> isLoggedIn() {
+    return channel
+        .invokeMethod<bool>("isLoggedIn")
+        .then<bool>((bool? value) => value ?? false);
+  }
+
   /// Disassociate a device from an external id.
   static Future<void> logout() {
     return channel.invokeMethod("logout");

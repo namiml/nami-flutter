@@ -244,6 +244,9 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "loggedInId" -> {
                 result.success(NamiCustomerManager.loggedInId())
             }
+            "isLoggedIn" -> {
+                result.success(NamiCustomerManager.isLoggedIn())
+            }
             "launch" -> {
                 val callback = { launchResult: LaunchCampaignResult ->
                     when (launchResult) {
@@ -270,6 +273,9 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         callback
                     )
                 }
+            }
+            "dismiss" -> {
+                result.notImplemented()
             }
             "journeyState" -> {
                 val stateMap = NamiCustomerManager.journeyState()?.convertToMap()
@@ -325,15 +331,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val skuIds = call.arguments as? List<String>
                 skuIds?.let {
                     result.success(NamiPurchaseManager.anySKUIDPurchased(it))
-                }
-            }
-            "buySKU" -> {
-                val skuRefId = call.arguments as? String
-                val activity = currentActivityWeakReference?.get()
-                if (skuRefId != null && activity != null) {
-                    NamiPurchaseManager.buySKU(activity, skuRefId) {
-                        result.success(it.convertToMap())
-                    }
                 }
             }
             "consumePurchasedSKU" -> {
