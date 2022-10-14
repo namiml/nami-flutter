@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-import 'package:nami_flutter/nami_error.dart';
 import 'package:nami_flutter/channel.dart';
 
 /// Manager class which providing functionality related to managing customer/user information
@@ -60,7 +59,7 @@ class NamiCustomerManager {
   /// Note that [Nami] platform will reject the [withId], and it
   /// will not get saved in case where [withId] value doesn't match
   /// a supported format.
-  static Future<void> login(String withId) {
+  static Future<void> login({String withId = ""}) {
     return channel.invokeMethod("login", withId);
   }
 
@@ -112,13 +111,13 @@ class CustomerJourneyState {
 class AccountState {
   final AccountStateAction accountStateAction;
   final bool success;
-  final NamiError? error;
+  final String? error;
 
   AccountState(this.accountStateAction, this.success, this.error);
 
   factory AccountState.fromMap(Map<dynamic, dynamic> map) {
     return AccountState(
-        map['accountStateAction'],
+        (map['accountStateAction'] as String)._toAccountStateAction(),
         map['success'],
         map['error']);
   }
@@ -135,3 +134,14 @@ enum AccountStateAction {
   unknown
 }
 
+extension on String {
+  AccountStateAction _toAccountStateAction() {
+    if (this == "login") {
+      return AccountStateAction.login;
+    } else if (this == "logout") {
+      return AccountStateAction.logout;
+    } else {
+      return AccountStateAction.unknown;
+    }
+  }
+}

@@ -60,12 +60,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     initPlatformState();
     NamiCustomerManager.registerJourneyStateHandler().listen((journeyState) {
       print("JourneyStateHandler triggered");
-      // _handleJourneyState(journeyState);
+      _handleJourneyState(journeyState);
     });
     NamiPaywallManager.signInEvents().listen((signInClicked) {
       NamiCustomerManager.logout();
-      NamiCustomerManager.login(
-          _testExternalIdentifier);
+      NamiCustomerManager.login(withId: _testExternalIdentifier);
       print('--------- Sign In Clicked ---------');
     });
     _handleActiveEntitlementsFuture(
@@ -78,6 +77,26 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     NamiPurchaseManager.registerPurchasesChangedHandler()
         .listen((purchasesResponseHandlerData) {
       print("PurchasesChangedHandler triggered");
+    });
+    NamiCustomerManager.registerAccountStateHandler()
+        .listen((accountState) {
+      print("AccountStateHandler triggered");
+
+      if (accountState.success) {
+        if (accountState.accountStateAction == AccountStateAction.login) {
+          print("Login success");
+        } else
+        if (accountState.accountStateAction == AccountStateAction.logout) {
+          print("Logout success");
+        }
+      } else {
+        if (accountState.accountStateAction == AccountStateAction.login) {
+          print("Login error - ${accountState.error}");
+        } else
+        if (accountState.accountStateAction == AccountStateAction.logout) {
+          print("Logout error - ${accountState.error}");
+        }
+      }
     });
     NamiAnalyticsSupport.analyticsEvents().listen((analyticsData) {
       _printAnalyticsEventData(analyticsData);
@@ -227,9 +246,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     child: ElevatedButton(
                       onPressed: () async {
                         print('Refresh button pressed');
-                        NamiEntitlementManager.refresh();
+                        var activeEntitlements = await NamiEntitlementManager.refresh();
+                        print ('Active Entitlements -> '
+                            '${activeEntitlements}');
                       },
                       child: Text('Refresh Active Entitlements'),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        print('Login button pressed');
+                        NamiCustomerManager.login(withId: _testExternalIdentifier);
+                      },
+                      child: Text('Login'),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        print('Logout button pressed');
+                        NamiCustomerManager.logout();
+                      },
+                      child: Text('Logout'),
                     ),
                   )
                 ])));

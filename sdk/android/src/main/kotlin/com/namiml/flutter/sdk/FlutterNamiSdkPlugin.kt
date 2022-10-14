@@ -8,6 +8,7 @@ import com.namiml.Nami
 import com.namiml.NamiConfiguration
 import com.namiml.NamiLanguageCode
 import com.namiml.NamiLogLevel
+import com.namiml.NamiError
 import com.namiml.analytics.NamiAnalyticsActionType
 import com.namiml.analytics.NamiAnalyticsKeys
 import com.namiml.analytics.NamiAnalyticsPurchaseActivityType
@@ -21,6 +22,7 @@ import com.namiml.campaign.LaunchCampaignError
 import com.namiml.campaign.LaunchCampaignResult
 import com.namiml.customer.CustomerJourneyState
 import com.namiml.customer.NamiCustomerManager
+import com.namiml.customer.AccountStateAction
 import com.namiml.entitlement.NamiEntitlement
 import com.namiml.entitlement.NamiEntitlementManager
 import com.namiml.entitlement.NamiPlatformType
@@ -66,6 +68,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var activeEntitlementsListener: EventChannel
     private lateinit var journeyStateListener: EventChannel
     private lateinit var purchaseChangeListener: EventChannel
+    private lateinit var accountStateListener: EventChannel
     private lateinit var context: Context
     private lateinit var moshi: Moshi
     private var currentActivityWeakReference: WeakReference<Activity>? = null
@@ -81,14 +84,16 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel(flutterPluginBinding.binaryMessenger, "purchasesResponseHandlerData")
         journeyStateListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "journeyStateEvent")
-
+        accountStateListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "accountStateEvent")
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
         setAnalyticsStreamHandler()
         setActiveEntitlementsStreamHandler()
         setPurchaseChangeStreamHandler()
-        setCustomerJourneyStateSHandler()
+        setCustomerJourneyStateHandler()
+        setAccountStateHandler()
     }
 
     private fun setPurchaseChangeStreamHandler() {
@@ -167,7 +172,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
-    private fun setCustomerJourneyStateSHandler() {
+    private fun setCustomerJourneyStateHandler() {
         journeyStateListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
@@ -180,6 +185,28 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             override fun onCancel(arguments: Any?) {
                 NamiCustomerManager.registerJourneyStateHandler(null)
+            }
+        })
+    }
+
+    private fun setAccountStateHandler() {
+        accountStateListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiCustomerManager.registerAccountStateHandler { accountStateAction, success, error ->
+                    val eventMap = mutableMapOf<String, Any?>()
+                    eventMap["accountStateAction"] = accountStateAction.getFlutterString()
+                    eventMap["success"] = success
+                    if (error != null) {
+                        eventMap["error"] = error.errorMessage
+                    }
+                    CoroutineScope(Dispatchers.Main).launch {
+                        events?.success(eventMap)
+                    }
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                NamiCustomerManager.registerAccountStateHandler(null)
             }
         })
     }
@@ -410,6 +437,14 @@ private fun NamiPurchaseSource.getFlutterString(): String {
         NamiPurchaseSource.MARKETPLACE -> "marketplace"
         NamiPurchaseSource.UNKNOWN -> "unknown"
         else -> ""
+    }
+}
+
+private fun AccountStateAction.getFlutterString(): String {
+    return when (this) {
+        AccountStateAction.LOGIN -> "login"
+        AccountStateAction.LOGOUT -> "logout"
+        else -> "unknown"
     }
 }
 
