@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:testnami/constants.dart';
@@ -14,6 +16,7 @@ class ProfileWidget extends StatefulWidget {
 
 class _ProfileWidgetState extends State<ProfileWidget>
     with WidgetsBindingObserver {
+  List<StreamSubscription> _subscriptions = [];
   CustomerJourneyState? _journeyState;
   String _deviceId = "";
   String _externalId = "";
@@ -84,19 +87,26 @@ class _ProfileWidgetState extends State<ProfileWidget>
 
     getDeviceId();
 
-    NamiCustomerManager.registerJourneyStateHandler().listen((journeyState) {
+    StreamSubscription journeyStateSubscription = NamiCustomerManager.registerJourneyStateHandler().listen((journeyState) {
       print("JourneyStateHandler triggered");
       _updateJourneyState(journeyState);
     });
 
-    NamiCustomerManager.registerAccountStateHandler().listen((accountState) {
+    _subscriptions.add(journeyStateSubscription);
+
+    StreamSubscription accountsStateSubscription = NamiCustomerManager.registerAccountStateHandler().listen((accountState) {
       _updateAccountState(accountState);
     });
+
+    _subscriptions.add(accountsStateSubscription);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _subscriptions.forEach((subscription) {
+      subscription.cancel();
+    });
     super.dispose();
   }
 

@@ -11,18 +11,14 @@ class CampaignWidget extends StatefulWidget {
   setState() {}
 }
 
-class CampaignWidgetState extends State<CampaignWidget>
-    with WidgetsBindingObserver {
+class CampaignWidgetState extends State<CampaignWidget> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    WidgetsFlutterBinding.ensureInitialized();
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 

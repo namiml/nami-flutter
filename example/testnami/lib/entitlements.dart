@@ -17,6 +17,7 @@ class EntitlementsWidget extends StatefulWidget {
 class _EntitlementsWidgetState extends State<EntitlementsWidget>
     with WidgetsBindingObserver {
   List<NamiEntitlement> _activeEntitlements = [];
+  List<StreamSubscription> _subscriptions = [];
 
   void _handleActiveEntitlements(List<NamiEntitlement> activeEntitlements) {
     if (activeEntitlements.isNotEmpty) {
@@ -41,7 +42,7 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     if (state == AppLifecycleState.resumed) {
-      _handleActiveEntitlementsFuture(NamiEntitlementManager.active());
+      NamiEntitlementManager.refresh();
     }
   }
 
@@ -50,16 +51,22 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    NamiEntitlementManager.registerActiveEntitlementsHandler()
+    StreamSubscription activeEntitlementsSubscription = NamiEntitlementManager.registerActiveEntitlementsHandler()
         .listen((activeEntitlements) {
       print("ActiveEntitlementsHandler triggered");
       _handleActiveEntitlements(activeEntitlements);
     });
+
+    _subscriptions.add(activeEntitlementsSubscription);
+
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _subscriptions.forEach((subscription) {
+      subscription.cancel();
+    });
     super.dispose();
   }
 
