@@ -12,14 +12,9 @@ class NamiCustomerManager {
   static Stream<CustomerJourneyState> registerJourneyStateHandler() {
     var data = _journeyStateEvent
         .receiveBroadcastStream()
-        .map((dynamic event) => _mapToCustomerJourneyState(event));
+        .map((dynamic event) => CustomerJourneyState.fromMap(event));
 
     return data;
-  }
-
-  static CustomerJourneyState _mapToCustomerJourneyState(
-      Map<dynamic, dynamic> map) {
-    return CustomerJourneyState.fromMap(map);
   }
 
   /// returns current customer's journey state
@@ -66,20 +61,27 @@ class NamiCustomerManager {
   /// A string of the external identifier that Nami has stored. Returns [null]
   /// if no id has been stored, including if a string was passed to
   /// [login] that was not valid.
-  static Future<String?> loggedInId() {
-    return channel.invokeMethod("loggedInId");
+  static Future<String?> loggedInId() async {
+    final String loggedInId = await channel.invokeMethod("deviceId");
+    return loggedInId;
   }
 
   /// Returns whether the device is associated with an external identifier
-  static Future<bool> isLoggedIn() {
-    return channel
-        .invokeMethod<bool>("isLoggedIn")
-        .then<bool>((bool? value) => value ?? false);
+  static Future<bool> isLoggedIn() async {
+    final bool isLoggedIn = await channel.invokeMethod("isLoggedIn");
+    return isLoggedIn;
   }
 
   /// Disassociate a device from an external id.
-  static Future<void> logout() {
-    return channel.invokeMethod("logout");
+  static Future<void> logout() async {
+    return await channel.invokeMethod("logout");
+  }
+
+  /// Provide the unique identifier that Nami uses to identifier this device.
+  /// Note: this identifier does not persist across app re-installs.
+  static Future<String> deviceId() async {
+    final String deviceId = await channel.invokeMethod("deviceId");
+    return deviceId;
   }
 }
 

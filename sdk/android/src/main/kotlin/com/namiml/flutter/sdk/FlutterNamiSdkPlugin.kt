@@ -247,6 +247,9 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "isLoggedIn" -> {
                 result.success(NamiCustomerManager.isLoggedIn())
             }
+            "deviceId" -> {
+                result.success(NamiCustomerManager.deviceId())
+            }
             "launch" -> {
                 val callback = { launchResult: LaunchCampaignResult ->
                     when (launchResult) {
@@ -456,7 +459,7 @@ private fun NamiAnalyticsPurchaseActivityType.getFlutterString(): String? {
 
 private fun NamiSKU.convertToMap(): Map<String, Any?> {
     return hashMapOf(
-        "name" to this.skuDetails.name,
+        "name" to this.name,
         "skuId" to this.skuId,
         "type" to this.type.getFlutterString(),
         )

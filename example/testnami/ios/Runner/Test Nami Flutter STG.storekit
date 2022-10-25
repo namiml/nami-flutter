@@ -1,0 +1,104 @@
+{
+  "identifier" : "D6D2C5A1",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6443924985",
+    "_developerTeamID" : "K6APTMK8Y8",
+    "_lastSynchronizedDate" : 687931324.24675798
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21033159",
+      "localizations" : [
+
+      ],
+      "name" : "Test Nami Flutter STG Sub Group",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "19.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1650679349",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plus Annual",
+              "displayName" : "Plus Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "sub_annual_flutter_stg",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Plus Annual",
+          "subscriptionGroupID" : "21033159",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "10.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1650678944",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plus Bi-Annual",
+              "displayName" : "Plus Bi-Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "sub_sixmonths_flutter_stg",
+          "recurringSubscriptionPeriod" : "P6M",
+          "referenceName" : "Plus Bi-Annual",
+          "subscriptionGroupID" : "21033159",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1650678664",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plus Monthly",
+              "displayName" : "Plus Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "sub_monthly_flutter_stg",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Plus Monthly",
+          "subscriptionGroupID" : "21033159",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}

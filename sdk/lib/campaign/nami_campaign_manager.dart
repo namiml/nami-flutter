@@ -9,7 +9,7 @@ class NamiCampaignManager {
   /// Optionally you can provide,
   /// - A [label] to identify a specific campaign
   static Future<LaunchCampaignResult> launch(
-      {String? label = ""}) async {
+      {String? label}) async {
     var variableMap = {
       "label": label,
     };

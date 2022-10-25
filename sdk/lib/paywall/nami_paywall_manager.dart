@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:nami_flutter/paywall/nami_paywall.dart';
 
 import '../channel.dart';
 

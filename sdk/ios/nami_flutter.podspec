@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'nami_flutter'
-  s.version          = '3.0.0-alpha.01'
+  s.version          = '3.0.0-alpha.02'
   s.summary          = 'Easy subscriptions & in-app purchases for Flutter, with powerful built-in paywalls and A/B testing.'
   s.description      = <<-DESC
   This library helps you offer subscriptions & IAPs for Flutter apps published to the App Store and Google Play.
@@ -27,10 +27,15 @@ See https://www.namiml.com for more details and to create a free account.
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '13.0'
-  s.dependency 'Nami', '3.0.0-rc.03'
-  s.static_framework = true
+  s.dependency 'Nami', '3.0.0-rc.04'
+#  s.static_framework = true
+#  s.preserve_paths = 'Nami.xcframework'
+#  s.xcconfig = { 'OTHER_LDFLAGS' => '-framework Nami' }
+
+  s.vendored_frameworks = 'Nami.xcframework'
 
   # Flutter.framework does not contain a i386 slice.
+
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
-  s.swift_version = '5.0'
+  s.swift_version = '5.7'
 end

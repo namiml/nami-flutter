@@ -1,0 +1,175 @@
+{
+  "identifier" : "27DA5551",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+
+  ],
+  "settings" : {
+    "_applicationInternalID" : "6443909433",
+    "_developerTeamID" : "K6APTMK8Y8",
+    "_lastSynchronizedDate" : 688324760.93707299
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "21032349",
+      "localizations" : [
+
+      ],
+      "name" : "Sub Group",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "19.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "1650507629",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plus Annual",
+              "displayName" : "Plus Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "sub_annual_flutter_prod",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Annual",
+          "subscriptionGroupID" : "21032349",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "10.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "1650507968",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plus Bi-Annual",
+              "displayName" : "Plus Bi-Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "sub_sixmonths_flutter_prod",
+          "recurringSubscriptionPeriod" : "P6M",
+          "referenceName" : "Bi-Annual",
+          "subscriptionGroupID" : "21032349",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "1.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
+          "internalID" : "1650507793",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Plus Monthly",
+              "displayName" : "Plus Monthly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "sub_monthly_flutter_prod",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "Monthly",
+          "subscriptionGroupID" : "21032349",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "99.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1650676627",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "VIP Annual",
+              "displayName" : "VIP Annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "sub_vip_annual_flutter_prod",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "VIP Annual",
+          "subscriptionGroupID" : "21032349",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "49.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1650676599",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "VIP Bi-annual",
+              "displayName" : "VIP Bi-annual",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "sub_vip_sixmonths_flutter_prod",
+          "recurringSubscriptionPeriod" : "P6M",
+          "referenceName" : "VIP Bi-Annual",
+          "subscriptionGroupID" : "21032349",
+          "type" : "RecurringSubscription"
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "9.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "1650676488",
+          "introductoryOffer" : null,
+          "localizations" : [
+
+          ],
+          "productID" : "sub_vip_monthly_flutter_prod",
+          "recurringSubscriptionPeriod" : "P1M",
+          "referenceName" : "VIP Monthly",
+          "subscriptionGroupID" : "21032349",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 2,
+    "minor" : 0
+  }
+}

@@ -20,41 +20,37 @@ class NamiAnalyticsSupport {
   }
 
   static NamiAnalyticsData _handleAnalyticsEvent(Map<dynamic, dynamic> map) {
-    var type = NamiAnalyticsActionType.unknown;
-    switch (map["type"]) {
+    var actionType = NamiAnalyticsActionType.unknown;
+    switch (map["action_type"]) {
       case "paywall_raise":
-        type = NamiAnalyticsActionType.paywall_raise;
-        break;
-      case "paywall_raise_blocked":
-        type = NamiAnalyticsActionType.paywall_raise_blocked;
+        actionType = NamiAnalyticsActionType.paywall_raise;
         break;
       case "purchase_activity":
-        type = NamiAnalyticsActionType.purchase_activity;
+        actionType = NamiAnalyticsActionType.purchase_activity;
     }
-    map.remove("type");
-    List<dynamic> products = map[NamiAnalyticsKeys.PAYWALL_PRODUCTS];
+    map.remove("action_type");
+    List<dynamic> products = map[NamiAnalyticsKeys.PAYWALL_SKUS];
     List<NamiSKU> namiSkus = List.empty(growable: true);
     products.forEach((element) {
       NamiSKU namiSKU = NamiSKU.fromMap(element);
       namiSkus.add(namiSKU);
     });
-    map[NamiAnalyticsKeys.PAYWALL_PRODUCTS] = namiSkus;
-    return NamiAnalyticsData(type, map);
+    map[NamiAnalyticsKeys.PAYWALL_SKUS] = namiSkus;
+    return NamiAnalyticsData(actionType, map);
   }
 }
 
 class NamiAnalyticsData {
-  final NamiAnalyticsActionType type;
+  final NamiAnalyticsActionType actionType;
   final Map<dynamic, dynamic> eventData;
 
-  NamiAnalyticsData(this.type, this.eventData);
+  NamiAnalyticsData(this.actionType, this.eventData);
 }
 
 /// The various types of analytics events that are associated whenever
 /// [NamiAnalyticsSupport.analyticsEvents()] is triggered which is set
 enum NamiAnalyticsActionType {
   paywall_raise,
-  paywall_raise_blocked,
   purchase_activity,
   unknown
 }
@@ -75,20 +71,25 @@ enum NamiAnalyticsPurchaseActivityType {
 /// [eventData] in [NamiAnalyticsData]. You should rely on key provided by us
 /// to retrieve data from the map rather than using raw strings on app side.
 class NamiAnalyticsKeys {
-  static const String CAMPAIGN_ID = "campaign_id";
-  static const String CAMPAIGN_NAME = "campaign_name";
+  static const String CAMPAIGN_RULE = "campaign_rule";
+  static const String CAMPAIGN_SEGMENT = "campaign_segment";
+  static const String CAMPAIGN_TYPE = "campaign_type";
+  static const String CAMPAIGN_VALUE = "campaign_value";
 
-  /// Returned value for this key in map would be of type [bool]
-  static const String NAMI_TRIGGERED = "nami_triggered";
-  static const String PAYWALL_ID = "paywall_id";
-  static const String PAYWALL_NAME = "paywall_name";
+  static const String PAYWALL = "paywall";
   static const String PAYWALL_TYPE = "paywall_type";
-  static const String PAYWALL_PRODUCTS = "paywall_products";
+  static const String PAYWALL_SKUS = "paywall_skus";
+  static const String PAYWALL_RAISE_SOURCE = "paywall_raise_source";
 
-  /// Returned value for this key in map would be of an enum of type [NamiAnalyticsPurchaseActivityType]
-  static const String PURCHASE_ACTIVITY_TYPE = "purchase_activity_type";
 
   /// Returned value for this key in map would be of type [NamiPurchase]
-  static const String PURCHASE_PRODUCT = "purchase_product";
-  static const String PURCHASE_TIMESTAMP = "purchase_timestamp";
+  static const String PURCHASED_SKU = "purchased_sku";
+  static const String PURCHASED_SKU_IDENTIFIER = "purchased_sku_id";
+  static const String PURCHASED_SKU_PURCHASE_TIMESTAMP = "purchased_sku_purchase_timestamp";
+  static const String PURCHASED_SKU_PRICE = "purchased_sku_price";
+  static const String PURCHASED_SKU_STORE_LOCALE = "purchased_sku_store_locale";
+  static const String PURCHASED_SKU_LOCALE = "purchased_sku_locale";
+
+  /// Returned value for this key in map would be of an enum of type [NamiAnalyticsPurchaseActivityType]
+  static const String PURCHASE_ACTIVITY_TYPE = "purchaseActivityType";
 }
