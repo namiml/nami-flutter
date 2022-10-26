@@ -53,13 +53,16 @@ jobs:
         env:
           NAMI_SDK_VERSION: ${{ inputs.version }}
 
+      - name: Write credentials
+        run: |
+          echo $PUB_DEV_CREDENTIAL_JSON >> ~/.config/dart/pub-credentials.json
+        env:
+          PUB_DEV_CREDENTIAL_JSON: ${{ secrets.PUB_DEV_CREDENTIAL_JSON }}
+
       - name: Publish
-        uses: sakebook/actions-flutter-pub-publisher@v1.4.1
-        with:
-          credential: ${{ secrets.PUB_DEV_CREDENTIAL_JSON }}
-          flutter_package: true
-          skip_test: true
-          package_directory: "sdk"
+        run: |
+          cd sdk
+          dart pub publish -f
 
       - name: Create Github Release
         run: |-
