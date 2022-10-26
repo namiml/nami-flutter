@@ -72,8 +72,8 @@ jobs:
       - name: Build Android App Bundle
         run: |
           export BUILD_NUMBER_STG=`cat $RUNNER_TEMP/.new_version_code`
-          flutter build appbundle -t lib/main-production.dart --flavor STG --release --build-number $BUILD_NUMBER_STG
-        working-directory: source/sdk/example/testnami/android
+          flutter build appbundle -t lib/main-staging.dart --flavor STG --release --build-number $BUILD_NUMBER_STG
+        working-directory: source/sdk/example/testnami
 
       - name: Sign Android App Bundle
         run: |
