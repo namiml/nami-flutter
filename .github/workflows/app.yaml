@@ -1,4 +1,4 @@
-name: Generate Test Flutter STG (Manual)
+name: Generate Test Flutter STG
 on:
   workflow_dispatch:
     inputs:
@@ -6,6 +6,15 @@ on:
         default: develop
         description: 'Git Tag, Branch or SHA to build'
         required: true
+    secrets:
+      BUILD_USER_PAT:
+        required: true
+
+  pull_request:
+    types:
+      - closed
+    branches:
+      - develop
     secrets:
       BUILD_USER_PAT:
         required: true
