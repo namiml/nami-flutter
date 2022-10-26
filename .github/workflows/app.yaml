@@ -31,16 +31,19 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 12.x
+
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v2
         with:
           channel: stable
           version: 3.3.5
+
       - name: 'Checkout ${{ inputs.ref }}'
         uses: actions/checkout@v2
         with:
           path: source
           ref: '${{ inputs.ref }}'
+
       - name: Install Google API python client
         run: |
           pip install google-api-python-client
@@ -52,26 +55,29 @@ jobs:
           rm -f .service_account
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT: '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}'
-        working-directory: sdk-android
+        working-directory: source
+
       - name: Create the Keystore
         run: |
           # import keystore from secrets
-          echo $KEYSTORE_BASE64: '${{ secrets.KEY_STORE_BASE64 }}'
-                 | base64 -d >
-          $RUNNER_TEMP/my_production.keystore
+          echo $KEYSTORE_BASE64: '${{ secrets.KEY_STORE_BASE64 }}' | base64 -d > $RUNNER_TEMP/my_production.keystore
         env:
           KEYSTORE_BASE64: '${{ secrets.KEY_STORE_BASE64 }}'
+
       - name: Get dependencies
         run: |
           flutter pub get
+
       - name: Build Android App Bundle
         run: |
           flutter build appbundle -t lib/main-production.dart --flavor STG --release
         working-directory: source/example/testnami/android
+
       - name: Sign Android App Bundle
         run: |
           jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass ${{ secrets.KEY_STORE_PASSWORD }} -keypass ${{ secrets.KEYSTORE_PASSWORD_ALIAS }} -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/STGRelease/app-STG-release.aab ${{ secrets/KEYSTORE_PASSWORD_ALIAS }}
         working-directory: source/example/testnami
+
       - name: Uploading to test track
         uses: r0adkll/upload-google-play@v1.0.17
         with:
@@ -80,7 +86,6 @@ jobs:
           serviceAccountJsonPlainText: '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}'
           status: completed
           track: internal
-
   build-ios:
     name: Generate Test Flutter for TestFlight
     permissions:
@@ -92,24 +97,29 @@ jobs:
       - uses: actions/setup-java@v1
         with:
           java-version: 12.x
+
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: 2.0.5
+
       - name: 'Checkout ${{ inputs.ref }}'
         uses: actions/checkout@v2
         with:
           path: source
           ref: '${{ inputs.ref }}'
+
       - name: Checkout appstoreconnect-build-tools
         uses: actions/checkout@v2
         with:
           path: appstoreconnect-build-tools
           ref: main
           repository: namiml/appstoreconnect-build-tools
+
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
           python-version: '3.10'
+
       - name: Get expected build number
         run: |
           pip3 install requests
@@ -122,6 +132,7 @@ jobs:
           APPSTORE_API_KEY_ID: '${{ secrets.APPSTORE_API_KEY_ID }}'
           APPSTORE_API_PRIVATE_KEY: '${{ secrets.APPSTORE_API_PRIVATE_KEY }}'
           APPSTORE_ISSUER_ID: '${{ secrets.APPSTORE_ISSUER_ID }}'
+
       - name: Install Apple Certificate
         uses: apple-actions/import-codesign-certs@v1
         with:
@@ -134,37 +145,45 @@ jobs:
           echo -n "$PROVISIONING_CERTIFICATE_BASE64" | base64 --decode --output $PP_PATH
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
-      - env:
+        env:
           PROVISIONING_CERTIFICATE_BASE64: '${{ secrets.IOS_MOBILE_PROVISION_BASE64 }}'
+
       - name: Get dependencies
         run: |
           flutter pub get
+
       - name: Update ExportOptions.plist
         run: |
           sed -i '' -e "s/APPSTORE_TEAM_ID/${{ secrets.APPSTORE_TEAM_ID }}/" ExportOptions.plist
           sed -i '' -e "s/APPSTORE_PROVISIONING_PROFILE_UUID/${{ secrets.APPSTORE_PROVISIONING_PROFILE_UUID }}/g" ExportOptions.plist
         working-directory: source/example/testnami/ios
+
       - name: Build iOS
         run: |
           export BUILD_NUMBER_STG=`cat ~/.next_build_number_stg`
           flutter build ios --release --no-codesign --flavor STG --release-number $BUILD_NUMBER_STG
         working-directory: source/example/testnami
+
       - name: Build resolve Swift dependencies
         run: |
           xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme STG -configuration Release
         working-directory: source/example/testnami
+
       - name: Build xArchive
         run: |
           xcodebuild -workspace ios/Runner.xcworkspace -scheme STG -configuration Release DEVELOPMENT_TEAM=${{ secrets.APPSTORE_TEAM_ID }} -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app-stg.xcarchive PROVISIONING_PROFILE=${{ secrets.APPSTORE_PROVISIONING_PROFILE_UUID }} clean archive CODE_SIGN_IDENTITY="${{ secrets.CODE_SIGNING_IDENTITY }}"
         working-directory: source/example/testnami
+
       - name: Export IPA
         run: |
           xcodebuild -exportArchive -archivePath build-output/app-stg.xcarchive -exportPath build-output/ios-stg -exportOptionsPlist ios/ExportOptions.plist
+
       - name: Publish iOS Artifacts - STG
         uses: actions/upload-artifact@v1
         with:
           name: release-ios
           path: build-output/ios-stg
+  
       - name: Upload app to TestFlight
         uses: apple-actions/upload-testflight-build@v1
         with:
