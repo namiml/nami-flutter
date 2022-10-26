@@ -1,5 +1,5 @@
 name: Generate Test Flutter STG (Manual)
-'true':
+on:
   workflow_dispatch:
     inputs:
       ref:
