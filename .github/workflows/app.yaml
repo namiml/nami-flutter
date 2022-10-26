@@ -67,6 +67,7 @@ jobs:
       - name: Get dependencies
         run: |
           flutter pub get
+        working-directory: source/example/testnami
 
       - name: Build Android App Bundle
         run: |
@@ -157,6 +158,7 @@ jobs:
       - name: Get dependencies
         run: |
           flutter pub get
+        working-directory: source/example/testnami
 
       - name: Update ExportOptions.plist
         run: |
@@ -184,7 +186,7 @@ jobs:
         run: |
           xcodebuild -exportArchive -archivePath build-output/app-stg.xcarchive -exportPath build-output/ios-stg -exportOptionsPlist ios/ExportOptions.plist
 
-      - name: Publish iOS Artifacts - STG
+      - name: Publish iOS Artifacts
         uses: actions/upload-artifact@v1
         with:
           name: release-ios
