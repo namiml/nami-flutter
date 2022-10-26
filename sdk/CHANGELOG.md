@@ -15,7 +15,6 @@ This Nami Flutter release utilizes the following native iOS and Android SDKs.
 ## Enhancements
 
 - Includes a more robust sample app in `example/testnami`
-- 
 
 # 3.0.0-alpha.01 (Oct 14, 2022)
 

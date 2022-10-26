@@ -21,7 +21,7 @@ on:
 
 jobs:
   build-android:
-    name: Generate Test Flutter for TestFlight
+    name: Generate Play Store app
     permissions:
       actions: write
       contents: write
@@ -71,12 +71,13 @@ jobs:
 
       - name: Build Android App Bundle
         run: |
-          flutter build appbundle -t lib/main-production.dart --flavor STG --release
+          export BUILD_NUMBER_STG=`cat ~/.next_build_number_stg`
+          flutter build appbundle -t lib/main-production.dart --flavor STG --release --build-number $BUILD_NUMBER_STG
         working-directory: source/example/testnami/android
 
       - name: Sign Android App Bundle
         run: |
-          jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass $KEY_STORE_PASSWORD -keypass $KEY_PASSWORD -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/STGRelease/app-STG-release.aab $KEYSTORE_PASSWORD_ALIAS
+          jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass $KEY_STORE_PASSWORD -keypass $KEY_PASSWORD -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/STGRelease/app-STG-release-signed.aab build/app/outputs/bundle/STGRelease/app-STG-release.aab $KEYSTORE_PASSWORD_ALIAS
         working-directory: source/example/testnami
         env:
           KEY_STORE_PASSWORD: '${{ secrets.KEY_STORE_PASSWORD }}'
@@ -87,12 +88,12 @@ jobs:
         uses: r0adkll/upload-google-play@v1.0.17
         with:
           packageName: com.namiml.testflutter.stg
-          releaseFiles: example/testnami/build/app/outputs/bundle/STGRelease/app-STG-release.aab
+          releaseFiles: example/testnami/build/app/outputs/bundle/STGRelease/app-STG-release-signed.aab
           serviceAccountJsonPlainText: '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}'
           status: completed
           track: internal
   build-ios:
-    name: Generate Test Flutter for TestFlight
+    name: Generate TestFlight app
     permissions:
       actions: write
       contents: write
@@ -169,7 +170,7 @@ jobs:
       - name: Build iOS
         run: |
           export BUILD_NUMBER_STG=`cat ~/.next_build_number_stg`
-          flutter build ios --release --no-codesign --flavor STG --release-number $BUILD_NUMBER_STG
+          flutter build ios --release --no-codesign --flavor STG --build-number $BUILD_NUMBER_STG
         working-directory: source/example/testnami
 
       - name: Build resolve Swift dependencies

@@ -20,7 +20,7 @@ Get started by heading over to our [quick start guide](https://docs.namiml.com/d
 Our Flutter package is available [here on pub.dev](https://pub.dev/packages/nami_flutter).
 
 ### Project Structure
-- `sdk` folder contains the flutter plugin along with a `basic` example app
+- `sdk` folder contains the flutter plugin along with a basic example app
 
 ## Next Steps
 
