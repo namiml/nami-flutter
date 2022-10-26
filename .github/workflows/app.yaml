@@ -60,25 +60,25 @@ jobs:
       - name: Create the Keystore
         run: |
           # import keystore from secrets
-          echo $KEYSTORE_BASE64: '${{ secrets.KEY_STORE_BASE64 }}' | base64 -d > $RUNNER_TEMP/my_production.keystore
+          echo $KEYSTORE_BASE64 | base64 -d > $RUNNER_TEMP/my_production.keystore
         env:
           KEYSTORE_BASE64: '${{ secrets.KEY_STORE_BASE64 }}'
 
       - name: Get dependencies
         run: |
           flutter pub get
-        working-directory: source/example/testnami
+        working-directory: source/sdk/example/testnami
 
       - name: Build Android App Bundle
         run: |
           export BUILD_NUMBER_STG=`cat ~/.next_build_number_stg`
           flutter build appbundle -t lib/main-production.dart --flavor STG --release --build-number $BUILD_NUMBER_STG
-        working-directory: source/example/testnami/android
+        working-directory: source/sdk/example/testnami/android
 
       - name: Sign Android App Bundle
         run: |
           jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass $KEY_STORE_PASSWORD -keypass $KEY_PASSWORD -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/STGRelease/app-STG-release-signed.aab build/app/outputs/bundle/STGRelease/app-STG-release.aab $KEYSTORE_PASSWORD_ALIAS
-        working-directory: source/example/testnami
+        working-directory: source/sdk/example/testnami
         env:
           KEY_STORE_PASSWORD: '${{ secrets.KEY_STORE_PASSWORD }}'
           KEYSTORE_PASSWORD_ALIAS: '${{ secrets.KEY_ALIAS }}'
@@ -159,33 +159,35 @@ jobs:
       - name: Get dependencies
         run: |
           flutter pub get
-        working-directory: source/example/testnami
+        working-directory: source/sdk/example/testnami
 
       - name: Update ExportOptions.plist
         run: |
           sed -i '' -e "s/APPSTORE_TEAM_ID/${{ secrets.APPSTORE_TEAM_ID }}/" ExportOptions.plist
           sed -i '' -e "s/APPSTORE_PROVISIONING_PROFILE_UUID/${{ secrets.APPSTORE_PROVISIONING_PROFILE_UUID }}/g" ExportOptions.plist
-        working-directory: source/example/testnami/ios
+        working-directory: source/sdk/example/testnami/ios
 
       - name: Build iOS
         run: |
           export BUILD_NUMBER_STG=`cat ~/.next_build_number_stg`
           flutter build ios --release --no-codesign --flavor STG --build-number $BUILD_NUMBER_STG
-        working-directory: source/example/testnami
+        working-directory: source/sdk/example/testnami
 
       - name: Build resolve Swift dependencies
         run: |
           xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme STG -configuration Release
-        working-directory: source/example/testnami
+        working-directory: source/sdk/example/testnami
 
       - name: Build xArchive
         run: |
           xcodebuild -workspace ios/Runner.xcworkspace -scheme STG -configuration Release DEVELOPMENT_TEAM=${{ secrets.APPSTORE_TEAM_ID }} -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app-stg.xcarchive PROVISIONING_PROFILE=${{ secrets.APPSTORE_PROVISIONING_PROFILE_UUID }} clean archive CODE_SIGN_IDENTITY="${{ secrets.CODE_SIGNING_IDENTITY }}"
-        working-directory: source/example/testnami
+        working-directory: source/sdk/example/testnami
 
       - name: Export IPA
         run: |
           xcodebuild -exportArchive -archivePath build-output/app-stg.xcarchive -exportPath build-output/ios-stg -exportOptionsPlist ios/ExportOptions.plist
+          ls build-output/ios-stg
+        working-directory: source/sdk/example/testnami
 
       - name: Publish iOS Artifacts
         uses: actions/upload-artifact@v1
