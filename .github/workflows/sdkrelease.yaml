@@ -40,6 +40,10 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Install Pyyaml
+        run: |
+          pip3 install pyyaml
+
       - name: Release Preflight Checks
         run: |
           python3 build-utils/preflight.py

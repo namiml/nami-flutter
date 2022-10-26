@@ -1,5 +1,5 @@
 import os
-import json
+import yaml
 import sys
 import re
 import subprocess
@@ -11,9 +11,9 @@ PRERELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+-(alpha|beta|rc)\.\d{2}$")
 early_access = str(os.getenv("EARLY_ACCESS"))
 
 # get the version out of source of truth
-with open("package.json", "r") as f:
-    package = json.load(f)
-    nami_sdk_version = package["version"]
+with open("sdk/pubspec.yaml", "r") as f:
+    pubspec = yaml.safe_load(file)
+    nami_sdk_version = pubspec["version"]
 
 # Get git version
 git_long_hash = (
