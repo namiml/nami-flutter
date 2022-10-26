@@ -71,7 +71,7 @@ jobs:
 
       - name: Build Android App Bundle
         run: |
-          export BUILD_NUMBER_STG=`cat ~/.next_build_number_stg`
+          export BUILD_NUMBER_STG=`cat $RUNNER_TEMP/.new_version_code`
           flutter build appbundle -t lib/main-production.dart --flavor STG --release --build-number $BUILD_NUMBER_STG
         working-directory: source/sdk/example/testnami/android
 
@@ -169,7 +169,7 @@ jobs:
 
       - name: Build iOS
         run: |
-          export BUILD_NUMBER_STG=`cat ~/.next_build_number_stg`
+          export BUILD_NUMBER_STG=`cat $RUNNER_TEMP/.next_build_number_stg`
           flutter build ios --release --no-codesign --flavor STG --build-number $BUILD_NUMBER_STG
         working-directory: source/sdk/example/testnami
 
