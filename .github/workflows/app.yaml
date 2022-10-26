@@ -75,8 +75,12 @@ jobs:
 
       - name: Sign Android App Bundle
         run: |
-          jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass ${{ secrets.KEY_STORE_PASSWORD }} -keypass ${{ secrets.KEYSTORE_PASSWORD_ALIAS }} -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/STGRelease/app-STG-release.aab ${{ secrets/KEYSTORE_PASSWORD_ALIAS }}
+          jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass $KEY_STORE_PASSWORD -keypass $KEY_PASSWORD -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/STGRelease/app-STG-release.aab $KEYSTORE_PASSWORD_ALIAS
         working-directory: source/example/testnami
+        env:
+          KEY_STORE_PASSWORD: '${{ secrets.KEY_STORE_PASSWORD }}'
+          KEYSTORE_PASSWORD_ALIAS: '${{ secrets.KEY_ALIAS }}'
+          $KEY_PASSWORD: '${{ secrets.$KEY_PASSWORD }}'
 
       - name: Uploading to test track
         uses: r0adkll/upload-google-play@v1.0.17
@@ -183,7 +187,7 @@ jobs:
         with:
           name: release-ios
           path: build-output/ios-stg
-  
+
       - name: Upload app to TestFlight
         uses: apple-actions/upload-testflight-build@v1
         with:
