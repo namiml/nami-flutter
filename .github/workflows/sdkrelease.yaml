@@ -20,13 +20,16 @@ jobs:
     name: Generate Flutter SDK release
     timeout-minutes: 30
     runs-on: ubuntu-latest
-    container:
-      image: google/dart:latest
     permissions:
       actions: write
       contents: write
       id-token: write
     steps:
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v2
+        with:
+          channel: stable
+          version: 3.3.5
 
       # clone the repo at a specific version
       - name: Checkout ${{ inputs.ref }}
