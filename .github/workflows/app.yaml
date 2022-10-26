@@ -28,7 +28,6 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
           java-version: 12.x
@@ -63,7 +62,8 @@ jobs:
         env:
           KEYSTORE_BASE64: '${{ secrets.KEY_STORE_BASE64 }}'
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
       - name: Build Android App Bundle
         run: |
           flutter build appbundle -t lib/main-production.dart --flavor STG --release
@@ -89,7 +89,6 @@ jobs:
       id-token: write
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
           java-version: 12.x
@@ -138,7 +137,8 @@ jobs:
       - env:
           PROVISIONING_CERTIFICATE_BASE64: '${{ secrets.IOS_MOBILE_PROVISION_BASE64 }}'
       - name: Get dependencies
-        run: flutter pub get
+        run: |
+          flutter pub get
       - name: Update ExportOptions.plist
         run: |
           sed -i '' -e "s/APPSTORE_TEAM_ID/${{ secrets.APPSTORE_TEAM_ID }}/" ExportOptions.plist
