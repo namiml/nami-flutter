@@ -9,6 +9,7 @@ on:
     secrets:
       BUILD_USER_PAT:
         required: true
+
 jobs:
   build-android:
     name: Generate Test Flutter for TestFlight
