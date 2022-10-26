@@ -11,7 +11,7 @@ PRERELEASE_VERSION_RE = re.compile(r"^\d+\.\d+\.\d+-(alpha|beta|rc)\.\d{2}$")
 early_access = str(os.getenv("EARLY_ACCESS"))
 
 # get the version out of source of truth
-with open("sdk/pubspec.yaml", "r") as f:
+with open("sdk/pubspec.yaml", "r") as file:
     pubspec = yaml.safe_load(file)
     nami_sdk_version = pubspec["version"]
 
