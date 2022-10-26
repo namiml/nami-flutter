@@ -55,6 +55,7 @@ jobs:
 
       - name: Write credentials
         run: |
+          mkdir ~/.config/dart/
           echo $PUB_DEV_CREDENTIAL_JSON >> ~/.config/dart/pub-credentials.json
         env:
           PUB_DEV_CREDENTIAL_JSON: ${{ secrets.PUB_DEV_CREDENTIAL_JSON }}
