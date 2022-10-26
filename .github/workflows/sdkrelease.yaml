@@ -42,11 +42,11 @@ jobs:
 
       - name: Install Pyyaml
         run: |
-          pip3 install pyyaml
+          pip install pyyaml
 
       - name: Release Preflight Checks
         run: |
-          python3 build-utils/preflight.py
+          python build-utils/preflight.py
         env:
           NAMI_SDK_VERSION: ${{ inputs.version }}
 
