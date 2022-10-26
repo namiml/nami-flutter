@@ -1,9 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.namiml.prod.testflutter">
+    package="com.namiml.testflutter">
    <application
         android:label="NamiFlutter"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="${appIcon}">
         <activity
             android:name=".MainActivity"
             android:exported="true"

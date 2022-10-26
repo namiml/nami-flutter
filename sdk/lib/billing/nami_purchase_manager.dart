@@ -56,7 +56,8 @@ class NamiPurchaseManager {
         (map['purchaseState'] as String)._toNamiPurchaseState(), map['error']);
   }
 
-  static Stream<NamiPurchaseResponseHandlerData> registerPurchasesChangedHandler() {
+  static Stream<NamiPurchaseResponseHandlerData>
+      registerPurchasesChangedHandler() {
     var data = _purchasesResponseHandlerData
         .receiveBroadcastStream()
         .map((dynamic event) => _mapToPurchaseResponseHandlerData(event));
@@ -107,7 +108,8 @@ class NamiPurchaseResponseHandlerData {
   final NamiPurchaseState purchaseState;
   final String? error;
 
-  NamiPurchaseResponseHandlerData(this.purchases, this.purchaseState, this.error);
+  NamiPurchaseResponseHandlerData(
+      this.purchases, this.purchaseState, this.error);
 }
 
 class NamiPurchaseCompleteResult {

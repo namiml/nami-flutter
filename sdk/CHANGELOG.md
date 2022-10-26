@@ -1,19 +1,21 @@
-# 3.0.0-alpha.02 (Oct 18, 2022)
+# 3.0.0-alpha.02 (Oct 25, 2022)
 
 ## Changelog
 
-This Nami Flutter release utilizes the following native iOS and Android SDKs. See 
+This Nami Flutter release utilizes the following native iOS and Android SDKs.
 
-- Apple SDK v3.0.0-rc.04 - [Release Notes](https://github.com/namiml/nami-apple/wiki/Nami-SDK-Early-Access-Releases#v300-rc04-oct-18-2022)
-- Android SDK v3.0.0-alpha.09 - [Release Notes](https://github.com/namiml/nami-android/wiki/Nami-SDK-Early-Access-Releases#v300-alpha09-october-18-2022)
+- Apple SDK v3.0.0-rc.05 - [Release Notes](https://github.com/namiml/nami-apple/wiki/Nami-SDK-Early-Access-Releases#v300-rc05-oct-25-2022)
+- Android SDK v3.0.0-alpha.10 - [Release Notes](https://github.com/namiml/nami-android/wiki/Nami-SDK-Early-Access-Releases#v300-alpha10-october-25-2022)
 
 ### Bugfixes
 
-- Resolve crash launching a campaign on iOS
+- Resolve campaign launch on iOS when analytics handler registered
+- Resolve SKU reference crash on Android
 
-### Maintenance
+## Enhancements
 
-- Add Flutter recommended linter to the project
+- Includes a more robust sample app in `example/testnami`
+- 
 
 # 3.0.0-alpha.01 (Oct 14, 2022)
 

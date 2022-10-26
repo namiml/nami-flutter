@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 
 import '../channel.dart';
 
-
 /// Class responsible for managing all aspects of a paywall in the Nami SDK
 class NamiPaywallManager {
   static const EventChannel _signInEvent = const EventChannel('signInEvent');
@@ -16,7 +15,6 @@ class NamiPaywallManager {
         .invokeMethod<bool>("dismiss", animated)
         .then<bool>((bool? value) => value ?? false);
   }
-
 
   /// Stream for when user presses sign in button on a paywall
   static Stream<NamiSignInClicked> signInEvents() {
@@ -34,7 +32,6 @@ class PreparePaywallResult {
 
   PreparePaywallResult(this.success, this.error);
 }
-
 
 class NamiSignInClicked {
   final bool clicked;

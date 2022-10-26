@@ -49,11 +49,7 @@ class NamiAnalyticsData {
 
 /// The various types of analytics events that are associated whenever
 /// [NamiAnalyticsSupport.analyticsEvents()] is triggered which is set
-enum NamiAnalyticsActionType {
-  paywall_raise,
-  purchase_activity,
-  unknown
-}
+enum NamiAnalyticsActionType { paywall_raise, purchase_activity, unknown }
 
 /// A type related to some purchase activity being sent with analytics event.
 /// You should expect a [NamiAnalyticsPurchaseActivityType] available when you
@@ -81,11 +77,11 @@ class NamiAnalyticsKeys {
   static const String PAYWALL_SKUS = "paywall_skus";
   static const String PAYWALL_RAISE_SOURCE = "paywall_raise_source";
 
-
   /// Returned value for this key in map would be of type [NamiPurchase]
   static const String PURCHASED_SKU = "purchased_sku";
   static const String PURCHASED_SKU_IDENTIFIER = "purchased_sku_id";
-  static const String PURCHASED_SKU_PURCHASE_TIMESTAMP = "purchased_sku_purchase_timestamp";
+  static const String PURCHASED_SKU_PURCHASE_TIMESTAMP =
+      "purchased_sku_purchase_timestamp";
   static const String PURCHASED_SKU_PRICE = "purchased_sku_price";
   static const String PURCHASED_SKU_STORE_LOCALE = "purchased_sku_store_locale";
   static const String PURCHASED_SKU_LOCALE = "purchased_sku_locale";

@@ -101,7 +101,7 @@ packages:
       path: "../../sdk"
       relative: true
     source: path
-    version: "3.0.0-alpha.01"
+    version: "3.0.0-alpha.02"
   path:
     dependency: transitive
     description:

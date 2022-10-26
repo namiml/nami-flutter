@@ -8,7 +8,7 @@ if (localPropertiesFile.exists()) {
 
 def flutterRoot = localProperties.getProperty('flutter.sdk')
 if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+    throw new FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
@@ -44,20 +44,39 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.example"
+        applicationId "com.namiml.testflutter"
+        manifestPlaceholders = [applicationName: "android.app.Application"]
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion flutter.targetSdkVersion
+        minSdkVersion 26
+        targetSdkVersion 31
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig null
+        }
+    }
+
+    flavorDimensions "environment"
+    productFlavors {
+        STG {
+            dimension "environment"
+            applicationIdSuffix ".stg"
+            resValue "string", "app_name", "NamiFlutter"
+            manifestPlaceholders = [
+                    appIcon: "@mipmap/ic_launcher_stg",
+            ]
+        }
+        PROD {
+            dimension "environment"
+            applicationIdSuffix ".prod"
+            resValue "string", "app_name", "NamiFlutter"
+            manifestPlaceholders = [
+                    appIcon: "@mipmap/ic_launcher_prod"
+            ]
         }
     }
 }

@@ -11,15 +11,10 @@ class NamiSKU {
   /// The store platform reference ID of the SKU
   final String skuId;
 
-  NamiSKU(
-      this.name,
-      this.skuId,
-      this.type);
+  NamiSKU(this.name, this.skuId, this.type);
 
   factory NamiSKU.fromMap(Map<dynamic, dynamic> map) {
-    return NamiSKU(
-        (map['name'] as String?) ?? "",
-        map['skuId'],
+    return NamiSKU((map['name'] as String?) ?? "", map['skuId'],
         (map['type'] as String?)._toNamiSKUType());
   }
 

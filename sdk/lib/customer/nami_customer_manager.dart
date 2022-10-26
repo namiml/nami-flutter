@@ -19,8 +19,7 @@ class NamiCustomerManager {
 
   /// returns current customer's journey state
   static Future<CustomerJourneyState?> journeyState() async {
-    Map<dynamic, dynamic>? map =
-        await channel.invokeMethod("journeyState");
+    Map<dynamic, dynamic>? map = await channel.invokeMethod("journeyState");
     if (map == null) {
       return null;
     }
@@ -28,7 +27,7 @@ class NamiCustomerManager {
   }
 
   static const EventChannel _accountStateEvent =
-  const EventChannel('accountStateEvent');
+      const EventChannel('accountStateEvent');
 
   static Stream<AccountState> registerAccountStateHandler() {
     var data = _accountStateEvent
@@ -38,11 +37,9 @@ class NamiCustomerManager {
     return data;
   }
 
-  static AccountState _mapToAccountState(
-      Map<dynamic, dynamic> map) {
+  static AccountState _mapToAccountState(Map<dynamic, dynamic> map) {
     return AccountState.fromMap(map);
   }
-
 
   /// Provide a unique identifier that is used to link different devices
   /// to the same customer in the [Nami] platform. This customer id will also
