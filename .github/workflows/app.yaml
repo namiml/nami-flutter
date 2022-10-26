@@ -80,7 +80,7 @@ jobs:
         env:
           KEY_STORE_PASSWORD: '${{ secrets.KEY_STORE_PASSWORD }}'
           KEYSTORE_PASSWORD_ALIAS: '${{ secrets.KEY_ALIAS }}'
-          $KEY_PASSWORD: '${{ secrets.$KEY_PASSWORD }}'
+          KEY_PASSWORD: '${{ secrets.$KEY_PASSWORD }}'
 
       - name: Uploading to test track
         uses: r0adkll/upload-google-play@v1.0.17
