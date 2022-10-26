@@ -102,9 +102,11 @@ jobs:
         with:
           java-version: 12.x
 
-      - uses: subosito/flutter-action@v1
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v2
         with:
-          flutter-version: 2.0.5
+          channel: stable
+          version: 3.3.5
 
       - name: 'Checkout ${{ inputs.ref }}'
         uses: actions/checkout@v2
