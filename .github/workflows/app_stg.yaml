@@ -98,7 +98,7 @@ jobs:
       actions: write
       contents: write
       id-token: write
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
       - uses: actions/setup-java@v1
         with:
