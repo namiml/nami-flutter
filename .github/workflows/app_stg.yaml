@@ -72,7 +72,7 @@ jobs:
       - name: Build Android App Bundle
         run: |
           export BUILD_NUMBER_STG=`cat $RUNNER_TEMP/.new_version_code`
-          flutter build appbundle -t lib/main-staging.dart --flavor STG --release --build-number $BUILD_NUMBER_STG
+          flutter build appbundle -t lib/main-staging.dart --flavor STG --release --build-number $BUILD_NUMBER_STG --verbose
         working-directory: source/sdk/example/testnami
 
       - name: Sign Android App Bundle
@@ -180,12 +180,12 @@ jobs:
 
       - name: Build resolve Swift dependencies
         run: |
-          xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme STG -configuration Release
+          xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme STG -configuration Release-STG
         working-directory: source/sdk/example/testnami
 
       - name: Build xArchive
         run: |
-          xcodebuild -workspace ios/Runner.xcworkspace -scheme STG -configuration Release DEVELOPMENT_TEAM='${{ secrets.APPSTORE_TEAM_ID }}' -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app-stg.xcarchive PROVISIONING_PROFILE='${{ secrets.APPSTORE_PROV_PROFILE_UUID_TEST_FLUTTER_STG }}' clean archive CODE_SIGN_IDENTITY='${{ secrets.CODE_SIGNING_IDENTITY }}'
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme STG -configuration Release-STG DEVELOPMENT_TEAM='${{ secrets.APPSTORE_TEAM_ID }}' -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app-stg.xcarchive PROVISIONING_PROFILE='${{ secrets.APPSTORE_PROV_PROFILE_UUID_TEST_FLUTTER_STG }}' clean archive CODE_SIGN_IDENTITY='${{ secrets.CODE_SIGNING_IDENTITY }}'
         working-directory: source/sdk/example/testnami
 
       - name: Export IPA
