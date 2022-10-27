@@ -21,7 +21,7 @@ on:
 
 jobs:
   build-android:
-    name: Generate Play Store app
+    name: Generate Play Store STG
     permissions:
       actions: write
       contents: write
@@ -93,7 +93,7 @@ jobs:
           status: completed
           track: internal
   build-ios:
-    name: Generate TestFlight app
+    name: Generate Apple STG
     permissions:
       actions: write
       contents: write
@@ -154,17 +154,22 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
         env:
-          PROVISIONING_CERTIFICATE_BASE64: '${{ secrets.IOS_MOBILE_PROVISION_BASE64 }}'
+          PROVISIONING_CERTIFICATE_BASE64: '${{ secrets.IOS_MOBILE_PROVISION_BASE64_TEST_FLUTTER_STG }}'
 
       - name: Get dependencies
         run: |
           flutter pub get
         working-directory: source/sdk/example/testnami
 
+      - name: Store App Store Private Key
+        run: |
+          mkdir ~/.private_keys
+          echo '${{ secrets.APPSTORE_API_PRIVATE_KEY }}' > ~/.private_keys/AuthKey_'${{ secrets.APPSTORE_API_KEY_ID }}'.p8
+
       - name: Update ExportOptions.plist
         run: |
           sed -i '' -e "s/APPSTORE_TEAM_ID/${{ secrets.APPSTORE_TEAM_ID }}/" ExportOptions.plist
-          sed -i '' -e "s/APPSTORE_PROVISIONING_PROFILE_UUID/${{ secrets.APPSTORE_PROVISIONING_PROFILE_UUID }}/g" ExportOptions.plist
+          sed -i '' -e "s/APPSTORE_PROVISIONING_PROFILE_UUID/${{ secrets.APPSTORE_PROV_PROFILE_UUID_TEST_FLUTTER_STG }}/g" ExportOptions.plist
         working-directory: source/sdk/example/testnami/ios
 
       - name: Build iOS
@@ -180,13 +185,12 @@ jobs:
 
       - name: Build xArchive
         run: |
-          xcodebuild -workspace ios/Runner.xcworkspace -scheme STG -configuration Release DEVELOPMENT_TEAM=${{ secrets.APPSTORE_TEAM_ID }} -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app-stg.xcarchive PROVISIONING_PROFILE=${{ secrets.APPSTORE_PROVISIONING_PROFILE_UUID }} clean archive CODE_SIGN_IDENTITY="${{ secrets.CODE_SIGNING_IDENTITY }}"
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme STG -configuration Release DEVELOPMENT_TEAM='${{ secrets.APPSTORE_TEAM_ID' }} -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app-stg.xcarchive PROVISIONING_PROFILE='${{ secrets.APPSTORE_PROV_PROFILE_UUID_TEST_FLUTTER_STG }}' clean archive CODE_SIGN_IDENTITY='${{ secrets.CODE_SIGNING_IDENTITY }}'
         working-directory: source/sdk/example/testnami
 
       - name: Export IPA
         run: |
           xcodebuild -exportArchive -archivePath build-output/app-stg.xcarchive -exportPath build-output/ios-stg -exportOptionsPlist ios/ExportOptions.plist
-          ls build-output/ios-stg
         working-directory: source/sdk/example/testnami
 
       - name: Publish iOS Artifacts
@@ -196,9 +200,9 @@ jobs:
           path: build-output/ios-stg
 
       - name: Upload app to TestFlight
-        uses: apple-actions/upload-testflight-build@v1
-        with:
-          api-key-id: '${{ secrets.APPSTORE_API_KEY_ID }}'
-          api-private-key: '${{ secrets.APPSTORE_API_PRIVATE_KEY }}'
-          app-path: output.ipa
-          issuer-id: '${{ secrets.APPSTORE_ISSUER_ID }}'
+        run: |
+          xcrun altool --upload-app --type ios --file build-output/ios-stg/TestNative.ipa --apiKey $APPSTORE_API_KEY_ID --apiIssuer $APPSTORE_ISSUER_ID
+        working-directory: source/sdk/example/testnami
+        env:
+          APPSTORE_API_KEY_ID: '${{ secrets.APPSTORE_API_KEY_ID }}'
+          APPSTORE_ISSUER_ID: '${{ secrets.APPSTORE_ISSUER_ID }}'
