@@ -87,14 +87,18 @@ class _ProfileWidgetState extends State<ProfileWidget>
 
     getDeviceId();
 
-    StreamSubscription journeyStateSubscription = NamiCustomerManager.registerJourneyStateHandler().listen((journeyState) {
+    StreamSubscription journeyStateSubscription =
+        NamiCustomerManager.registerJourneyStateHandler()
+            .listen((journeyState) {
       print("JourneyStateHandler triggered");
       _updateJourneyState(journeyState);
     });
 
     _subscriptions.add(journeyStateSubscription);
 
-    StreamSubscription accountsStateSubscription = NamiCustomerManager.registerAccountStateHandler().listen((accountState) {
+    StreamSubscription accountsStateSubscription =
+        NamiCustomerManager.registerAccountStateHandler()
+            .listen((accountState) {
       _updateAccountState(accountState);
     });
 

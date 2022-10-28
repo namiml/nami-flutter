@@ -10,7 +10,7 @@
             buildForTesting = "YES"
             buildForRunning = "YES"
             buildForProfiling = "YES"
-            buildForArchiving = "NO"
+            buildForArchiving = "YES"
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
@@ -51,7 +51,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../Runner/Test Nami Flutter PROD.storekit">
+         identifier = "../../Runner/Test Nami Flutter PROD.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction

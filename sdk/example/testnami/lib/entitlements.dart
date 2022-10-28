@@ -51,14 +51,14 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    StreamSubscription activeEntitlementsSubscription = NamiEntitlementManager.registerActiveEntitlementsHandler()
-        .listen((activeEntitlements) {
+    StreamSubscription activeEntitlementsSubscription =
+        NamiEntitlementManager.registerActiveEntitlementsHandler()
+            .listen((activeEntitlements) {
       print("ActiveEntitlementsHandler triggered");
       _handleActiveEntitlements(activeEntitlements);
     });
 
     _subscriptions.add(activeEntitlementsSubscription);
-
   }
 
   @override

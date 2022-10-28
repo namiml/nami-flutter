@@ -1,4 +1,4 @@
-name: Generate Test Flutter STG
+name: Generate Test Flutter PROD
 on:
   workflow_dispatch:
     inputs:
@@ -21,7 +21,7 @@ on:
 
 jobs:
   build-android:
-    name: Generate Play Store STG
+    name: Generate Play Store PROD
     permissions:
       actions: write
       contents: write
@@ -51,7 +51,7 @@ jobs:
       - name: Get new version code
         run: |
           echo $GOOGLE_PLAY_SERVICE_ACCOUNT > $RUNNER_TEMP/.service_account
-          python3 build-utils/get_version_code.py $RUNNER_TEMP/.service_account com.namiml.testflutter.stg internal  --quiet >> $RUNNER_TEMP/.new_version_code
+          python3 build-utils/get_version_code.py $RUNNER_TEMP/.service_account com.namiml.testflutter.prod internal  --quiet >> $RUNNER_TEMP/.new_version_code
           rm -f .service_account
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT: '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}'
@@ -71,25 +71,25 @@ jobs:
 
       - name: Build Android App Bundle
         run: |
-          export BUILD_NUMBER_STG=`cat $RUNNER_TEMP/.new_version_code`
-          flutter build appbundle -t lib/main-staging.dart --flavor stg --release --build-name 1.0.0 --build-number $BUILD_NUMBER_STG
+          export BUILD_NUMBER=`cat $RUNNER_TEMP/.new_version_code`
+          flutter build appbundle -t lib/main-production.dart --flavor prod --release --build-name 1.0.0 --build-number $BUILD_NUMBER
         working-directory: source/sdk/example/testnami
 
       - name: Sign Android App Bundle
         run: |
-          jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass '${{ secrets.KEY_STORE_PASSWORD }}' -keypass '${{ secrets.KEY_PASSWORD }}' -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/stgRelease/app-stg-release-signed.aab build/app/outputs/bundle/stgRelease/app-stg-release.aab '${{ secrets.KEY_ALIAS }}'
+          jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass '${{ secrets.KEY_STORE_PASSWORD }}' -keypass '${{ secrets.KEY_PASSWORD }}' -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/prodRelease/app-prod-release-signed.aab build/app/outputs/bundle/prodRelease/app-prod-release.aab '${{ secrets.KEY_ALIAS }}'
         working-directory: source/sdk/example/testnami
 
       - name: Uploading to test track
         uses: r0adkll/upload-google-play@v1.0.17
         with:
-          packageName: 'com.namiml.testflutter.stg'
-          releaseFiles: source/sdk/example/testnami/build/app/outputs/bundle/stgRelease/app-stg-release-signed.aab
+          packageName: 'com.namiml.testflutter.prod'
+          releaseFiles: source/sdk/example/testnami/build/app/outputs/bundle/prodRelease/app-prod-release-signed.aab
           serviceAccountJsonPlainText: '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}'
           status: completed
           track: internal
   build-ios:
-    name: Generate Apple STG
+    name: Generate Apple PROD
     permissions:
       actions: write
       contents: write
@@ -130,8 +130,8 @@ jobs:
           pip3 install pydantic
           pip3 install cryptography
           pip3 install PyJWT
-          python3 get_current_version.py com.namiml.stg.testflutter --prerelease > $RUNNER_TEMP/.build_name_stg
-          python3 get_next_build.py com.namiml.stg.testflutter --prerelease > $RUNNER_TEMP/.next_build_number_stg
+          python3 get_current_version.py com.namiml.app.testflutter --prerelease > $RUNNER_TEMP/.build_name
+          python3 get_next_build.py com.namiml.app.testflutter --prerelease > $RUNNER_TEMP/.next_build_number
         working-directory: appstoreconnect-build-tools
         env:
           APPSTORE_API_KEY_ID: '${{ secrets.APPSTORE_API_KEY_ID }}'
@@ -151,7 +151,7 @@ jobs:
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp $PP_PATH ~/Library/MobileDevice/Provisioning\ Profiles
         env:
-          PROVISIONING_CERTIFICATE_BASE64: '${{ secrets.IOS_MOBILE_PROVISION_BASE64_TEST_FLUTTER_STG }}'
+          PROVISIONING_CERTIFICATE_BASE64: '${{ secrets.IOS_MOBILE_PROVISION_BASE64_TEST_FLUTTER_PROD }}'
 
       - name: Get dependencies
         run: |
@@ -166,35 +166,35 @@ jobs:
       - name: Update ExportOptions.plist
         run: |
           sed -i '' -e "s/APPSTORE_TEAM_ID/${{ secrets.APPSTORE_TEAM_ID }}/" ExportOptions.plist
-          sed -i '' -e "s/APPSTORE_PROVISIONING_PROFILE_UUID/${{ secrets.APPSTORE_PROV_PROFILE_UUID_TEST_FLUTTER_STG }}/g" ExportOptions.plist
+          sed -i '' -e "s/APPSTORE_PROVISIONING_PROFILE_UUID/${{ secrets.APPSTORE_PROV_PROFILE_UUID_TEST_FLUTTER_PROD }}/g" ExportOptions.plist
         working-directory: source/sdk/example/testnami/ios
 
       - name: Build iOS
         run: |
-          export BUILD_NAME_STG=`cat $RUNNER_TEMP/.build_name_stg`
-          export BUILD_NUMBER_STG=`cat $RUNNER_TEMP/.next_build_number_stg`
-          sed -i '' -e "s/1.0.0+1/$BUILD_NAME_STG+$BUILD_NUMBER_STG/" pubspec.yaml
-          flutter build ios --release --no-codesign --flavor stg -t lib/main-staging.dart
+          export BUILD_NAME=`cat $RUNNER_TEMP/.build_name`
+          export BUILD_NUMBER=`cat $RUNNER_TEMP/.next_build_number`
+          sed -i '' -e "s/1.0.0+1/$BUILD_NAME+$BUILD_NUMBER/" pubspec.yaml
+          flutter build ios --release --no-codesign --flavor prod -t lib/main-production.dart
         working-directory: source/sdk/example/testnami
 
       - name: Build resolve Swift dependencies
         run: |
-          xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme stg -configuration Release-stg
+          xcodebuild -resolvePackageDependencies -workspace ios/Runner.xcworkspace -scheme prod -configuration Release-prod
         working-directory: source/sdk/example/testnami
 
       - name: Build xArchive
         run: |
-          xcodebuild -workspace ios/Runner.xcworkspace -scheme stg -configuration Release-stg DEVELOPMENT_TEAM='${{ secrets.APPSTORE_TEAM_ID }}' -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app-stg.xcarchive PROVISIONING_PROFILE='${{ secrets.APPSTORE_PROV_PROFILE_UUID_TEST_FLUTTER_STG }}' clean archive CODE_SIGN_IDENTITY='${{ secrets.CODE_SIGNING_IDENTITY }}'
+          xcodebuild -workspace ios/Runner.xcworkspace -scheme prod -configuration Release-prod DEVELOPMENT_TEAM='${{ secrets.APPSTORE_TEAM_ID }}' -sdk 'iphoneos' -destination 'generic/platform=iOS' -archivePath build-output/app-prod.xcarchive PROVISIONING_PROFILE='${{ secrets.APPSTORE_PROV_PROFILE_UUID_TEST_FLUTTER_PROD }}' clean archive CODE_SIGN_IDENTITY='${{ secrets.CODE_SIGNING_IDENTITY }}'
         working-directory: source/sdk/example/testnami
 
       - name: Export IPA
         run: |
-          xcodebuild -exportArchive -archivePath build-output/app-stg.xcarchive -exportPath build-output/ios-stg -exportOptionsPlist ios/ExportOptions.plist
+          xcodebuild -exportArchive -archivePath build-output/app-prod.xcarchive -exportPath build-output/ios-prod -exportOptionsPlist ios/ExportOptions.plist
         working-directory: source/sdk/example/testnami
 
       - name: Upload app to TestFlight
         run: |
-          xcrun altool --upload-app --type ios --file build-output/ios-stg/example.ipa --apiKey $APPSTORE_API_KEY_ID --apiIssuer $APPSTORE_ISSUER_ID
+          xcrun altool --upload-app --type ios --file build-output/ios-prod/example.ipa --apiKey $APPSTORE_API_KEY_ID --apiIssuer $APPSTORE_ISSUER_ID
         working-directory: source/sdk/example/testnami
         env:
           APPSTORE_API_KEY_ID: '${{ secrets.APPSTORE_API_KEY_ID }}'
