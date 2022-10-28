@@ -1,17 +1,10 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
-
 class NamiPaywall {
   final String id;
   final String type;
   final Map<dynamic, dynamic>? extraData;
   final List<String> namiSkus;
 
-  NamiPaywall(
-      this.id,
-      this.type,
-      this.extraData,
-      this.namiSkus);
+  NamiPaywall(this.id, this.type, this.extraData, this.namiSkus);
 
   factory NamiPaywall.fromMap(Map<dynamic, dynamic> map) {
     List<dynamic> dynamicSkus = map['namiSkus'];
@@ -20,10 +13,6 @@ class NamiPaywall {
       namiSkus.add(element.toString());
     });
 
-    return NamiPaywall(
-        map['id'],
-        map['type'],
-        map['extraData'],
-        namiSkus);
+    return NamiPaywall(map['id'], map['type'], map['extraData'], namiSkus);
   }
 }

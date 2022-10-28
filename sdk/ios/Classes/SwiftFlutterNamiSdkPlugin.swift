@@ -63,6 +63,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             result(NamiCustomerManager.loggedInId())
         case "isLoggedIn":
             result(NamiCustomerManager.isLoggedIn())
+        case "deviceId":
+            result(NamiCustomerManager.deviceId())
         case "launch":
             let args = call.arguments as? [String: Any]
             if let data = args {
@@ -70,7 +72,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 let campaignLaunchHandler = { (success: Bool, error: Error?) in
                     result(handleLaunchCampaignResult(success: success, error: error))
                 }
-                if(label == nil) {
+
+                if(label != nil) {
                     NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler)
                 } else {
                     NamiCampaignManager.launch(launchHandler: campaignLaunchHandler)
@@ -178,29 +181,35 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     
     class AnalyticsEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiAnalyticsSupport.registerAnalyticsHandler { (type: NamiAnalyticsActionType, data: [String : Any]) in
+            NamiAnalyticsSupport.registerAnalyticsHandler { (actionType: NamiAnalyticsActionType, data: [String : Any]) in
                 var eventMap = [String : Any?]()
                 let typeString: String
-                if(type == NamiAnalyticsActionType.paywallRaise) {
+                if(actionType == NamiAnalyticsActionType.paywallRaise) {
                     typeString = "paywall_raise"
                 } else {
                     typeString = "purchase_activity"
                 }
-                eventMap["type"] = typeString
+                eventMap["action_type"] = typeString
                 eventMap["campaign_rule"] = data[NamiAnalyticsKeys.campaignRule]
                 eventMap["campaign_segment"] = data[NamiAnalyticsKeys.campaignSegment]
                 eventMap["campaign_type"] = data[NamiAnalyticsKeys.campaignType]
-                eventMap["campaign_value"] = data[NamiAnalyticsKeys.campaignValue]
+
+                if let campaignValue = data[NamiAnalyticsKeys.campaignValue] {
+                    eventMap["campaign_value"] = campaignValue
+                } else {
+                    eventMap["campaign_value"] = ""
+                }
 
                 eventMap["paywall"] = data[NamiAnalyticsKeys.paywall]
                 eventMap["paywall_type"] = data[NamiAnalyticsKeys.paywallType]
 
-                eventMap["purchased_sku"] = data[NamiAnalyticsKeys.purchasedSKU]
-                eventMap["purchased_sku_id"] = data[NamiAnalyticsKeys.purchasedSKUIdentifier]
-                eventMap["purchased_sku_price"] = data[NamiAnalyticsKeys.purchasedSKUPrice]
-                eventMap["purchased_sku_store_locale"] = data[NamiAnalyticsKeys.purchasedSKUStoreLocale]
-                eventMap["purchased_sku_locale"] = data[NamiAnalyticsKeys.purchasedSKULocale]
-                eventMap["purchase_timestamp"] = data[NamiAnalyticsKeys.purchasedSKUPurchaseTimestamp_Date]
+                // TODO: Convert to NamiPurchase map
+//                 eventMap["purchased_sku"] = data[NamiAnalyticsKeys.purchasedSKU]
+//                 eventMap["purchased_sku_id"] = data[NamiAnalyticsKeys.purchasedSKUIdentifier]
+//                 eventMap["purchased_sku_price"] = data[NamiAnalyticsKeys.purchasedSKUPrice]
+//                 eventMap["purchased_sku_store_locale"] = data[NamiAnalyticsKeys.purchasedSKUStoreLocale]
+//                 eventMap["purchased_sku_locale"] = data[NamiAnalyticsKeys.purchasedSKULocale]
+//                 eventMap["purchased_sku_purchase_timestamp"] = data[NamiAnalyticsKeys.purchasedSKUPurchaseTimestamp_Date]
 
                 let activityType = data[NamiAnalyticsKeys.purchaseActivityType_ActivityType] as? NamiAnalyticsPurchaseActivityType
                 if(activityType == NamiAnalyticsPurchaseActivityType.cancelled) {

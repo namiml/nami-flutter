@@ -3,18 +3,16 @@ import '../channel.dart';
 /// Manager class which providing functionality related to displaying a paywall
 /// by launching a campaign
 class NamiCampaignManager {
-
   /// Launch a campaign to raise a paywall
   ///
   /// Optionally you can provide,
   /// - A [label] to identify a specific campaign
-  static Future<LaunchCampaignResult> launch(
-      {String? label = ""}) async {
+  static Future<LaunchCampaignResult> launch({String? label}) async {
     var variableMap = {
       "label": label,
     };
     Map<dynamic, dynamic> result =
-      await channel.invokeMethod("launch", variableMap);
+        await channel.invokeMethod("launch", variableMap);
 
     var error = (result['error'] as String?)._toLaunchCampaignError();
     return LaunchCampaignResult(result['success'], error);
@@ -64,4 +62,3 @@ extension on String? {
     }
   }
 }
-

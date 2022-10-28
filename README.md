@@ -11,7 +11,7 @@ Nami is on a mission to help you grow your app IAPs and subscription app revenue
 
 Nami is simple adopt while giving you the tools you need to improve revenue. Our free tier is generous, and gives you everything you need to get started. [Sign up for a free account](https://app.namiml.com/join/)
 
-Get started by heading over to our [quick start guide](https://docs.namiml.com/v2.0/docs/nami-quickstart-guide)
+Get started by heading over to our [quick start guide](https://docs.namiml.com/docs/nami-quickstart-guide)
 
 ## Getting the Nami for Flutter
 
@@ -20,11 +20,11 @@ Get started by heading over to our [quick start guide](https://docs.namiml.com/v
 Our Flutter package is available [here on pub.dev](https://pub.dev/packages/nami_flutter).
 
 ### Project Structure
-- `sdk` folder contains the flutter plugin along with a `basic` example app
+- `sdk` folder contains the flutter plugin along with a basic example app
 
 ## Next Steps
 
-Once the SDK is initialized, you're ready to show a paywall. See the [complete guide to Flutter setup](https://docs.namiml.com/v2.0/docs/flutter-setup#show-a-paywall) to find out how.
+Once the SDK is initialized, you're ready to show a paywall. See the [complete guide to Flutter setup](https://docs.namiml.com/docs/flutter-setup#show-a-paywall) to find out how.
 
 ## Other Resources
 
@@ -34,4 +34,4 @@ Once the SDK is initialized, you're ready to show a paywall. See the [complete g
 
 ### Documentation
 
-- [SDK Reference](https://docs.namiml.com/v2.0/reference/)
+- [SDK Reference](https://docs.namiml.com/reference/)

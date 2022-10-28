@@ -19,10 +19,10 @@ class NamiConfiguration {
   final NamiLogLevel namiLogLevel;
   final List<String>? extraData;
 
-  const NamiConfiguration({required this.appPlatformIdApple,
-    required this.appPlatformIdGoogle,
-    this.bypassStore = false,
-    this.namiLogLevel = NamiLogLevel.warn,
-    this.extraData
-  });
+  const NamiConfiguration(
+      {required this.appPlatformIdApple,
+      required this.appPlatformIdGoogle,
+      this.bypassStore = false,
+      this.namiLogLevel = NamiLogLevel.warn,
+      this.extraData});
 }

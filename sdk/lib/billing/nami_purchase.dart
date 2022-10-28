@@ -16,12 +16,8 @@ class NamiPurchase {
   /// A human-readable description of the contents of this purchase
   final String? localizedDescription;
 
-  NamiPurchase(
-      this.purchaseInitiatedTimestamp,
-      this.purchaseSource,
-      this.skuId,
-      this.transactionIdentifier,
-      this.localizedDescription);
+  NamiPurchase(this.purchaseInitiatedTimestamp, this.purchaseSource, this.skuId,
+      this.transactionIdentifier, this.localizedDescription);
 
   factory NamiPurchase.fromMap(Map<dynamic, dynamic> map) {
     return NamiPurchase(

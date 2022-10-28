@@ -1,0 +1,30 @@
+name: CI Tests
+
+on: pull_request
+
+env:
+  CI: true
+  GIT_COMMIT_SHA: ${{ github.sha }}
+  GIT_BRANCH: ${{ github.head_ref }}
+  CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_ID }}
+
+jobs:
+  test:
+    name: Dart Format & Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 12.x
+
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v2
+        with:
+          channel: stable
+          version: 3.3.5
+
+      - uses: actions/checkout@v2
+      - name: Verify Formatting
+        run: dart format --output=none --set-exit-if-changed .
+#      - name: Analyze Project Source
+#        run: dart analyze
