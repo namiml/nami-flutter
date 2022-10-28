@@ -88,7 +88,6 @@ jobs:
           serviceAccountJsonPlainText: '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}'
           status: completed
           track: internal
-          changesNotSentForReview: true
   build-ios:
     name: Generate Apple STG
     permissions:
