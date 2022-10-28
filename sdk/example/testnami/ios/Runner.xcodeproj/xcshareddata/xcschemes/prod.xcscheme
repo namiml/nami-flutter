@@ -76,6 +76,7 @@
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Release-prod"
+      customArchiveName = "prod"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>
