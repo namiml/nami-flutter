@@ -77,18 +77,14 @@ jobs:
 
       - name: Sign Android App Bundle
         run: |
-          jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass $KEY_STORE_PASSWORD -keypass $KEY_PASSWORD -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/stgRelease/app-stg-release-signed.aab build/app/outputs/bundle/stgRelease/app-stg-release.aab $KEYSTORE_PASSWORD_ALIAS
+          jarsigner -keystore $RUNNER_TEMP/my_production.keystore -storepass '${{ secrets.KEY_STORE_PASSWORD }}' -keypass '${{ secrets.KEY_PASSWORD }}' -sigalg SHA256withRSA -digestalg SHA-256 -signedjar build/app/outputs/bundle/stgRelease/app-stg-release-signed.aab build/app/outputs/bundle/stgRelease/app-stg-release.aab '${{ secrets.KEY_ALIAS }}'
         working-directory: source/sdk/example/testnami
-        env:
-          KEY_STORE_PASSWORD: '${{ secrets.KEY_STORE_PASSWORD }}'
-          KEYSTORE_PASSWORD_ALIAS: '${{ secrets.KEY_ALIAS }}'
-          KEY_PASSWORD: '${{ secrets.KEY_PASSWORD }}'
 
       - name: Uploading to test track
         uses: r0adkll/upload-google-play@v1.0.17
         with:
-          packageName: com.namiml.testflutter.stg
-          releaseFiles: example/testnami/build/app/outputs/bundle/stgRelease/app-stg-release-signed.aab
+          packageName: 'com.namiml.testflutter.stg'
+          releaseFiles: source/sdk/example/testnami/build/app/outputs/bundle/stgRelease/app-stg-release-signed.aab
           serviceAccountJsonPlainText: '${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}'
           status: completed
           track: internal
@@ -175,7 +171,7 @@ jobs:
       - name: Build iOS
         run: |
           export BUILD_NUMBER_STG=`cat $RUNNER_TEMP/.next_build_number_stg`
-          flutter build ios --release --no-codesign --flavor stg -t lib/main-staging.dart --build-number $BUILD_NUMBER_STG
+          flutter build ios --release --no-codesign --flavor stg -t lib/main-staging.dart --build-name $BUILD_NUMBER_STG
         working-directory: source/sdk/example/testnami
 
       - name: Build resolve Swift dependencies
