@@ -130,7 +130,8 @@ jobs:
           pip3 install pydantic
           pip3 install cryptography
           pip3 install PyJWT
-          python3 get_next_build.py com.namiml.stg.testflutter--prerelease > $RUNNER_TEMP/.next_build_number_stg
+          python3 get_current_version.py com.namiml.stg.testflutter --prerelease > $RUNNER_TEMP/.build_name_stg
+          python3 get_next_build.py com.namiml.stg.testflutter --prerelease > $RUNNER_TEMP/.next_build_number_stg
         working-directory: appstoreconnect-build-tools
         env:
           APPSTORE_API_KEY_ID: '${{ secrets.APPSTORE_API_KEY_ID }}'
@@ -170,8 +171,9 @@ jobs:
 
       - name: Build iOS
         run: |
+          export BUILD_NAME_STG=`cat $RUNNER_TEMP/.build_name_stg`
           export BUILD_NUMBER_STG=`cat $RUNNER_TEMP/.next_build_number_stg`
-          flutter build ios --release --no-codesign --flavor stg -t lib/main-staging.dart --build-name 1.0.0 --build-number $BUILD_NUMBER_STG
+          flutter build ios --release --no-codesign --flavor stg -t lib/main-staging.dart --build-name $BUILD_NAME_STG--build-number $BUILD_NUMBER_STG
         working-directory: source/sdk/example/testnami
 
       - name: Build resolve Swift dependencies
