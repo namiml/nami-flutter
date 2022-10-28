@@ -316,7 +316,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		249021D3217E4FDB00AE95B9 /* Profile-PROD */ = {
+		249021D3217E4FDB00AE95B9 /* Profile-prod */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -364,9 +364,9 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Profile-PROD";
+			name = "Profile-prod";
 		};
-		249021D4217E4FDB00AE95B9 /* Profile-PROD */ = {
+		249021D4217E4FDB00AE95B9 /* Profile-prod */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -389,9 +389,9 @@
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Profile-PROD";
+			name = "Profile-prod";
 		};
-		421110A929008C3400810726 /* Debug-STG */ = {
+		421110A929008C3400810726 /* Debug-stg */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -444,9 +444,9 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = "Debug-STG";
+			name = "Debug-stg";
 		};
-		421110AA29008C3400810726 /* Debug-STG */ = {
+		421110AA29008C3400810726 /* Debug-stg */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
@@ -470,9 +470,9 @@
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Debug-STG";
+			name = "Debug-stg";
 		};
-		421110AB29008C3D00810726 /* Release-STG */ = {
+		421110AB29008C3D00810726 /* Release-stg */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -522,9 +522,9 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Release-STG";
+			name = "Release-stg";
 		};
-		421110AC29008C3D00810726 /* Release-STG */ = {
+		421110AC29008C3D00810726 /* Release-stg */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -548,9 +548,9 @@
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Release-STG";
+			name = "Release-stg";
 		};
-		421110AD29008C4700810726 /* Profile-STG */ = {
+		421110AD29008C4700810726 /* Profile-stg */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -598,9 +598,9 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Profile-STG";
+			name = "Profile-stg";
 		};
-		421110AE29008C4700810726 /* Profile-STG */ = {
+		421110AE29008C4700810726 /* Profile-stg */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -623,9 +623,9 @@
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Profile-STG";
+			name = "Profile-stg";
 		};
-		97C147031CF9000F007C117D /* Debug-PROD */ = {
+		97C147031CF9000F007C117D /* Debug-prod */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -678,9 +678,9 @@
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
-			name = "Debug-PROD";
+			name = "Debug-prod";
 		};
-		97C147041CF9000F007C117D /* Release-PROD */ = {
+		97C147041CF9000F007C117D /* Release-prod */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -730,9 +730,9 @@
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 			};
-			name = "Release-PROD";
+			name = "Release-prod";
 		};
-		97C147061CF9000F007C117D /* Debug-PROD */ = {
+		97C147061CF9000F007C117D /* Debug-prod */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
@@ -756,9 +756,9 @@
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Debug-PROD";
+			name = "Debug-prod";
 		};
-		97C147071CF9000F007C117D /* Release-PROD */ = {
+		97C147071CF9000F007C117D /* Release-prod */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
@@ -782,7 +782,7 @@
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
-			name = "Release-PROD";
+			name = "Release-prod";
 		};
 /* End XCBuildConfiguration section */
 
@@ -790,28 +790,28 @@
 		97C146E91CF9000F007C117D /* Build configuration list for PBXProject "Runner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				97C147031CF9000F007C117D /* Debug-PROD */,
-				421110A929008C3400810726 /* Debug-STG */,
-				97C147041CF9000F007C117D /* Release-PROD */,
-				421110AB29008C3D00810726 /* Release-STG */,
-				249021D3217E4FDB00AE95B9 /* Profile-PROD */,
-				421110AD29008C4700810726 /* Profile-STG */,
+				97C147031CF9000F007C117D /* Debug-prod */,
+				421110A929008C3400810726 /* Debug-stg */,
+				97C147041CF9000F007C117D /* Release-prod */,
+				421110AB29008C3D00810726 /* Release-stg */,
+				249021D3217E4FDB00AE95B9 /* Profile-prod */,
+				421110AD29008C4700810726 /* Profile-stg */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-PROD";
+			defaultConfigurationName = "Release-prod";
 		};
 		97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				97C147061CF9000F007C117D /* Debug-PROD */,
-				421110AA29008C3400810726 /* Debug-STG */,
-				97C147071CF9000F007C117D /* Release-PROD */,
-				421110AC29008C3D00810726 /* Release-STG */,
-				249021D4217E4FDB00AE95B9 /* Profile-PROD */,
-				421110AE29008C4700810726 /* Profile-STG */,
+				97C147061CF9000F007C117D /* Debug-prod */,
+				421110AA29008C3400810726 /* Debug-stg */,
+				97C147071CF9000F007C117D /* Release-prod */,
+				421110AC29008C3D00810726 /* Release-stg */,
+				249021D4217E4FDB00AE95B9 /* Profile-prod */,
+				421110AE29008C4700810726 /* Profile-stg */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = "Release-PROD";
+			defaultConfigurationName = "Release-prod";
 		};
 /* End XCConfigurationList section */
 	};

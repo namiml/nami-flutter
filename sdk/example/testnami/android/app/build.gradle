@@ -62,7 +62,7 @@ android {
 
     flavorDimensions "environment"
     productFlavors {
-        STG {
+        stg {
             dimension "environment"
             applicationIdSuffix ".stg"
             resValue "string", "app_name", "NamiFlutter"
@@ -70,7 +70,7 @@ android {
                     appIcon: "@mipmap/ic_launcher_stg",
             ]
         }
-        PROD {
+        prod {
             dimension "environment"
             applicationIdSuffix ".prod"
             resValue "string", "app_name", "NamiFlutter"
