@@ -181,7 +181,7 @@ jobs:
         run: |
           export CURRENT_VERSION=`cat $RUNNER_TEMP/.current_version`
           export BUILD_NUMBER=`cat $RUNNER_TEMP/.next_build_number`
-          sed -i '' -e "s/1.0.0+1/$BUILD_NAME+$BUILD_NUMBER/" pubspec.yaml
+          sed -i '' -e "s/1.0.0+1/$CURRENT_VERSION+$BUILD_NUMBER/" pubspec.yaml
           flutter build ios --release --no-codesign --flavor prod -t lib/main-production.dart --build-name $CURRENT_VERSION --build-number $BUILD_NUMBER
         working-directory: source/sdk/example/testnami
 

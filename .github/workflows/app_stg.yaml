@@ -179,10 +179,10 @@ jobs:
 
       - name: Build iOS
         run: |
-          export BUILD_NAME=`cat $RUNNER_TEMP/.current_version`
+          export CURRENT_VERSION=`cat $RUNNER_TEMP/.current_version`
           export BUILD_NUMBER=`cat $RUNNER_TEMP/.next_build_number`
-          sed -i '' -e "s/1.0.0+1/$BUILD_NAME_STG+$BUILD_NUMBER_STG/" pubspec.yaml
-          flutter build ios --release --no-codesign --flavor stg -t lib/main-staging.dart --build-name $BUILD_NAME --build-number $BUILD_NUMBER
+          sed -i '' -e "s/1.0.0+1/$CURRENT_VERSION+$BUILD_NUMBER/" pubspec.yaml
+          flutter build ios --release --no-codesign --flavor stg -t lib/main-staging.dart --build-name $CURRENT_VERSION --build-number $BUILD_NUMBER
         working-directory: source/sdk/example/testnami
 
       - name: Build resolve Swift dependencies
