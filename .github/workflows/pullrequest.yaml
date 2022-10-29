@@ -24,7 +24,8 @@ jobs:
           version: 3.3.5
 
       - uses: actions/checkout@v2
-        path: source
+        with:
+          path: source
       - name: Get dependencies
         run: flutter pub get
         working-directory: source/sdk/
