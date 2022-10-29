@@ -29,6 +29,9 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
         working-directory: source/sdk/
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: source/sdk/example/testnami/
       - name: Verify Formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze Project Source
