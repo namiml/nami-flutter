@@ -1,4 +1,4 @@
-# 3.0.0-alpha.03 (Oct 28, 2022)
+# 3.0.0-alpha.03 (Oct 29, 2022)
 
 ## Changelog
 
@@ -10,6 +10,10 @@ This Nami Flutter release utilizes the following native iOS and Android SDKs.
 ### Bugfixes
 
 - Resolve `dart analyze` warnings
+
+### Maintenance
+
+- Improve project CI/CD workflow
 
 # 3.0.0-alpha.02 (Oct 25, 2022)
 
