@@ -24,6 +24,8 @@ jobs:
           version: 3.3.5
 
       - uses: actions/checkout@v2
+      - name: Get dependencies
+        run: flutter pub get
       - name: Verify Formatting
         run: dart format --output=none --set-exit-if-changed .
       - name: Analyze Project Source
