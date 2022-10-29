@@ -39,22 +39,4 @@ extension on String? {
       return NamiSKUType.unknown;
     }
   }
-
-  PeriodUnit _toPeriodUnit() {
-    if (this == "day") {
-      return PeriodUnit.day;
-    } else if (this == "week") {
-      return PeriodUnit.weekly;
-    } else if (this == "month") {
-      return PeriodUnit.monthly;
-    } else if (this == "year") {
-      return PeriodUnit.annual;
-    } else if (this == "quarter") {
-      return PeriodUnit.quarterly;
-    } else if (this == "half_year") {
-      return PeriodUnit.half_year;
-    } else {
-      return PeriodUnit.not_used;
-    }
-  }
 }
