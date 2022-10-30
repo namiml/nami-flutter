@@ -24,7 +24,15 @@ jobs:
           version: 3.3.5
 
       - uses: actions/checkout@v2
+        with:
+          path: source
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: source/sdk/
+      - name: Get dependencies
+        run: flutter pub get
+        working-directory: source/sdk/example/testnami/
       - name: Verify Formatting
         run: dart format --output=none --set-exit-if-changed .
-#      - name: Analyze Project Source
-#        run: dart analyze
+      - name: Analyze Project Source
+        run: dart analyze

@@ -59,21 +59,3 @@ enum PreparePaywallError {
   /// Connection to Google Play Billing is not available (Android only)
   PLAY_BILLING_NOT_AVAILABLE
 }
-
-extension on String? {
-  PreparePaywallError? _toPreparePaywallError() {
-    if (this == "paywall_data_not_found") {
-      return PreparePaywallError.PAYWALL_DATA_NOT_FOUND;
-    } else if (this == "image_load_failed") {
-      return PreparePaywallError.PAYWALL_IMAGE_LOAD_FAILED;
-    } else if (this == "paywall_data_not_available") {
-      return PreparePaywallError.PAYWALL_DATA_NOT_AVAILABLE;
-    } else if (this == "no_live_campaign") {
-      return PreparePaywallError.NO_LIVE_CAMPAIGN;
-    } else if (this == "play_billing_not_available") {
-      return PreparePaywallError.PLAY_BILLING_NOT_AVAILABLE;
-    } else {
-      return null;
-    }
-  }
-}

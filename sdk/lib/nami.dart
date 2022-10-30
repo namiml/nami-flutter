@@ -10,7 +10,7 @@ class Nami {
   /// This method configures and initializes the SDK. This method must be
   /// called as the first thing before interacting with the SDK.
   static Future<bool> configure(NamiConfiguration namiConfiguration) {
-    var extraDataList = ["extendedClientInfo:flutter:3.0.0-alpha.02"];
+    var extraDataList = ["extendedClientInfo:flutter:3.0.0-alpha.03"];
     extraDataList.addAll(namiConfiguration.extraData ?? []);
     var variableMap = {
       'appPlatformIdApple': namiConfiguration.appPlatformIdApple,

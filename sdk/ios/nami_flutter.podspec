@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'nami_flutter'
-  s.version          = '3.0.0-alpha.02'
+  s.version          = '3.0.0-alpha.03'
   s.summary          = 'Easy subscriptions & in-app purchases for Flutter, with powerful built-in paywalls and A/B testing.'
   s.description      = <<-DESC
   This library helps you offer subscriptions & IAPs for Flutter apps published to the App Store and Google Play.

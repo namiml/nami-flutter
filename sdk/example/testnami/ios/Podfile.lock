@@ -1,7 +1,7 @@
 PODS:
   - Flutter (1.0.0)
   - Nami (3.0.0-rc.05)
-  - nami_flutter (3.0.0-alpha.02):
+  - nami_flutter (3.0.0-alpha.03):
     - Flutter
     - Nami (= 3.0.0-rc.05)
 
@@ -22,7 +22,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   Nami: c3c4a1d55f96a8ed618e8e09161cad85c35e738a
-  nami_flutter: 887cba945b00a782b5abf9914d19f6bc4a671e10
+  nami_flutter: 7ea745dcb691b9ebf29d70b23589acbc8f01e556
 
 PODFILE CHECKSUM: 1c52d6e62a9d29e87d901921113bc869192e43bd
 

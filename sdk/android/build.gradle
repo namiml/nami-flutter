@@ -1,5 +1,5 @@
 group 'com.namiml.flutter.sdk'
-version '3.0.0-alpha.02'
+version '3.0.0-alpha.03'
 
 buildscript {
     ext.kotlin_version = '1.5.31'
