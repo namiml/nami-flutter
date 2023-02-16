@@ -29,9 +29,8 @@ class NamiCampaignManager {
   static const EventChannel _campaignsEvent = const EventChannel('campaignsEvent');
 
   static Stream<List<NamiCampaign>> registerAvailableCampaignsHandler() {
-    var data = _campaignsEvent
-        .receiveBroadcastStream()
-        .map((event) => _mapToNamiCampaignList(event));
+    var data =
+        _campaignsEvent.receiveBroadcastStream().map((event) => _mapToNamiCampaignList(event));
 
     return data;
   }

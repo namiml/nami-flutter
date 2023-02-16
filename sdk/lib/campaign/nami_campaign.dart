@@ -15,6 +15,11 @@ class NamiCampaign {
     return NamiCampaign(
         map['paywall'], map['segment'], (map['type'] as String?).toNamiCampaignRuleType(), map['value']);
   }
+
+  @override
+  String toString() {
+    return "$type - $value";
+  }
 }
 
 enum NamiCampaignRuleType { DEFAULT, LABEL }
@@ -23,10 +28,10 @@ extension on String? {
   NamiCampaignRuleType toNamiCampaignRuleType() {
     if (this == "DEFAULT") {
       return NamiCampaignRuleType.DEFAULT;
-    } else if (this == "default_campaign_not_found") {
+    } else if (this == "LABEL") {
       return NamiCampaignRuleType.LABEL;
     } else {
-      return NamiCampaignRuleType.DEFAULT;
+      return NamiCampaignRuleType.LABEL;
     }
   }
 }
