@@ -1,3 +1,6 @@
+import 'package:flutter/services.dart';
+import 'package:nami_flutter/campaign/nami_campaign.dart';
+
 import '../channel.dart';
 
 /// Manager class which providing functionality related to displaying a paywall
@@ -16,6 +19,27 @@ class NamiCampaignManager {
 
     var error = (result['error'] as String?)._toLaunchCampaignError();
     return LaunchCampaignResult(result['success'], error);
+  }
+
+  static Future<List<NamiCampaign>> allCampaigns() async {
+    List<dynamic> list = await channel.invokeMethod("allCampaigns");
+    return list.map((e) => NamiCampaign.fromMap(e)).toList();
+  }
+
+  static const EventChannel _campaignsEvent = const EventChannel('campaignsEvent');
+
+  static Stream<List<NamiCampaign>> registerAvailableCampaignsHandler() {
+    var data = _campaignsEvent
+        .receiveBroadcastStream()
+        .map((event) => _mapToNamiCampaignList(event));
+
+    return data;
+  }
+
+  static List<NamiCampaign> _mapToNamiCampaignList(List<dynamic> list) {
+    return list.map((element) {
+      return NamiCampaign.fromMap(element);
+    }).toList();
   }
 }
 
