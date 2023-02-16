@@ -14,8 +14,7 @@ class NamiCampaignManager {
     var variableMap = {
       "label": label,
     };
-    Map<dynamic, dynamic> result =
-        await channel.invokeMethod("launch", variableMap);
+    Map<dynamic, dynamic> result = await channel.invokeMethod("launch", variableMap);
 
     var error = (result['error'] as String?)._toLaunchCampaignError();
     return LaunchCampaignResult(result['success'], error);

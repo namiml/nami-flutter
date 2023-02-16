@@ -12,8 +12,8 @@ class NamiCampaign {
   NamiCampaign(this.paywall, this.segment, this.type, this.value);
 
   factory NamiCampaign.fromMap(Map<dynamic, dynamic> map) {
-    return NamiCampaign(
-        map['paywall'], map['segment'], (map['type'] as String?).toNamiCampaignRuleType(), map['value']);
+    return NamiCampaign(map['paywall'], map['segment'],
+        (map['type'] as String?).toNamiCampaignRuleType(), map['value']);
   }
 
   @override
