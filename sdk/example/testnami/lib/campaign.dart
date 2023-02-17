@@ -38,14 +38,15 @@ class CampaignWidgetState extends State<CampaignWidget> {
   Widget build(BuildContext context) {
     NamiCampaign? defaultCampaign;
     try {
-      defaultCampaign =
-          _campaigns.firstWhere((element) => element.type == NamiCampaignRuleType.DEFAULT);
+      defaultCampaign = _campaigns.firstWhere(
+          (element) => element.type == NamiCampaignRuleType.DEFAULT);
     } catch (e) {
       defaultCampaign = null;
     }
 
-    List<NamiCampaign> labeledCampaigns =
-        _campaigns.where((element) => element.type == NamiCampaignRuleType.LABEL).toList();
+    List<NamiCampaign> labeledCampaigns = _campaigns
+        .where((element) => element.type == NamiCampaignRuleType.LABEL)
+        .toList();
 
     List<Widget> campaignItems = [];
 
@@ -56,7 +57,8 @@ class CampaignWidgetState extends State<CampaignWidget> {
 
     if (labeledCampaigns.isNotEmpty) {
       campaignItems.add(header("Labeled campaign"));
-      campaignItems.addAll(labeledCampaigns.map((e) => campaignItem(e)).toList());
+      campaignItems
+          .addAll(labeledCampaigns.map((e) => campaignItem(e)).toList());
     }
 
     return Scaffold(
@@ -120,7 +122,9 @@ class CampaignWidgetState extends State<CampaignWidget> {
         alignment: Alignment.center,
         decoration: BoxDecoration(border: Border.all(color: Colors.lightBlue)),
         child: Text(
-          campaign.type == NamiCampaignRuleType.DEFAULT ? "Default" : campaign.value ?? '',
+          campaign.type == NamiCampaignRuleType.DEFAULT
+              ? "Default"
+              : campaign.value ?? '',
           style: const TextStyle(fontSize: 20),
         ),
       ),

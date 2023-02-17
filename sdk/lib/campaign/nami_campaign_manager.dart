@@ -14,7 +14,8 @@ class NamiCampaignManager {
     var variableMap = {
       "label": label,
     };
-    Map<dynamic, dynamic> result = await channel.invokeMethod("launch", variableMap);
+    Map<dynamic, dynamic> result =
+        await channel.invokeMethod("launch", variableMap);
 
     var error = (result['error'] as String?)._toLaunchCampaignError();
     return LaunchCampaignResult(result['success'], error);
@@ -25,11 +26,13 @@ class NamiCampaignManager {
     return list.map((e) => NamiCampaign.fromMap(e)).toList();
   }
 
-  static const EventChannel _campaignsEvent = const EventChannel('campaignsEvent');
+  static const EventChannel _campaignsEvent =
+      const EventChannel('campaignsEvent');
 
   static Stream<List<NamiCampaign>> registerAvailableCampaignsHandler() {
-    var data =
-        _campaignsEvent.receiveBroadcastStream().map((event) => _mapToNamiCampaignList(event));
+    var data = _campaignsEvent
+        .receiveBroadcastStream()
+        .map((event) => _mapToNamiCampaignList(event));
 
     return data;
   }
