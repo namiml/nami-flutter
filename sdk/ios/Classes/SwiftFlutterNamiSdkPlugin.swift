@@ -1,6 +1,6 @@
 import Flutter
 import UIKit
-import Nami
+import NamiApple
 
 public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
@@ -11,6 +11,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let purchasesChangeEventChannel = FlutterEventChannel(name: "purchasesResponseHandlerData", binaryMessenger: registrar.messenger())
         let journeyStateEventChannel = FlutterEventChannel(name: "journeyStateEvent", binaryMessenger: registrar.messenger())
         let accountStateEventChannel = FlutterEventChannel(name: "accountStateEvent", binaryMessenger: registrar.messenger())
+        let campaignsEventChannel = FlutterEventChannel(name: "campaignsEvent", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
@@ -19,6 +20,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         purchasesChangeEventChannel.setStreamHandler(PurchasesChangedEventHandler())
         journeyStateEventChannel.setStreamHandler(JourneyStateEventHandler())
         accountStateEventChannel.setStreamHandler(AccountStateEventHandler())
+        campaignsEventChannel.setStreamHandler(CampaignsEventHandler())
     }
 
     
@@ -79,6 +81,10 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     NamiCampaignManager.launch(launchHandler: campaignLaunchHandler)
                 }
             }
+        case "allCampaigns":
+            let allCampaigns = NamiCampaignManager.allCampaigns()
+            let listOfMaps = allCampaigns.map({ (campaign: NamiCampaign) in campaign.convertToMap()})
+            result(listOfMaps)
         case "dismiss":
             let animated = call.arguments as? Bool ?? false
             NamiPaywallManager.dismiss(animated: animated) {
@@ -256,6 +262,21 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
+    class CampaignsEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiCampaignManager.registerAvailableCampaignsHandler {(campaigns: [NamiCampaign]) in
+                let listofMaps = campaigns.map({ (campaign: NamiCampaign) in campaign.convertToMap()})
+                events(listofMaps)
+            }
+            return nil
+        }
+        
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            NamiCampaignManager.unregisterAvailableCampaignsHandler()
+            return nil
+        }
+    }
+    
     class JourneyStateEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiCustomerManager.registerJourneyStateHandler { newCustomerJourneyState in
@@ -407,6 +428,23 @@ public extension NamiSKU {
         } else {
             map["type"] = "unknown"
         }
+        return map
+    }
+}
+
+public extension NamiCampaign {
+    func convertToMap() -> [String: Any] {
+        var map = [String: Any]()
+        map["paywall"] = self.paywall
+        map["segment"] = self.segment
+        if(self.type == NamiCampaignRuleType.default) {
+            map["type"] = "DEFAULT"
+        } else if (self.type == NamiCampaignRuleType.label) {
+            map["type"] = "LABEL"
+        } else {
+            map["type"] = "LABEL"
+        }
+        map["value"] = self.value
         return map
     }
 }

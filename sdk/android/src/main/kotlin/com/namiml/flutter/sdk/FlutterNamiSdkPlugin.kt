@@ -38,9 +38,10 @@ import com.namiml.paywall.PaywallDisplayOptions
 import com.namiml.paywall.PaywallStyleData
 import com.namiml.paywall.PreparePaywallError
 import com.namiml.paywall.SubscriptionPeriod
+import com.namiml.paywall.model.NamiPaywallAction
+import com.namiml.campaign.NamiCampaign
 import com.namiml.util.extensions.getFormattedPrice
 import com.namiml.util.extensions.getSubscriptionPeriodEnum
-import com.squareup.moshi.Moshi
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -69,12 +70,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var journeyStateListener: EventChannel
     private lateinit var purchaseChangeListener: EventChannel
     private lateinit var accountStateListener: EventChannel
+    private lateinit var campaignsListener: EventChannel
     private lateinit var context: Context
-    private lateinit var moshi: Moshi
     private var currentActivityWeakReference: WeakReference<Activity>? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        moshi = Moshi.Builder().build()
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
         signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
         analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
@@ -86,6 +86,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel(flutterPluginBinding.binaryMessenger, "journeyStateEvent")
         accountStateListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "accountStateEvent")
+        campaignsListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "campaignsEvent")
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
@@ -94,6 +96,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         setPurchaseChangeStreamHandler()
         setCustomerJourneyStateHandler()
         setAccountStateHandler()
+        setCampaignStreamHandler()
     }
 
     private fun setPurchaseChangeStreamHandler() {
@@ -211,6 +214,25 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
+    private fun setCampaignStreamHandler() {
+        campaignsListener.setStreamHandler(object : StreamHandler(),
+            EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiCampaignManager.registerAvailableCampaignsHandler { namiCampaigns ->
+                    CoroutineScope(Dispatchers.Main).launch {
+                        events?.success(namiCampaigns.map { it.convertToMap() })
+                    }
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                NamiCampaignManager.registerAvailableCampaignsHandler{
+
+                }
+            }
+        })
+    }
+
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
             "getPlatformVersion" -> {
@@ -267,15 +289,26 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                 }
 
+                val actionCallback = { action: NamiPaywallAction, sku: NamiSKU? ->
+
+                }
+
                 val label = call.argument<String>("label") ?: ""
 
                 currentActivityWeakReference?.get()?.let { activity ->
                     NamiCampaignManager.launch(
                         activity,
                         label,
+                        actionCallback,
                         callback
                     )
                 }
+            }
+
+            "allCampaigns" -> {
+                result.success(
+                    NamiCampaignManager.allCampaigns().map { it.convertToMap() }
+                )
             }
             "dismiss" -> {
                 result.notImplemented()
@@ -418,6 +451,16 @@ private fun NamiEntitlement.convertToMap(): Map<String, Any?> {
         "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
         "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
         "activePurchases" to activePurchases.map { it.convertToMap() })
+}
+
+
+private fun NamiCampaign.convertToMap(): Map<String, Any?> {
+    return mapOf(
+        "paywall" to paywall,
+        "segment" to segment,
+        "type" to type.name,
+        "value" to value
+    )
 }
 
 private fun NamiPurchase.convertToMap(): Map<String, Any?> {

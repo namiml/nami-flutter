@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nami_flutter/campaign/nami_campaign.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
 
 class CampaignWidget extends StatefulWidget {
@@ -6,15 +7,26 @@ class CampaignWidget extends StatefulWidget {
 
   @override
   CampaignWidgetState createState() => CampaignWidgetState();
-
-  @override
-  setState() {}
 }
 
 class CampaignWidgetState extends State<CampaignWidget> {
+  List<NamiCampaign> _campaigns = [];
+
   @override
   void initState() {
     super.initState();
+
+    NamiCampaignManager.registerAvailableCampaignsHandler().listen((list) {
+      setState(() {
+        _campaigns = list;
+      });
+    });
+
+    NamiCampaignManager.allCampaigns().then((list) {
+      setState(() {
+        _campaigns = list;
+      });
+    });
   }
 
   @override
@@ -24,114 +36,109 @@ class CampaignWidgetState extends State<CampaignWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        ///padding: EdgeInsets.symmetric(horizontal: 10),
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              SizedBox(height: 10),
-              SizedBox(height: 10),
-              Text(
-                "Launch a Campaign",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              SizedBox(height: 3),
-              Text(
-                "Tap a campaign to show a paywall",
-                style: TextStyle(
-                  fontSize: 10,
-                ),
-              ),
-              SizedBox(height: 20),
-              DataTable(
-                showCheckboxColumn: false,
-                columns: const <DataColumn>[
-                  DataColumn(
-                    label: Expanded(
-                      child: Text(
-                        'Campaign',
-                        style: TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                  ),
-                ],
-                rows: <DataRow>[
-                  DataRow(
-                    onSelectChanged: (value) async {
-                      var launchCampaignResult =
-                          await NamiCampaignManager.launch();
+    NamiCampaign? defaultCampaign;
+    try {
+      defaultCampaign = _campaigns.firstWhere(
+          (element) => element.type == NamiCampaignRuleType.DEFAULT);
+    } catch (e) {
+      defaultCampaign = null;
+    }
 
-                      if (launchCampaignResult.success) {
-                        print('Campaign Launch success -> ');
-                      } else {
-                        print('Campaign Launch error -> '
-                            '${launchCampaignResult.error}');
-                      }
-                    },
-                    cells: <DataCell>[
-                      DataCell(Text('Default')),
-                    ],
-                  ),
-                  DataRow(
-                    onSelectChanged: (value) {
-                      NamiCampaignManager.launch(label: "penguin");
-                    },
-                    cells: <DataCell>[
-                      DataCell(Text('Penguin')),
-                    ],
-                  ),
-                  DataRow(
-                    onSelectChanged: (value) {
-                      NamiCampaignManager.launch(label: "pacific");
-                    },
-                    cells: <DataCell>[
-                      DataCell(Text('Pacific')),
-                    ],
-                  ),
-                  DataRow(
-                    onSelectChanged: (value) {
-                      NamiCampaignManager.launch(label: "trident");
-                    },
-                    cells: <DataCell>[
-                      DataCell(Text('Trident')),
-                    ],
-                  ),
-                  DataRow(
-                    onSelectChanged: (value) {
-                      NamiCampaignManager.launch(label: "starfish");
-                    },
-                    cells: <DataCell>[
-                      DataCell(Text('Starfish')),
-                    ],
-                  ),
-                  DataRow(
-                    onSelectChanged: (value) {
-                      NamiCampaignManager.launch(label: "mantis");
-                    },
-                    cells: <DataCell>[
-                      DataCell(Text('Mantis')),
-                    ],
-                  ),
-                  DataRow(
-                    onSelectChanged: (value) {
-                      NamiCampaignManager.launch(label: "venice");
-                    },
-                    cells: <DataCell>[
-                      DataCell(Text('Venice')),
-                    ],
-                  ),
-                ],
+    List<NamiCampaign> labeledCampaigns = _campaigns
+        .where((element) => element.type == NamiCampaignRuleType.LABEL)
+        .toList();
+
+    List<Widget> campaignItems = [];
+
+    if (defaultCampaign != null) {
+      campaignItems.add(header("Default campaign"));
+      campaignItems.add(campaignItem(defaultCampaign));
+    }
+
+    if (labeledCampaigns.isNotEmpty) {
+      campaignItems.add(header("Labeled campaign"));
+      campaignItems
+          .addAll(labeledCampaigns.map((e) => campaignItem(e)).toList());
+    }
+
+    return Scaffold(
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            const SizedBox(height: 10),
+            const SizedBox(height: 10),
+            const Text(
+              "Launch a Campaign",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
-            ],
-          ),
+            ),
+            const SizedBox(height: 3),
+            const Text(
+              "Tap a campaign to show a paywall",
+              style: TextStyle(
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+                child: SingleChildScrollView(
+              child: Column(
+                children: campaignItems,
+              ),
+            ))
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget campaignItem(NamiCampaign campaign) {
+    return InkWell(
+      onTap: () async {
+        LaunchCampaignResult result;
+        switch (campaign.type) {
+          case NamiCampaignRuleType.DEFAULT:
+            result = await NamiCampaignManager.launch();
+            break;
+          case NamiCampaignRuleType.LABEL:
+            result = await NamiCampaignManager.launch(label: campaign.value);
+            break;
+        }
+
+        if (result.success) {
+          print("Campaign ${campaign.value} launched successfully");
+        } else {
+          print("Campaign ${campaign.value} launched failed");
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12.0),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(border: Border.all(color: Colors.lightBlue)),
+        child: Text(
+          campaign.type == NamiCampaignRuleType.DEFAULT
+              ? "Default"
+              : campaign.value ?? '',
+          style: const TextStyle(fontSize: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget header(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12.0),
+      alignment: Alignment.centerLeft,
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
       ),
     );
   }
