@@ -103,10 +103,17 @@ class CampaignWidgetState extends State<CampaignWidget> {
         LaunchCampaignResult result;
         switch (campaign.type) {
           case NamiCampaignRuleType.DEFAULT:
-            result = await NamiCampaignManager.launch();
+            result = await NamiCampaignManager.launch(
+                onPaywallAction: (action, sku) {
+              print("Paywall action $action");
+            });
             break;
           case NamiCampaignRuleType.LABEL:
-            result = await NamiCampaignManager.launch(label: campaign.value);
+            result = await NamiCampaignManager.launch(
+                label: campaign.value,
+                onPaywallAction: (action, sku) {
+                  print("Paywall action $action");
+                });
             break;
         }
 

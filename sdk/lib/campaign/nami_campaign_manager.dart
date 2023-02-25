@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
+import 'package:nami_flutter/paywall/nami_sku.dart';
 
 import '../channel.dart';
 
@@ -10,15 +13,44 @@ class NamiCampaignManager {
   ///
   /// Optionally you can provide,
   /// - A [label] to identify a specific campaign
-  static Future<LaunchCampaignResult> launch({String? label}) async {
+  /// - A [onPaywallAction] callback to listen for the actions triggered on paywall
+  static Future<LaunchCampaignResult> launch(
+      {String? label,
+      Function(NamiPaywallAction, NamiSKU?)? onPaywallAction}) async {
+    Completer<LaunchCampaignResult> launchResult = Completer();
     var variableMap = {
       "label": label,
     };
-    Map<dynamic, dynamic> result =
-        await channel.invokeMethod("launch", variableMap);
 
-    var error = (result['error'] as String?)._toLaunchCampaignError();
-    return LaunchCampaignResult(result['success'], error);
+    channel
+        .invokeMethod("launch", variableMap)
+        .whenComplete(() => null)
+        .asStream()
+        .listen((event) {
+      print("ANH1 result $event");
+
+      final String? type = event["type"] as String?;
+
+      if (type == "launchResult") {
+        var error = (event['error'] as String?)._toLaunchCampaignError();
+        launchResult
+            .complete(LaunchCampaignResult(event['success'] ?? false, error));
+      } else if (type == "paywallAction") {
+        NamiPaywallAction? action =
+            (event["action"] as String?)._toNamiPaywallAction();
+        Map<dynamic, dynamic>? skuMap = event["sku"] as Map<dynamic, dynamic>?;
+        NamiSKU? sku;
+        if (skuMap != null) {
+          sku = NamiSKU.fromMap(skuMap);
+        }
+
+        if (action != null) {
+          onPaywallAction!(action, sku);
+        }
+      }
+    });
+
+    return launchResult.future;
   }
 
   static Future<List<NamiCampaign>> allCampaigns() async {
@@ -104,6 +136,35 @@ extension on String? {
       return LaunchCampaignError.PAYWALL_ALREADY_DISPLAYED;
     } else if (this == "sdk_not_initialized") {
       return LaunchCampaignError.CAMPAIGN_DATA_NOT_FOUND;
+    } else {
+      return null;
+    }
+  }
+}
+
+enum NamiPaywallAction {
+  NAMI_CLOSE_PAYWALL,
+  NAMI_RESTORE_PURCHASES,
+  NAMI_SIGN_IN,
+  NAMI_BUY_SKU,
+  NAMI_SELECT_SKU,
+  NAMI_PURCHASE_SELECTED_SKU
+}
+
+extension on String? {
+  NamiPaywallAction? _toNamiPaywallAction() {
+    if (this == "NAMI_CLOSE_PAYWALL") {
+      return NamiPaywallAction.NAMI_CLOSE_PAYWALL;
+    } else if (this == "NAMI_RESTORE_PURCHASES") {
+      return NamiPaywallAction.NAMI_RESTORE_PURCHASES;
+    } else if (this == "NAMI_SIGN_IN") {
+      return NamiPaywallAction.NAMI_SIGN_IN;
+    } else if (this == "NAMI_BUY_SKU") {
+      return NamiPaywallAction.NAMI_BUY_SKU;
+    } else if (this == "NAMI_SELECT_SKU") {
+      return NamiPaywallAction.NAMI_SELECT_SKU;
+    } else if (this == "NAMI_PURCHASE_SELECTED_SKU") {
+      return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
     } else {
       return null;
     }

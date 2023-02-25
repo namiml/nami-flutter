@@ -318,13 +318,13 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val callback = { launchResult: LaunchCampaignResult ->
                     when (launchResult) {
                         is LaunchCampaignResult.Success -> {
-                            with(hashMapOf("success" to true, "error" to null)) {
+                            with(mapOf("type" to "launchResult", "success" to true, "error" to null)) {
                                 result.success(this)
                             }
                         }
                         is LaunchCampaignResult.Failure -> {
                             val error = launchResult.error as LaunchCampaignError
-                            with(hashMapOf("success" to false, "error" to error.getFlutterString())) {
+                            with(mapOf("type" to "launchResult","success" to false, "error" to error.getFlutterString())) {
                                 result.success(this)
                             }
                         }
@@ -332,7 +332,13 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 val actionCallback = { action: NamiPaywallAction, sku: NamiSKU? ->
-
+                    result.success(
+                        mapOf(
+                            "type" to "paywallAction",
+                            "action" to action.name,
+                            "sku" to sku?.convertToMap()
+                        )
+                    )
                 }
 
                 val label = call.argument<String>("label") ?: ""
