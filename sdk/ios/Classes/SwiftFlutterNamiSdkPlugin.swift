@@ -2,6 +2,10 @@ import Flutter
 import UIKit
 import NamiApple
 
+struct NamiFlutterCache {
+    static var paywallActionCallback: ((NamiPaywallAction, NamiSKU?) -> Void)?
+}
+
 public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "nami", binaryMessenger: registrar.messenger())
@@ -15,6 +19,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let closePaywallEventChannel = FlutterEventChannel(name: "closePaywallEvent", binaryMessenger: registrar.messenger())
         let buySkuEventChannel = FlutterEventChannel(name: "buySkuEvent", binaryMessenger:
             registrar.messenger())
+        let paywallActionEventChannel = FlutterEventChannel(name: "paywallActionEvent", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
@@ -26,6 +31,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         campaignsEventChannel.setStreamHandler(CampaignsEventHandler())
         closePaywallEventChannel.setStreamHandler(ClosePaywallEventHandler())
         buySkuEventChannel.setStreamHandler(BuySkuEventHandler())
+        paywallActionEventChannel.setStreamHandler(PaywallActionEventHandler())
     }
 
     
@@ -80,23 +86,28 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     result(handleLaunchCampaignResult(success: success, error: error))
                 }
 
+                let paywallActionHandler = { (action: NamiPaywallAction, sku: NamiSKU?, purchaseError: Error?, purchases: [NamiApple.NamiPurchase]) in
+                    NamiFlutterCache.paywallActionCallback?(action, sku)
+                    return
+                }
+
                 if(label != nil) {
-                    NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler)
+                    NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
                 } else {
-                    NamiCampaignManager.launch(launchHandler: campaignLaunchHandler)
+                    NamiCampaignManager.launch(launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
                 }
             }
         case "allCampaigns":
             let allCampaigns = NamiCampaignManager.allCampaigns()
             let listOfMaps = allCampaigns.map({ (campaign: NamiCampaign) in campaign.convertToMap()})
             result(listOfMaps)
-            
+
         case "campaigns.refresh":
             NamiCampaignManager.refresh{(campaigns: [NamiCampaign]) in
                 let listOfMaps = campaigns.map({ (campaign: NamiCampaign) in campaign.convertToMap()})
                 result(listOfMaps)
             }
-            
+
         case "isCampaignAvailable":
             let args = call.arguments as? [String: Any]
             var isAvailable = false
@@ -109,7 +120,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 }
             }
             result(isAvailable)
-            
+
         case "dismiss":
             let animated = call.arguments as? Bool ?? false
             NamiPaywallManager.dismiss(animated: animated) {
@@ -301,7 +312,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
-    
+
     class ClosePaywallEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.registerCloseHandler { (fromvc) in
@@ -309,13 +320,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             return nil
         }
-        
+
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             NamiPaywallManager.registerCloseHandler(nil)
             return nil
         }
     }
-    
+
     class BuySkuEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.registerBuySkuHandler { sku in
@@ -323,13 +334,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             return nil
         }
-        
+
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             NamiPaywallManager.registerBuySkuHandler(nil)
             return nil
         }
     }
-    
+
     class JourneyStateEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiCustomerManager.registerJourneyStateHandler { newCustomerJourneyState in
@@ -379,6 +390,26 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
+
+    class PaywallActionEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiFlutterCache.paywallActionCallback = { (action: NamiPaywallAction, sku: NamiSKU?) in
+                events(self.handlePaywallAction(action: action, sku: sku))
+            }
+            return nil
+        }
+
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            return nil
+        }
+
+        private func handlePaywallAction(action: NamiPaywallAction, sku: NamiSKU?) -> [String: Any?] {
+            var map = [String: Any?]()
+            map["action"] = action.toFlutterString()
+            map["sku"] = sku?.convertToMap()
+            return map
+        }
+    }
 }
 
 
@@ -389,6 +420,27 @@ public extension AccountStateAction {
             return "login"
         case AccountStateAction.logout:
             return "logout"
+        default:
+            return "unknown"
+        }
+    }
+}
+
+public extension NamiPaywallAction {
+    func toFlutterString() -> String {
+        switch self {
+        case NamiPaywallAction.close_paywall:
+            return "NAMI_CLOSE_PAYWALL"
+        case NamiPaywallAction.restore_purchases:
+            return "NAMI_RESTORE_PURCHASES"
+        case NamiPaywallAction.sign_in:
+            return "NAMI_SIGN_IN"
+        case NamiPaywallAction.buy_sku:
+            return "NAMI_BUY_SKU"
+        case NamiPaywallAction.select_sku:
+            return "NAMI_SELECT_SKU"
+        case NamiPaywallAction.purchase_selected_sku:
+            return "NAMI_PURCHASE_SELECTED_SKU"
         default:
             return "unknown"
         }

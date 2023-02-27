@@ -73,8 +73,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var campaignsListener: EventChannel
     private lateinit var closePaywallListener: EventChannel
     private lateinit var buySkuListener: EventChannel
+    private lateinit var paywallActionListener: EventChannel
     private lateinit var context: Context
     private var currentActivityWeakReference: WeakReference<Activity>? = null
+
+    private var paywallActionCallback : ((NamiPaywallAction, NamiSKU?) -> Unit)? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
@@ -94,6 +97,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel(flutterPluginBinding.binaryMessenger, "closePaywallEvent")
         buySkuListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "buySkuEvent")
+        paywallActionListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "paywallActionEvent")
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
@@ -105,6 +110,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         setCampaignStreamHandler()
         setClosePaywallStreamHandler()
         setBuySkuStreamHandler()
+        setPaywallActionStreamHandler()
     }
 
     private fun setPurchaseChangeStreamHandler() {
@@ -275,6 +281,26 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
+    private fun setPaywallActionStreamHandler() {
+        paywallActionListener.setStreamHandler(object : StreamHandler(),
+            EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                paywallActionCallback = { action, sku ->
+                    CoroutineScope(Dispatchers.Main).launch {
+                        events?.success(
+                            mapOf(
+                                "action" to action.name,
+                                "sku" to sku?.convertToMap()
+                            )
+                        )
+                    }
+                }
+            }
+            override fun onCancel(arguments: Any?) {
+            }
+        })
+    }
+
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         when (call.method) {
             "getPlatformVersion" -> {
@@ -318,13 +344,13 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val callback = { launchResult: LaunchCampaignResult ->
                     when (launchResult) {
                         is LaunchCampaignResult.Success -> {
-                            with(mapOf("type" to "launchResult", "success" to true, "error" to null)) {
+                            with(mapOf("success" to true, "error" to null)) {
                                 result.success(this)
                             }
                         }
                         is LaunchCampaignResult.Failure -> {
-                            val error = launchResult.error as LaunchCampaignError
-                            with(mapOf("type" to "launchResult","success" to false, "error" to error.getFlutterString())) {
+                            val error = launchResult.error as? LaunchCampaignError
+                            with(mapOf("success" to false, "error" to error?.getFlutterString())) {
                                 result.success(this)
                             }
                         }
@@ -332,13 +358,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 }
 
                 val actionCallback = { action: NamiPaywallAction, sku: NamiSKU? ->
-                    result.success(
-                        mapOf(
-                            "type" to "paywallAction",
-                            "action" to action.name,
-                            "sku" to sku?.convertToMap()
-                        )
-                    )
+                    paywallActionCallback?.invoke(action, sku)
+                    Unit
                 }
 
                 val label = call.argument<String>("label") ?: ""

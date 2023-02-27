@@ -17,40 +17,29 @@ class NamiCampaignManager {
   static Future<LaunchCampaignResult> launch(
       {String? label,
       Function(NamiPaywallAction, NamiSKU?)? onPaywallAction}) async {
-    Completer<LaunchCampaignResult> launchResult = Completer();
+
+    _paywallActionEvent.receiveBroadcastStream().listen((event) {
+      NamiPaywallAction? action =
+          (event["action"] as String?)._toNamiPaywallAction();
+      Map<dynamic, dynamic>? skuMap = event["sku"] as Map<dynamic, dynamic>?;
+      NamiSKU? sku;
+      if (skuMap != null) {
+        sku = NamiSKU.fromMap(skuMap);
+      }
+
+      if (action != null) {
+        onPaywallAction!(action, sku);
+      }
+    });
+
     var variableMap = {
       "label": label,
     };
 
-    channel
-        .invokeMethod("launch", variableMap)
-        .whenComplete(() => null)
-        .asStream()
-        .listen((event) {
-      print("ANH1 result $event");
+    final result = await channel.invokeMethod("launch", variableMap);
+    var error = (result['error'] as String?)._toLaunchCampaignError();
 
-      final String? type = event["type"] as String?;
-
-      if (type == "launchResult") {
-        var error = (event['error'] as String?)._toLaunchCampaignError();
-        launchResult
-            .complete(LaunchCampaignResult(event['success'] ?? false, error));
-      } else if (type == "paywallAction") {
-        NamiPaywallAction? action =
-            (event["action"] as String?)._toNamiPaywallAction();
-        Map<dynamic, dynamic>? skuMap = event["sku"] as Map<dynamic, dynamic>?;
-        NamiSKU? sku;
-        if (skuMap != null) {
-          sku = NamiSKU.fromMap(skuMap);
-        }
-
-        if (action != null) {
-          onPaywallAction!(action, sku);
-        }
-      }
-    });
-
-    return launchResult.future;
+    return LaunchCampaignResult(result['success'] ?? false, error);
   }
 
   static Future<List<NamiCampaign>> allCampaigns() async {
@@ -60,6 +49,8 @@ class NamiCampaignManager {
 
   static const EventChannel _campaignsEvent =
       const EventChannel('campaignsEvent');
+  static const EventChannel _paywallActionEvent =
+      const EventChannel('paywallActionEvent');
 
   static Stream<List<NamiCampaign>> registerAvailableCampaignsHandler() {
     var data = _campaignsEvent
