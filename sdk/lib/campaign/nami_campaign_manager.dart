@@ -17,7 +17,6 @@ class NamiCampaignManager {
   static Future<LaunchCampaignResult> launch(
       {String? label,
       Function(NamiPaywallAction, NamiSKU?)? onPaywallAction}) async {
-
     _paywallActionEvent.receiveBroadcastStream().listen((event) {
       NamiPaywallAction? action =
           (event["action"] as String?)._toNamiPaywallAction();
