@@ -9,6 +9,12 @@ import '../channel.dart';
 /// Manager class which providing functionality related to displaying a paywall
 /// by launching a campaign
 class NamiCampaignManager {
+  // EventChannel(s) to listen for the event from native
+  static const EventChannel _campaignsEvent =
+      const EventChannel('campaignsEvent');
+  static const EventChannel _paywallActionEvent =
+      const EventChannel('paywallActionEvent');
+
   /// Launch a campaign to raise a paywall
   ///
   /// Optionally you can provide,
@@ -17,6 +23,7 @@ class NamiCampaignManager {
   static Future<LaunchCampaignResult> launch(
       {String? label,
       Function(NamiPaywallAction, NamiSKU?)? onPaywallAction}) async {
+    // Listen for the paywall action event
     _paywallActionEvent.receiveBroadcastStream().listen((event) {
       NamiPaywallAction? action =
           (event["action"] as String?)._toNamiPaywallAction();
@@ -45,11 +52,6 @@ class NamiCampaignManager {
     List<dynamic> list = await channel.invokeMethod("allCampaigns");
     return list.map((e) => NamiCampaign.fromMap(e)).toList();
   }
-
-  static const EventChannel _campaignsEvent =
-      const EventChannel('campaignsEvent');
-  static const EventChannel _paywallActionEvent =
-      const EventChannel('paywallActionEvent');
 
   static Stream<List<NamiCampaign>> registerAvailableCampaignsHandler() {
     var data = _campaignsEvent
