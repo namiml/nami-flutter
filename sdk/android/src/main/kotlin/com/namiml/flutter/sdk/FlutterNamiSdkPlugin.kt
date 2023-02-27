@@ -310,6 +310,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     NamiCampaignManager.allCampaigns().map { it.convertToMap() }
                 )
             }
+            "campaigns.refresh" -> {
+                NamiCampaignManager.refresh { campaigns ->
+                    result.success(campaigns?.map { it.convertToMap() })
+                }
+            }
             "dismiss" -> {
                 result.notImplemented()
             }

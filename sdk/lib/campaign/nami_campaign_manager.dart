@@ -37,6 +37,15 @@ class NamiCampaignManager {
     return data;
   }
 
+  /**
+   * Asks Nami to fetch the latest active campaigns for this device
+   * @return list of active campaigns after updating.
+   */
+  static Future<List<NamiCampaign>> refresh() async {
+    List<dynamic> list = await channel.invokeMethod("campaigns.refresh");
+    return list.map((e) => NamiCampaign.fromMap(e)).toList();
+  }
+
   static List<NamiCampaign> _mapToNamiCampaignList(List<dynamic> list) {
     return list.map((element) {
       return NamiCampaign.fromMap(element);

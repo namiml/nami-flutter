@@ -85,6 +85,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let allCampaigns = NamiCampaignManager.allCampaigns()
             let listOfMaps = allCampaigns.map({ (campaign: NamiCampaign) in campaign.convertToMap()})
             result(listOfMaps)
+            
+        case "campaigns.refresh":
+            NamiCampaignManager.refresh{(campaigns: [NamiCampaign]) in
+                let listOfMaps = campaigns.map({ (campaign: NamiCampaign) in campaign.convertToMap()})
+                result(listOfMaps)
+            }
+            
         case "dismiss":
             let animated = call.arguments as? Bool ?? false
             NamiPaywallManager.dismiss(animated: animated) {
