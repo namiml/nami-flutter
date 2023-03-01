@@ -315,6 +315,16 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     result.success(campaigns?.map { it.convertToMap() })
                 }
             }
+            "isCampaignAvailable" -> {
+                val label = call.argument<String>("label")
+                result.success(
+                    if (label != null) {
+                        NamiCampaignManager.isCampaignAvailable(label = label)
+                    } else {
+                        NamiCampaignManager.isCampaignAvailable()
+                    }
+                )
+            }
             "dismiss" -> {
                 result.notImplemented()
             }

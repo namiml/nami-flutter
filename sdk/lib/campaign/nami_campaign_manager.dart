@@ -46,6 +46,20 @@ class NamiCampaignManager {
     return list.map((e) => NamiCampaign.fromMap(e)).toList();
   }
 
+
+  /**
+   * Returns true if a campaign is available matching the provided label or default
+   * @param provided label or null if default campaign
+   */
+  static Future<bool> isCampaignAvailable({String? label}) async {
+    var variableMap = {
+      "label": label,
+    };
+    bool available =
+        await channel.invokeMethod("isCampaignAvailable", variableMap);
+    return available;
+  }
+
   static List<NamiCampaign> _mapToNamiCampaignList(List<dynamic> list) {
     return list.map((element) {
       return NamiCampaign.fromMap(element);

@@ -92,6 +92,19 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 result(listOfMaps)
             }
             
+        case "isCampaignAvailable":
+            let args = call.arguments as? [String: Any]
+            var isAvailable = false
+            if let data = args {
+                let label = data["label"] as? String
+                if(label != nil){
+                    isAvailable = NamiCampaignManager.isCampaignAvailable(label: label!)
+                } else {
+                    isAvailable = NamiCampaignManager.isCampaignAvailable()
+                }
+            }
+            result(isAvailable)
+            
         case "dismiss":
             let animated = call.arguments as? Bool ?? false
             NamiPaywallManager.dismiss(animated: animated) {
