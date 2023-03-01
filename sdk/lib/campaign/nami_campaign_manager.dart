@@ -46,7 +46,6 @@ class NamiCampaignManager {
     return list.map((e) => NamiCampaign.fromMap(e)).toList();
   }
 
-
   /**
    * Returns true if a campaign is available matching the provided label or default
    * @param provided label or null if default campaign
