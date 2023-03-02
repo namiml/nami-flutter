@@ -71,6 +71,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var purchaseChangeListener: EventChannel
     private lateinit var accountStateListener: EventChannel
     private lateinit var campaignsListener: EventChannel
+    private lateinit var closePaywallListener: EventChannel
+    private lateinit var buySkuListener: EventChannel
     private lateinit var context: Context
     private var currentActivityWeakReference: WeakReference<Activity>? = null
 
@@ -88,6 +90,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             EventChannel(flutterPluginBinding.binaryMessenger, "accountStateEvent")
         campaignsListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "campaignsEvent")
+        closePaywallListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "closePaywallEvent")
+        buySkuListener =
+            EventChannel(flutterPluginBinding.binaryMessenger, "buySkuEvent")
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
@@ -97,6 +103,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         setCustomerJourneyStateHandler()
         setAccountStateHandler()
         setCampaignStreamHandler()
+        setClosePaywallStreamHandler()
+        setBuySkuStreamHandler()
     }
 
     private fun setPurchaseChangeStreamHandler() {
@@ -229,6 +237,40 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 NamiCampaignManager.registerAvailableCampaignsHandler{
 
                 }
+            }
+        })
+    }
+
+    private fun setClosePaywallStreamHandler() {
+        closePaywallListener.setStreamHandler(object : StreamHandler(),
+            EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiPaywallManager.registerCloseHandler {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        events?.success(null)
+                    }
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                NamiPaywallManager.registerCloseHandler(null)
+            }
+        })
+    }
+
+    private fun setBuySkuStreamHandler() {
+        buySkuListener.setStreamHandler(object : StreamHandler(),
+            EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiPaywallManager.registerBuySkuHandler { _, skuId ->
+                    CoroutineScope(Dispatchers.Main).launch {
+                        events?.success(skuId)
+                    }
+                }
+            }
+
+            override fun onCancel(arguments: Any?) {
+                NamiPaywallManager.registerBuySkuHandler(null)
             }
         })
     }
