@@ -1,33 +1,57 @@
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
+import 'package:nami_flutter/paywall/nami_sku.dart';
 
 import '../channel.dart';
 
 /// Manager class which providing functionality related to displaying a paywall
 /// by launching a campaign
 class NamiCampaignManager {
+  // EventChannel(s) to listen for the event from native
+  static const EventChannel _campaignsEvent =
+      const EventChannel('campaignsEvent');
+  static const EventChannel _paywallActionEvent =
+      const EventChannel('paywallActionEvent');
+
   /// Launch a campaign to raise a paywall
   ///
   /// Optionally you can provide,
   /// - A [label] to identify a specific campaign
-  static Future<LaunchCampaignResult> launch({String? label}) async {
+  /// - A [onPaywallAction] callback to listen for the actions triggered on paywall
+  static Future<LaunchCampaignResult> launch(
+      {String? label,
+      Function(NamiPaywallAction, NamiSKU?)? onPaywallAction}) async {
+    // Listen for the paywall action event
+    _paywallActionEvent.receiveBroadcastStream().listen((event) {
+      NamiPaywallAction? action =
+          (event["action"] as String?)._toNamiPaywallAction();
+      Map<dynamic, dynamic>? skuMap = event["sku"] as Map<dynamic, dynamic>?;
+      NamiSKU? sku;
+      if (skuMap != null) {
+        sku = NamiSKU.fromMap(skuMap);
+      }
+
+      if (action != null) {
+        onPaywallAction!(action, sku);
+      }
+    });
+
     var variableMap = {
       "label": label,
     };
-    Map<dynamic, dynamic> result =
-        await channel.invokeMethod("launch", variableMap);
 
+    final result = await channel.invokeMethod("launch", variableMap);
     var error = (result['error'] as String?)._toLaunchCampaignError();
-    return LaunchCampaignResult(result['success'], error);
+
+    return LaunchCampaignResult(result['success'] ?? false, error);
   }
 
   static Future<List<NamiCampaign>> allCampaigns() async {
     List<dynamic> list = await channel.invokeMethod("allCampaigns");
     return list.map((e) => NamiCampaign.fromMap(e)).toList();
   }
-
-  static const EventChannel _campaignsEvent =
-      const EventChannel('campaignsEvent');
 
   static Stream<List<NamiCampaign>> registerAvailableCampaignsHandler() {
     var data = _campaignsEvent
@@ -104,6 +128,35 @@ extension on String? {
       return LaunchCampaignError.PAYWALL_ALREADY_DISPLAYED;
     } else if (this == "sdk_not_initialized") {
       return LaunchCampaignError.CAMPAIGN_DATA_NOT_FOUND;
+    } else {
+      return null;
+    }
+  }
+}
+
+enum NamiPaywallAction {
+  NAMI_CLOSE_PAYWALL,
+  NAMI_RESTORE_PURCHASES,
+  NAMI_SIGN_IN,
+  NAMI_BUY_SKU,
+  NAMI_SELECT_SKU,
+  NAMI_PURCHASE_SELECTED_SKU
+}
+
+extension on String? {
+  NamiPaywallAction? _toNamiPaywallAction() {
+    if (this == "NAMI_CLOSE_PAYWALL") {
+      return NamiPaywallAction.NAMI_CLOSE_PAYWALL;
+    } else if (this == "NAMI_RESTORE_PURCHASES") {
+      return NamiPaywallAction.NAMI_RESTORE_PURCHASES;
+    } else if (this == "NAMI_SIGN_IN") {
+      return NamiPaywallAction.NAMI_SIGN_IN;
+    } else if (this == "NAMI_BUY_SKU") {
+      return NamiPaywallAction.NAMI_BUY_SKU;
+    } else if (this == "NAMI_SELECT_SKU") {
+      return NamiPaywallAction.NAMI_SELECT_SKU;
+    } else if (this == "NAMI_PURCHASE_SELECTED_SKU") {
+      return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
     } else {
       return null;
     }
