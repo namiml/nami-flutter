@@ -12,6 +12,9 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let journeyStateEventChannel = FlutterEventChannel(name: "journeyStateEvent", binaryMessenger: registrar.messenger())
         let accountStateEventChannel = FlutterEventChannel(name: "accountStateEvent", binaryMessenger: registrar.messenger())
         let campaignsEventChannel = FlutterEventChannel(name: "campaignsEvent", binaryMessenger: registrar.messenger())
+        let closePaywallEventChannel = FlutterEventChannel(name: "closePaywallEvent", binaryMessenger: registrar.messenger())
+        let buySkuEventChannel = FlutterEventChannel(name: "buySkuEvent", binaryMessenger:
+            registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
@@ -21,6 +24,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         journeyStateEventChannel.setStreamHandler(JourneyStateEventHandler())
         accountStateEventChannel.setStreamHandler(AccountStateEventHandler())
         campaignsEventChannel.setStreamHandler(CampaignsEventHandler())
+        closePaywallEventChannel.setStreamHandler(ClosePaywallEventHandler())
+        buySkuEventChannel.setStreamHandler(BuySkuEventHandler())
     }
 
     
@@ -293,6 +298,34 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             NamiCampaignManager.unregisterAvailableCampaignsHandler()
+            return nil
+        }
+    }
+    
+    class ClosePaywallEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiPaywallManager.registerCloseHandler { (fromvc) in
+                events(nil)
+            }
+            return nil
+        }
+        
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            NamiPaywallManager.registerCloseHandler(nil)
+            return nil
+        }
+    }
+    
+    class BuySkuEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiPaywallManager.registerBuySkuHandler { sku in
+                events(sku.id)
+            }
+            return nil
+        }
+        
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            NamiPaywallManager.registerBuySkuHandler(nil)
             return nil
         }
     }
