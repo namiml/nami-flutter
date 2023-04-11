@@ -1,6 +1,6 @@
 name: nami_flutter
-description: Integrate the Nami® platform with a few lines of code to launch, grow, and optimize your app's revenue with subscription and in-app purchases (IAPs).
-version: 3.0.0-alpha.03
+description:  Easy subscriptions & in-app purchases for Flutter, with powerful built-in paywalls and A/B testing.
+version: 3.0.7
 homepage: https://www.namiml.com/
 repository: https://github.com/namiml/nami-flutter/
 
