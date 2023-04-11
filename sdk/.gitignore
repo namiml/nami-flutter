@@ -4,6 +4,8 @@
 .packages
 .pub/
 
+Podfile.lock
+
 build/
 *.iml
 
