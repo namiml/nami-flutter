@@ -1,3 +1,11 @@
+# 3.0.7 (Apr 14, 2023)
+
+## Changelog
+
+### Maintenance
+
+- Update native SDK dependencies to 3.0.7
+
 # 3.0.0-alpha.03 (Oct 29, 2022)
 
 ## Changelog

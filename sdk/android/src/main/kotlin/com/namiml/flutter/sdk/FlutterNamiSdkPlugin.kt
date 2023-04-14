@@ -354,6 +354,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                 result.success(this)
                             }
                         }
+                        is LaunchCampaignResult.PurchaseChanged -> {
+                            with(mapOf("success" to true, "error" to null)) {
+                                result.success(this)
+                            }
+                        }
                     }
                 }
 
@@ -440,20 +445,20 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "allPurchases" -> {
                 result.success(NamiPurchaseManager.allPurchases().map { it.convertToMap() })
             }
-            "isSKUIDPurchased" -> {
+            "skuPurchased" -> {
                 val skuId = call.arguments as? String
                 skuId?.let {
                     result.success(NamiPurchaseManager.isSKUIDPurchased(it))
                 }
             }
-            "anySKUIDPurchased" -> {
+            "anySkuPurchased" -> {
                 @Suppress("UNCHECKED_CAST")
                 val skuIds = call.arguments as? List<String>
                 skuIds?.let {
                     result.success(NamiPurchaseManager.anySKUIDPurchased(it))
                 }
             }
-            "consumePurchasedSKU" -> {
+            "consumePurchasedSku" -> {
                 val skuRefId = call.arguments as? String
                 if (skuRefId != null) {
                     NamiPurchaseManager.consumePurchasedSKU(skuRefId)

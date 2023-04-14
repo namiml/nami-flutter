@@ -61,19 +61,15 @@ class NamiCampaignManager {
     return data;
   }
 
-  /**
-   * Asks Nami to fetch the latest active campaigns for this device
-   * @return list of active campaigns after updating.
-   */
+  /// Asks Nami to fetch the latest active campaigns for this device
+  /// @return list of active campaigns after updating.
   static Future<List<NamiCampaign>> refresh() async {
     List<dynamic> list = await channel.invokeMethod("campaigns.refresh");
     return list.map((e) => NamiCampaign.fromMap(e)).toList();
   }
 
-  /**
-   * Returns true if a campaign is available matching the provided label or default
-   * @param provided label or null if default campaign
-   */
+  /// Returns true if a campaign is available matching the provided label or default
+  /// @param provided label or null if default campaign
   static Future<bool> isCampaignAvailable({String? label}) async {
     var variableMap = {
       "label": label,

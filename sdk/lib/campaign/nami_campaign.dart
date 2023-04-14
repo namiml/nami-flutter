@@ -1,8 +1,6 @@
 import 'dart:core';
 
-/**
- * This object represents the campaign in Nami.
- */
+/// This object represents the campaign in Nami.
 class NamiCampaign {
   final String paywall;
   final String segment;

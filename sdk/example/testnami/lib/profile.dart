@@ -8,22 +8,30 @@ class ProfileWidget extends StatefulWidget {
   const ProfileWidget({Key? key}) : super(key: key);
 
   @override
-  _ProfileWidgetState createState() => new _ProfileWidgetState();
+  ProfileWidgetState createState() => ProfileWidgetState();
 
   @override
   setState() {}
 }
 
-class _ProfileWidgetState extends State<ProfileWidget>
+class ProfileWidgetState extends State<ProfileWidget>
     with WidgetsBindingObserver {
   List<StreamSubscription> _subscriptions = [];
-  CustomerJourneyState? _journeyState;
   String _deviceId = "";
   String _externalId = "";
   bool _isLoggedIn = false;
 
+  bool _formerSubscriber = false;
+  bool _inTrialPeriod = false;
+  bool _inIntroOfferPeriod = false;
+  bool _inGracePeriod = false;
+  bool _inPause = false;
+  bool _inAccountHold = false;
+  bool _isCancelled = false;
+
   void getDeviceId() async {
     var deviceId = await NamiCustomerManager.deviceId();
+    print("deviceId $deviceId");
 
     setState(() {
       _deviceId = deviceId;
@@ -36,9 +44,11 @@ class _ProfileWidgetState extends State<ProfileWidget>
 
     setState(() {
       _isLoggedIn = isLoggedIn;
-      if (_externalId != null) {
-        _externalId = loggedInId!;
+      if (loggedInId != null) {
+        _externalId = loggedInId;
       }
+      print(
+          "isLoggedIn $_isLoggedIn, loggedInId $_externalId, deviceId $_deviceId");
     });
   }
 
@@ -63,7 +73,13 @@ class _ProfileWidgetState extends State<ProfileWidget>
 
   void _updateJourneyState(CustomerJourneyState journeyState) {
     setState(() {
-      _journeyState = journeyState;
+      _formerSubscriber = journeyState.formerSubscriber;
+      _inTrialPeriod = journeyState.inTrialPeriod;
+      _inIntroOfferPeriod = journeyState.inIntroOfferPeriod;
+      _inGracePeriod = journeyState.inGracePeriod;
+      _inPause = journeyState.inPause;
+      _inAccountHold = journeyState.inAccountHold;
+      _isCancelled = journeyState.isCancelled;
       print("JourneyStateHandler triggered");
     });
 
@@ -90,7 +106,6 @@ class _ProfileWidgetState extends State<ProfileWidget>
     StreamSubscription journeyStateSubscription =
         NamiCustomerManager.registerJourneyStateHandler()
             .listen((journeyState) {
-      print("JourneyStateHandler triggered");
       _updateJourneyState(journeyState);
     });
 
@@ -175,39 +190,13 @@ class _ProfileWidgetState extends State<ProfileWidget>
                     ),
                   ],
                   rows: <DataRow>[
-                    dataRowItem(
-                        _journeyState != null
-                            ? _journeyState?.inTrialPeriod
-                            : false,
-                        'In Trial Period'),
-                    dataRowItem(
-                        _journeyState != null
-                            ? _journeyState?.inIntroOfferPeriod
-                            : false,
-                        'In Intro Offer Period'),
-                    dataRowItem(
-                        _journeyState != null
-                            ? _journeyState?.inGracePeriod
-                            : false,
-                        'In Grace Period'),
-                    dataRowItem(
-                        _journeyState != null ? _journeyState?.inPause : false,
-                        'In Pause'),
-                    dataRowItem(
-                        _journeyState != null
-                            ? _journeyState?.inAccountHold
-                            : false,
-                        'In Account Hold'),
-                    dataRowItem(
-                        _journeyState != null
-                            ? _journeyState?.isCancelled
-                            : false,
-                        'Is Cancelled'),
-                    dataRowItem(
-                        _journeyState != null
-                            ? _journeyState?.formerSubscriber
-                            : false,
-                        'Former Subscriber')
+                    dataRowItem(_inTrialPeriod, 'In Trial Period'),
+                    dataRowItem(_inIntroOfferPeriod, 'In Intro Offer Period'),
+                    dataRowItem(_inGracePeriod, 'In Grace Period'),
+                    dataRowItem(_inPause, 'In Pause'),
+                    dataRowItem(_inAccountHold, 'In Account Hold'),
+                    dataRowItem(_isCancelled, 'Is Cancelled'),
+                    dataRowItem(_formerSubscriber, 'Former Subscriber')
                   ],
                 )
               ]),
@@ -215,7 +204,7 @@ class _ProfileWidgetState extends State<ProfileWidget>
       ),
       floatingActionButton: FloatingActionButton.extended(
         label: Text(_isLoggedIn ? "Logout" : "Login"),
-        icon: new Icon(_isLoggedIn ? Icons.logout : Icons.login),
+        icon: Icon(_isLoggedIn ? Icons.logout : Icons.login),
         backgroundColor: namiPrimaryBlue,
         onPressed: () {
           if (_isLoggedIn == false) {

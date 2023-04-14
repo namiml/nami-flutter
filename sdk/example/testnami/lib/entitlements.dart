@@ -129,7 +129,7 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        label: Text("Refresh Entitlements"),
+        label: Text("Refresh"),
         icon: new Icon(Icons.refresh),
         backgroundColor: namiPrimaryBlue,
         onPressed: () {
