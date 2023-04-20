@@ -3,7 +3,7 @@ version '3.0.0-alpha.03'
 
 buildscript {
     ext.kotlin_version = '1.6.10'
-    ext.nami_sdk_version = '3.0.7'
+    ext.nami_sdk_version = '3.0.8.1'
     repositories {
         mavenCentral()
         google()
