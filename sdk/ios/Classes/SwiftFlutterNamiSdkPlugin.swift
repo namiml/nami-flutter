@@ -165,17 +165,19 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let allPurchases = NamiPurchaseManager.allPurchases()
             let listofMaps = allPurchases.map({ (namiPurchase: NamiPurchase) in namiPurchase.convertToMap()})
             result(listofMaps)
-        case "isSKUIDPurchased":
+        case "skuPurchased":
             let args = call.arguments as? String
             if let skuId = args {
                 result(NamiPurchaseManager.skuPurchased(skuId))
             }
-        case "anySKUIDPurchased":
+        case "anySkuPurchased":
             let args = call.arguments as? [String]
             if let skuIds = args {
                 result(NamiPurchaseManager.anySkuPurchased(skuIds))
             }
-        case "consumePurchasedSKU":
+        case "presentCodeRedemptionSheet":
+            NamiPurchaseManager.presentCodeRedemptionSheet()
+        case "consumePurchasedSku":
             let args = call.arguments as? String
             if let skuId = args {
                 NamiPurchaseManager.consumePurchasedSku(skuId: skuId)
@@ -217,68 +219,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             NamiPaywallManager.registerSignInHandler(nil)
-            return nil
-        }
-    }
-    
-    class AnalyticsEventHandler: NSObject, FlutterStreamHandler {
-        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiAnalyticsSupport.registerAnalyticsHandler { (actionType: NamiAnalyticsActionType, data: [String : Any]) in
-                var eventMap = [String : Any?]()
-                let typeString: String
-                if(actionType == NamiAnalyticsActionType.paywallRaise) {
-                    typeString = "paywall_raise"
-                } else {
-                    typeString = "purchase_activity"
-                }
-                eventMap["action_type"] = typeString
-                eventMap["campaign_rule"] = data[NamiAnalyticsKeys.campaignRule]
-                eventMap["campaign_segment"] = data[NamiAnalyticsKeys.campaignSegment]
-                eventMap["campaign_type"] = data[NamiAnalyticsKeys.campaignType]
-
-                if let campaignValue = data[NamiAnalyticsKeys.campaignValue] {
-                    eventMap["campaign_value"] = campaignValue
-                } else {
-                    eventMap["campaign_value"] = ""
-                }
-
-                eventMap["paywall"] = data[NamiAnalyticsKeys.paywall]
-                eventMap["paywall_type"] = data[NamiAnalyticsKeys.paywallType]
-
-                // TODO: Convert to NamiPurchase map
-//                 eventMap["purchased_sku"] = data[NamiAnalyticsKeys.purchasedSKU]
-//                 eventMap["purchased_sku_id"] = data[NamiAnalyticsKeys.purchasedSKUIdentifier]
-//                 eventMap["purchased_sku_price"] = data[NamiAnalyticsKeys.purchasedSKUPrice]
-//                 eventMap["purchased_sku_store_locale"] = data[NamiAnalyticsKeys.purchasedSKUStoreLocale]
-//                 eventMap["purchased_sku_locale"] = data[NamiAnalyticsKeys.purchasedSKULocale]
-//                 eventMap["purchased_sku_purchase_timestamp"] = data[NamiAnalyticsKeys.purchasedSKUPurchaseTimestamp_Date]
-
-                let activityType = data[NamiAnalyticsKeys.purchaseActivityType_ActivityType] as? NamiAnalyticsPurchaseActivityType
-                if(activityType == NamiAnalyticsPurchaseActivityType.cancelled) {
-                    eventMap["purchase_activity_type"] = "cancelled"
-                } else if (activityType == NamiAnalyticsPurchaseActivityType.newPurchase) {
-                    eventMap["purchase_activity_type"] = "new_purchase"
-                } else if (activityType == NamiAnalyticsPurchaseActivityType.restored) {
-                    eventMap["purchase_activity_type"] = "restored"
-                } else {
-                    eventMap["purchase_activity_type"] = "resubscribe"
-                }
-                let skus = data[NamiAnalyticsKeys.paywallSKUs] as? [NamiSKU]
-                var list = [[String: Any]]()
-                skus?.forEach { (sku: NamiSKU) in
-                    list.append(sku.convertToMap())
-                }
-                eventMap["paywall_skus"] = list
-
-                eventMap["paywall_raise_source"] = data[NamiAnalyticsKeys.paywallRaiseSource]
-
-                events(eventMap)
-            }
-            return nil
-        }
-        
-        func onCancel(withArguments arguments: Any?) -> FlutterError? {
-            NamiAnalyticsSupport.registerAnalyticsHandler(handler: nil)
             return nil
         }
     }

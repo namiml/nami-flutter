@@ -48,6 +48,11 @@ class NamiPurchaseManager {
     return channel.invokeMethod("consumePurchasedSku", skuID);
   }
 
+  /// Call the offer code redemption sheet (Apple-only)
+  static Future<void> presentCodeRedemptionSheet() {
+    return channel.invokeMethod("presentCodeRedemptionSheet");
+  }
+
   /// Initiate a Google Play Billing or Apple StoreKit purchase using
   /// [skuId] from a [NamiSKU]. Used by the linked paywall use case only.
   static Future<NamiPurchaseCompleteResult> buySku(String skuId) async {
