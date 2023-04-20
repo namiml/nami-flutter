@@ -1,10 +1,16 @@
-# 3.0.7 (Apr 14, 2023)
+# 3.0.7 (Apr 20, 2023)
 
 ## Changelog
 
+### Bugfixes
+
+- Handle native Android launch result case LaunchCampaignResult.PurchaseChanged 
+- Fix several bridge references
+
 ### Maintenance
 
-- Update native SDK dependencies to 3.0.7
+- Update native SDK dependencies
+- Improve sample app
 
 # 3.0.0-alpha.03 (Oct 29, 2022)
 
