@@ -1,22 +1,14 @@
 import 'package:flutter/services.dart';
 import 'package:nami_flutter/billing/nami_purchase.dart';
-import 'package:nami_flutter/paywall/nami_sku.dart';
 
 import '../channel.dart';
 
 /// Encapsulates all functionality relating to purchases made on the device
 /// whether it's done via the remote Google Play Billing service or Apple
-/// StoreKit or local Nami Bypass Store service
+/// StoreKit
 class NamiPurchaseManager {
   static const EventChannel _purchasesResponseHandlerData =
-      const EventChannel('purchasesResponseHandlerData');
-
-  /// Clears out any purchases made while bypassStore was enabled. This clears
-  /// out bypassStore purchases only, it cannot clear out production purchases
-  /// made on device.
-  static Future<void> clearBypassStorePurchases() {
-    return channel.invokeMethod("clearBypassStorePurchases");
-  }
+      EventChannel('purchasesResponseHandlerData');
 
   /// Returns a list of all purchases
   static Future<List<NamiPurchase>> allPurchases() async {
@@ -51,14 +43,6 @@ class NamiPurchaseManager {
   /// Call the offer code redemption sheet (Apple-only)
   static Future<void> presentCodeRedemptionSheet() {
     return channel.invokeMethod("presentCodeRedemptionSheet");
-  }
-
-  /// Initiate a Google Play Billing or Apple StoreKit purchase using
-  /// [skuId] from a [NamiSKU]. Used by the linked paywall use case only.
-  static Future<NamiPurchaseCompleteResult> buySku(String skuId) async {
-    Map<dynamic, dynamic> map = await channel.invokeMethod("buySku", skuId);
-    return NamiPurchaseCompleteResult(
-        (map['purchaseState'] as String)._toNamiPurchaseState(), map['error']);
   }
 
   static Stream<NamiPurchaseResponseHandlerData>

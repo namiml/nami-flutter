@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nami_flutter/billing/nami_purchase_success_apple.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
 import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
@@ -33,6 +34,10 @@ class CampaignWidgetState extends State<CampaignWidget> {
 
     NamiPaywallManager.registerBuySkuHandler().listen((sku) {
       print('start purchase process for $sku');
+
+      // Detect apple and create a fake NamiPurchaseSuccessApple()
+      // detect gogle and create a fake NamiPurchaseSuccessGoogle
+      // NamiPaywallManager.buySkuComplete(purchaseSuccess)
     });
   }
 
@@ -106,7 +111,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
         ),
         floatingActionButton: FloatingActionButton.extended(
             label: Text("Refresh"),
-            icon: new Icon(Icons.refresh),
+            icon: Icon(Icons.refresh),
             backgroundColor: namiPrimaryBlue,
             onPressed: () {
               NamiCampaignManager.refresh();
@@ -121,7 +126,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
           case NamiCampaignRuleType.DEFAULT:
             if (await NamiCampaignManager.isCampaignAvailable()) {
               result = await NamiCampaignManager.launch(
-                  onPaywallAction: (action, sku) {
+                  onPaywallAction: (action, sku, purchaseError, purchases) {
                 print("Paywall action $action");
               });
 
@@ -139,7 +144,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
                 label: campaign.value)) {
               result = await NamiCampaignManager.launch(
                   label: campaign.value,
-                  onPaywallAction: (action, sku) {
+                  onPaywallAction: (action, sku, purchaseError, purchases) {
                     print("Paywall action $action");
                   });
 

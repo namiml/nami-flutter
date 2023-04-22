@@ -15,7 +15,6 @@ class Nami {
     var variableMap = {
       'appPlatformIdApple': namiConfiguration.appPlatformIdApple,
       "appPlatformIdGoogle": namiConfiguration.appPlatformIdGoogle,
-      "bypassStore": namiConfiguration.bypassStore,
       "namiLogLevel": describeEnum(namiConfiguration.namiLogLevel),
       "extraDataList": extraDataList
     };

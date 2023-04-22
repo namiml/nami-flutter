@@ -1,3 +1,3 @@
 import 'package:flutter/services.dart';
 
-const MethodChannel channel = const MethodChannel('nami');
+const MethodChannel channel = MethodChannel('nami');

@@ -2,14 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
+import 'package:nami_flutter/paywall/nami_sku.dart';
+import 'package:nami_flutter/billing/nami_purchase_success.dart';
+import 'package:nami_flutter/billing/nami_purchase_success_apple.dart';
+import 'package:nami_flutter/billing/nami_purchase_success_amazon.dart';
+import 'package:nami_flutter/billing/nami_purchase_success_google.dart';
+
 import '../channel.dart';
 
 /// Class responsible for managing all aspects of a paywall in the Nami SDK
 class NamiPaywallManager {
-  static const EventChannel _signInEvent = const EventChannel('signInEvent');
+  static const EventChannel _signInEvent = EventChannel('signInEvent');
   static const EventChannel _closePaywallEvent =
-      const EventChannel('closePaywallEvent');
-  static const EventChannel _buySkuEvent = const EventChannel('buySkuEvent');
+      EventChannel('closePaywallEvent');
+  static const EventChannel _buySkuEvent = EventChannel('buySkuEvent');
 
   /// Will animate the closing of the paywall if [animated] is true. Returns
   /// [true] when paywall is dismissed, may be immediate if not presented
@@ -34,12 +40,27 @@ class NamiPaywallManager {
     return data;
   }
 
-  // Stream of skuId for when user presses sku on a paywall
-  static Stream<String> registerBuySkuHandler() {
+  // Stream of sku for when user presses sku on a paywall
+  static Stream<NamiSKU> registerBuySkuHandler() {
     var data = _buySkuEvent
         .receiveBroadcastStream()
-        .map((dynamic event) => event as String);
+        .map((dynamic event) => event as NamiSKU);
     return data;
+  }
+
+  static Future<void> buySkuComplete(
+      NamiPurchaseSuccess purchaseSuccess) async {
+    if (purchaseSuccess.runtimeType == NamiPurchaseSuccessApple) {
+      await channel.invokeMethod<void>(
+          "buySkuCompleteApple", purchaseSuccess.toString());
+    } else if (purchaseSuccess.runtimeType == NamiPurchaseSuccessAmazon) {
+      await channel.invokeMethod<void>(
+          "buySkuCompleteAmazon", purchaseSuccess.toString());
+    } else if (purchaseSuccess.runtimeType == NamiPurchaseSuccessGoogle) {
+      await channel.invokeMethod<void>(
+          "buySkuCompleteGoogle", purchaseSuccess.toString());
+    }
+    return;
   }
 }
 

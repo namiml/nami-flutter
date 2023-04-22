@@ -10,7 +10,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "nami", binaryMessenger: registrar.messenger())
         let signInEventChannel = FlutterEventChannel(name: "signInEvent", binaryMessenger: registrar.messenger())
-        let analyticsEventChannel = FlutterEventChannel(name: "analyticsEvent", binaryMessenger: registrar.messenger())
         let activeEntitlementsEventChannel = FlutterEventChannel(name: "activeEntitlementsEvent", binaryMessenger: registrar.messenger())
         let purchasesChangeEventChannel = FlutterEventChannel(name: "purchasesResponseHandlerData", binaryMessenger: registrar.messenger())
         let journeyStateEventChannel = FlutterEventChannel(name: "journeyStateEvent", binaryMessenger: registrar.messenger())
@@ -23,7 +22,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
-        analyticsEventChannel.setStreamHandler(AnalyticsEventHandler())
         activeEntitlementsEventChannel.setStreamHandler(ActiveEntitlementsEventHandler())
         purchasesChangeEventChannel.setStreamHandler(PurchasesChangedEventHandler())
         journeyStateEventChannel.setStreamHandler(JourneyStateEventHandler())
@@ -44,11 +42,9 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             if let myArgs = args as? [String: Any],
                let appPlatformId = myArgs["appPlatformIdApple"] as? String,
-               let bypassStore = myArgs["bypassStore"] as? Bool,
                let namiLogLevel = myArgs["namiLogLevel"] as? String,
                let namiCommands = myArgs["extraDataList"] as? Array<String> {
                let namiConfig = NamiConfiguration(appPlatformId: appPlatformId)
-                namiConfig.bypassStore = bypassStore
                 namiConfig.namiCommands = namiCommands
                 if(namiLogLevel == "debug") {
                     namiConfig.logLevel = NamiLogLevel.debug
@@ -159,8 +155,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             if let labels = args {
                 NamiMLManager.exitCoreContent(labels: labels)
             }
-        case "clearBypassStorePurchases":
-            NamiPurchaseManager.clearBypassStorePurchases()
         case "allPurchases":
             let allPurchases = NamiPurchaseManager.allPurchases()
             let listofMaps = allPurchases.map({ (namiPurchase: NamiPurchase) in namiPurchase.convertToMap()})
@@ -182,6 +176,12 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             if let skuId = args {
                 NamiPurchaseManager.consumePurchasedSku(skuId: skuId)
             }
+        case "buySkuCompleteApple":
+            let purchaseSuccess = call.arguments as? String
+            if let purchaseSuccess.convertToNamiPurchaseSuccess() {
+                NamiPaywallManager.buySkuComplete(purchaseSuccess: purchaseSuccess)
+            }
+
         default:
             result("iOS " + UIDevice.current.systemVersion)
         }
@@ -270,7 +270,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     class BuySkuEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.registerBuySkuHandler { sku in
-                events(sku.id)
+                let skuMap = sku.convertToMap()
+                events(skuMap)
             }
             return nil
         }

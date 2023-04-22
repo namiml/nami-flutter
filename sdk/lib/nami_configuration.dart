@@ -9,8 +9,6 @@ class NamiConfiguration {
   /// App Settings screen on the Platforms tab in the Nami Control Center.
   final String appPlatformIdGoogle;
 
-  final bool bypassStore;
-
   /// Optional preferable [NamiLogLevel] to set within SDK to get appropriate
   /// logging information. Make sure to either not set this param in release
   /// build, or set to [NamiLogLevel.error] if you would like Nami error logs
@@ -22,7 +20,6 @@ class NamiConfiguration {
   const NamiConfiguration(
       {required this.appPlatformIdApple,
       required this.appPlatformIdGoogle,
-      this.bypassStore = false,
       this.namiLogLevel = NamiLogLevel.warn,
       this.extraData});
 }

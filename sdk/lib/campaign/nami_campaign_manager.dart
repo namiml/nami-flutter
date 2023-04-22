@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 import 'package:nami_flutter/paywall/nami_sku.dart';
+import 'package:nami_flutter/billing/nami_purchase.dart';
 
 import '../channel.dart';
 
@@ -10,10 +11,9 @@ import '../channel.dart';
 /// by launching a campaign
 class NamiCampaignManager {
   // EventChannel(s) to listen for the event from native
-  static const EventChannel _campaignsEvent =
-      const EventChannel('campaignsEvent');
+  static const EventChannel _campaignsEvent = EventChannel('campaignsEvent');
   static const EventChannel _paywallActionEvent =
-      const EventChannel('paywallActionEvent');
+      EventChannel('paywallActionEvent');
 
   /// Launch a campaign to raise a paywall
   ///
@@ -22,7 +22,7 @@ class NamiCampaignManager {
   /// - A [onPaywallAction] callback to listen for the actions triggered on paywall
   static Future<LaunchCampaignResult> launch(
       {String? label,
-      Function(NamiPaywallAction, NamiSKU?)? onPaywallAction}) async {
+      Function(NamiPaywallAction, NamiSKU?, String?, List<NamiPurchase>?)? onPaywallAction}) async {
     // Listen for the paywall action event
     _paywallActionEvent.receiveBroadcastStream().listen((event) {
       NamiPaywallAction? action =
@@ -33,8 +33,17 @@ class NamiCampaignManager {
         sku = NamiSKU.fromMap(skuMap);
       }
 
+      String? purchaseError = event["purchaseError"] as String?;
+
+      // List<dynamic> dynamicPurchases = event["purchases"];
+      List<NamiPurchase> purchases = List.empty(growable: true) as List<NamiPurchase>;
+      // dynamicPurchases.forEach((element) {
+      //   NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
+      //   purchases.add(namiPurchase);
+      // });
+
       if (action != null) {
-        onPaywallAction!(action, sku);
+        onPaywallAction!(action, sku, purchaseError, purchases);
       }
     });
 
@@ -136,7 +145,13 @@ enum NamiPaywallAction {
   NAMI_SIGN_IN,
   NAMI_BUY_SKU,
   NAMI_SELECT_SKU,
-  NAMI_PURCHASE_SELECTED_SKU
+  NAMI_PURCHASE_SELECTED_SKU,
+  NAMI_PURCHASE_SUCCESS,
+  NAMI_PURCHASE_CANCELLED,
+  NAMI_PURCHASE_FAILED,
+  NAMI_PURCHASE_DEFERRED,
+  NAMI_PURCHASE_PENDING,
+  NAMI_PURCHASE_UNKNOWN
 }
 
 extension on String? {
@@ -153,6 +168,10 @@ extension on String? {
       return NamiPaywallAction.NAMI_SELECT_SKU;
     } else if (this == "NAMI_PURCHASE_SELECTED_SKU") {
       return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
+    } else if (this == "NAMI_PURCHASE_SUCCESS") {
+      return NamiPaywallAction.NAMI_PURCHASE_SUCCESS;
+    } else if (this == "NAMI_PURCHASE_SUCCESS") {
+      return NamiPaywallAction.NAMI_PURCHASE_SUCCESS;
     } else {
       return null;
     }

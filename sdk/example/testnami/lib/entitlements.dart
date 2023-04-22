@@ -8,7 +8,7 @@ class EntitlementsWidget extends StatefulWidget {
   const EntitlementsWidget({Key? key}) : super(key: key);
 
   @override
-  _EntitlementsWidgetState createState() => new _EntitlementsWidgetState();
+  _EntitlementsWidgetState createState() => _EntitlementsWidgetState();
 
   @override
   setState() {}
@@ -130,7 +130,7 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
       ),
       floatingActionButton: FloatingActionButton.extended(
         label: Text("Refresh"),
-        icon: new Icon(Icons.refresh),
+        icon: Icon(Icons.refresh),
         backgroundColor: namiPrimaryBlue,
         onPressed: () {
           NamiEntitlementManager.refresh();

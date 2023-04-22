@@ -9,10 +9,6 @@ import com.namiml.NamiConfiguration
 import com.namiml.NamiLanguageCode
 import com.namiml.NamiLogLevel
 import com.namiml.NamiError
-import com.namiml.analytics.NamiAnalyticsActionType
-import com.namiml.analytics.NamiAnalyticsKeys
-import com.namiml.analytics.NamiAnalyticsPurchaseActivityType
-import com.namiml.analytics.NamiAnalyticsSupport
 import com.namiml.billing.NamiPurchase
 import com.namiml.billing.NamiPurchaseCompleteResult
 import com.namiml.billing.NamiPurchaseManager
@@ -65,7 +61,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     /// when the Flutter Engine is detached from the Activity
     private lateinit var channel: MethodChannel
     private lateinit var signInListener: EventChannel
-    private lateinit var analyticsListener: EventChannel
     private lateinit var activeEntitlementsListener: EventChannel
     private lateinit var journeyStateListener: EventChannel
     private lateinit var purchaseChangeListener: EventChannel
@@ -77,12 +72,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var context: Context
     private var currentActivityWeakReference: WeakReference<Activity>? = null
 
-    private var paywallActionCallback : ((NamiPaywallAction, NamiSKU?) -> Unit)? = null
+    private var paywallActionCallback : ((NamiPaywallAction, NamiSKU?, String?, List<NamiPurchase>?) -> Unit)? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
         signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
-        analyticsListener = EventChannel(flutterPluginBinding.binaryMessenger, "analyticsEvent")
         activeEntitlementsListener =
             EventChannel(flutterPluginBinding.binaryMessenger, "activeEntitlementsEvent")
         purchaseChangeListener =
@@ -102,7 +96,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
-        setAnalyticsStreamHandler()
         setActiveEntitlementsStreamHandler()
         setPurchaseChangeStreamHandler()
         setCustomerJourneyStateHandler()
@@ -143,31 +136,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             override fun onCancel(arguments: Any?) {
                 NamiPaywallManager.registerSignInHandler(null)
-            }
-        })
-    }
-
-    private fun setAnalyticsStreamHandler() {
-        analyticsListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                NamiAnalyticsSupport.registerAnalyticsHandler { namiAnalyticsActionType, map ->
-                    val finalMap = HashMap(map)
-                    finalMap["type"] = namiAnalyticsActionType.getFlutterString()
-                    @Suppress("UNCHECKED_CAST")
-                    val skus = map[NamiAnalyticsKeys.PAYWALL_PRODUCTS] as? List<NamiSKU>
-                    finalMap[NamiAnalyticsKeys.PAYWALL_PRODUCTS] = skus?.map { it.convertToMap() }
-                    val purchasedProduct = map[NamiAnalyticsKeys.PURCHASE_PRODUCT] as? NamiSKU
-                    finalMap[NamiAnalyticsKeys.PURCHASE_PRODUCT] = purchasedProduct?.convertToMap()
-                    val activityType = map[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE]
-                        as? NamiAnalyticsPurchaseActivityType
-                    finalMap[NamiAnalyticsKeys.PURCHASE_ACTIVITY_TYPE] =
-                        activityType?.getFlutterString()
-                    events?.success(finalMap)
-                }
-            }
-
-            override fun onCancel(arguments: Any?) {
-                NamiAnalyticsSupport.registerAnalyticsHandler(null)
             }
         })
     }
@@ -268,9 +236,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         buySkuListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                NamiPaywallManager.registerBuySkuHandler { _, skuId ->
+                NamiPaywallManager.registerBuySkuHandler { _, sku ->
                     CoroutineScope(Dispatchers.Main).launch {
-                        events?.success(skuId)
+                        val skuMap = sku.convertToMap()
+                        events?.success(skuMap)
                     }
                 }
             }
@@ -285,12 +254,14 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         paywallActionListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                paywallActionCallback = { action, sku ->
+                paywallActionCallback = { action, sku, purchaseError, purchases ->
                     CoroutineScope(Dispatchers.Main).launch {
                         events?.success(
                             mapOf(
                                 "action" to action.name,
-                                "sku" to sku?.convertToMap()
+                                "sku" to sku?.convertToMap(),
+                                "purchaseError" to purchaseError?.toString(),
+                                "purchases" to purchases?.map { it.convertToMap() }
                             )
                         )
                     }
@@ -316,7 +287,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 configure(
                     context,
                     call.argument<String>("appPlatformIdGoogle"),
-                    call.argument<Boolean>("bypassStore"),
                     namiLogLevel,
                     call.argument<List<String>>("extraDataList")
                 )
@@ -354,16 +324,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                                 result.success(this)
                             }
                         }
-                        is LaunchCampaignResult.PurchaseChanged -> {
-                            with(mapOf("success" to true, "error" to null)) {
-                                result.success(this)
-                            }
-                        }
                     }
                 }
 
-                val actionCallback = { action: NamiPaywallAction, sku: NamiSKU? ->
-                    paywallActionCallback?.invoke(action, sku)
+                val actionCallback = { action: NamiPaywallAction, sku: NamiSKU?, purchaseError: String?, purchases: List<NamiPurchase>? ->
+                    paywallActionCallback?.invoke(action, sku, purchaseError, purchases)
                     Unit
                 }
 
@@ -439,9 +404,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     NamiMLManager.exitCoreContent(it)
                 }
             }
-            "clearBypassStorePurchases" -> {
-                NamiPurchaseManager.clearBypassStorePurchases()
-            }
             "allPurchases" -> {
                 result.success(NamiPurchaseManager.allPurchases().map { it.convertToMap() })
             }
@@ -473,7 +435,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private fun configure(
         context: Context,
         platformId: String?,
-        bypass: Boolean?,
         namiLogLevel: NamiLogLevel,
         extraDataList: List<String>?
     ) {
@@ -482,7 +443,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
         val configuration = NamiConfiguration.build(context, platformId) {
             this.logLevel = namiLogLevel
-            this.bypassStore = bypass ?: false
             this.settingsList = extraDataList
         }
         Nami.configure(configuration)
@@ -580,15 +540,6 @@ private fun AccountStateAction.getFlutterString(): String {
     }
 }
 
-private fun NamiAnalyticsPurchaseActivityType.getFlutterString(): String? {
-    return when (this) {
-        NamiAnalyticsPurchaseActivityType.NEW_PURCHASE -> "new_purchase"
-        NamiAnalyticsPurchaseActivityType.RESTORE -> "restore"
-        NamiAnalyticsPurchaseActivityType.RESUBSCRIBE -> "resubscribe"
-        else -> null
-    }
-}
-
 private fun NamiSKU.convertToMap(): Map<String, Any?> {
     return hashMapOf(
         "name" to this.name,
@@ -636,15 +587,6 @@ private fun NamiPurchaseState.getFlutterString(): String {
         else -> "unknown"
     }
 }
-
-private fun NamiAnalyticsActionType.getFlutterString(): String {
-    return when (this) {
-        NamiAnalyticsActionType.PAYWALL_RAISE -> "paywall_raise"
-        NamiAnalyticsActionType.PAYWALL_RAISE_BLOCKED -> "paywall_raise_blocked"
-        NamiAnalyticsActionType.PURCHASE_ACTIVITY -> "purchase_activity"
-    }
-}
-
 
 private fun LaunchCampaignError.getFlutterString(): String {
     return when (this) {
