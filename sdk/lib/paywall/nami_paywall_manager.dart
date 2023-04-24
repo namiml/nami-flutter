@@ -44,7 +44,7 @@ class NamiPaywallManager {
   static Stream<NamiSKU> registerBuySkuHandler() {
     var data = _buySkuEvent
         .receiveBroadcastStream()
-        .map((dynamic event) => event as NamiSKU);
+        .map((dynamic event) => NamiSKU.fromMap(event));
     return data;
   }
 

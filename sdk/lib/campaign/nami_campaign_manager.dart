@@ -22,7 +22,8 @@ class NamiCampaignManager {
   /// - A [onPaywallAction] callback to listen for the actions triggered on paywall
   static Future<LaunchCampaignResult> launch(
       {String? label,
-      Function(NamiPaywallAction, NamiSKU?, String?, List<NamiPurchase>?)? onPaywallAction}) async {
+      Function(NamiPaywallAction, NamiSKU?, String?, List<NamiPurchase>?)?
+          onPaywallAction}) async {
     // Listen for the paywall action event
     _paywallActionEvent.receiveBroadcastStream().listen((event) {
       NamiPaywallAction? action =
@@ -35,12 +36,12 @@ class NamiCampaignManager {
 
       String? purchaseError = event["purchaseError"] as String?;
 
-      // List<dynamic> dynamicPurchases = event["purchases"];
-      List<NamiPurchase> purchases = List.empty(growable: true) as List<NamiPurchase>;
-      // dynamicPurchases.forEach((element) {
-      //   NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
-      //   purchases.add(namiPurchase);
-      // });
+      List<dynamic>? dynamicPurchases = event["purchases"];
+      List<NamiPurchase> purchases = [];
+      dynamicPurchases?.forEach((element) {
+        NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
+        purchases.add(namiPurchase);
+      });
 
       if (action != null) {
         onPaywallAction!(action, sku, purchaseError, purchases);
