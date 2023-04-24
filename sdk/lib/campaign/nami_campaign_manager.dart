@@ -35,12 +35,12 @@ class NamiCampaignManager {
 
       String? purchaseError = event["purchaseError"] as String?;
 
-      // List<dynamic> dynamicPurchases = event["purchases"];
-      List<NamiPurchase> purchases = List.empty(growable: true) as List<NamiPurchase>;
-      // dynamicPurchases.forEach((element) {
-      //   NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
-      //   purchases.add(namiPurchase);
-      // });
+      List<dynamic>? dynamicPurchases = event["purchases"];
+      List<NamiPurchase> purchases = [];
+      dynamicPurchases?.forEach((element) {
+        NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
+        purchases.add(namiPurchase);
+      });
 
       if (action != null) {
         onPaywallAction!(action, sku, purchaseError, purchases);
