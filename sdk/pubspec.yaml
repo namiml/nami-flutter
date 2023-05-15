@@ -1,6 +1,6 @@
 name: nami_flutter
 description:  Easy subscriptions & in-app purchases for Flutter, with powerful built-in paywalls and A/B testing.
-version: 3.0.7
+version: 3.0.9
 homepage: https://www.namiml.com/
 repository: https://github.com/namiml/nami-flutter/
 

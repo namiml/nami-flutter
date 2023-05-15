@@ -1,3 +1,9 @@
+# 3.0.9 (May 15, 2023)
+
+# Changelog
+
+- Update bridge to support Apple SDK 3.0.9 and Android SDK 3.0.9
+
 # 3.0.7 (Apr 20, 2023)
 
 ## Changelog

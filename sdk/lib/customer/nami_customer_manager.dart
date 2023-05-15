@@ -59,7 +59,7 @@ class NamiCustomerManager {
   /// if no id has been stored, including if a string was passed to
   /// [login] that was not valid.
   static Future<String?> loggedInId() async {
-    final String loggedInId = await channel.invokeMethod("loggedInId");
+    final String? loggedInId = await channel.invokeMethod("loggedInId");
     return loggedInId;
   }
 
