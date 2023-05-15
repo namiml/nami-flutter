@@ -136,6 +136,18 @@ enum AccountStateAction {
   /// The account state being required relates to [NamiCustomerManager.logout]
   logout,
 
+  advertising_id_set,
+
+  advertising_id_cleared,
+
+  vendor_id_set,
+
+  vendor_id_cleared,
+
+  customer_data_platform_id_set,
+
+  customer_data_platform_id_cleared,
+
   /// Unknown account state
   unknown
 }
@@ -146,6 +158,18 @@ extension on String {
       return AccountStateAction.login;
     } else if (this == "logout") {
       return AccountStateAction.logout;
+    } else if (this == "advertising_id_set") {
+      return AccountStateAction.advertising_id_set;
+    } else if (this == "advertising_id_cleared") {
+      return AccountStateAction.advertising_id_cleared;
+    } else if (this == "vendor_id_set") {
+      return AccountStateAction.vendor_id_set;
+    } else if (this == "vendor_id_cleared") {
+      return AccountStateAction.vendor_id_cleared;
+    } else if (this == "customer_data_platform_id_set") {
+      return AccountStateAction.customer_data_platform_id_set;
+    } else if (this == "customer_data_platform_id_cleared") {
+      return AccountStateAction.customer_data_platform_id_cleared;
     } else {
       return AccountStateAction.unknown;
     }
