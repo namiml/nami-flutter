@@ -18,7 +18,7 @@ class ProfileWidgetState extends State<ProfileWidget>
     with WidgetsBindingObserver {
   List<StreamSubscription> _subscriptions = [];
   String _deviceId = "";
-  String _externalId = "";
+  String? _externalId;
   bool _isLoggedIn = false;
 
   bool _formerSubscriber = false;
@@ -44,9 +44,7 @@ class ProfileWidgetState extends State<ProfileWidget>
 
     setState(() {
       _isLoggedIn = isLoggedIn;
-      if (loggedInId != null) {
-        _externalId = loggedInId;
-      }
+      _externalId = loggedInId;
       print(
           "isLoggedIn $_isLoggedIn, loggedInId $_externalId, deviceId $_deviceId");
     });

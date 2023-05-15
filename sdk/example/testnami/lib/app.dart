@@ -96,7 +96,7 @@ class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
 
     var namiConfiguration = NamiConfiguration(
         appPlatformIdApple: iosAppPlatformId,
-        appPlatformIdGoogle: androidAppPlatformId,
+        appPlatformIdAndroid: androidAppPlatformId,
         namiLogLevel: NamiLogLevel.debug,
         extraData: extraData);
     Nami.configure(namiConfiguration);

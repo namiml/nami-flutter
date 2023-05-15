@@ -7,7 +7,7 @@ class NamiConfiguration {
 
   /// A UUID for the Android app. You can find the Nami App Platform ID in the
   /// App Settings screen on the Platforms tab in the Nami Control Center.
-  final String appPlatformIdGoogle;
+  final String appPlatformIdAndroid;
 
   final bool bypassStore;
 
@@ -21,7 +21,7 @@ class NamiConfiguration {
 
   const NamiConfiguration(
       {required this.appPlatformIdApple,
-      required this.appPlatformIdGoogle,
+      required this.appPlatformIdAndroid,
       this.bypassStore = false,
       this.namiLogLevel = NamiLogLevel.warn,
       this.extraData});

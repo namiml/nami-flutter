@@ -165,6 +165,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
               ? "default"
               : campaign.value ?? '',
           style: const TextStyle(fontSize: 20),
+          textAlign: TextAlign.center,
         ),
       ),
     );

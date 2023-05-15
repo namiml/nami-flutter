@@ -10,7 +10,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "nami", binaryMessenger: registrar.messenger())
         let signInEventChannel = FlutterEventChannel(name: "signInEvent", binaryMessenger: registrar.messenger())
-        let analyticsEventChannel = FlutterEventChannel(name: "analyticsEvent", binaryMessenger: registrar.messenger())
         let activeEntitlementsEventChannel = FlutterEventChannel(name: "activeEntitlementsEvent", binaryMessenger: registrar.messenger())
         let purchasesChangeEventChannel = FlutterEventChannel(name: "purchasesResponseHandlerData", binaryMessenger: registrar.messenger())
         let journeyStateEventChannel = FlutterEventChannel(name: "journeyStateEvent", binaryMessenger: registrar.messenger())
@@ -23,7 +22,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
         signInEventChannel.setStreamHandler(SignInEventHandler())
-        analyticsEventChannel.setStreamHandler(AnalyticsEventHandler())
         activeEntitlementsEventChannel.setStreamHandler(ActiveEntitlementsEventHandler())
         purchasesChangeEventChannel.setStreamHandler(PurchasesChangedEventHandler())
         journeyStateEventChannel.setStreamHandler(JourneyStateEventHandler())
@@ -360,6 +358,18 @@ public extension AccountStateAction {
             return "login"
         case AccountStateAction.logout:
             return "logout"
+        case  AccountStateAction.ADVERTISING_ID_SET:
+            return "advertising_id_set"
+        case  AccountStateAction.ADVERTISING_ID_CLEARED:
+            return "advertising_id_cleared"
+        case  AccountStateAction.VENDOR_ID_SET:
+            return "vendor_id_set"
+        case  AccountStateAction.VENDOR_ID_CLEARED:
+            return "vendor_id_cleared"
+        case  AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_SET:
+            return "customer_data_platform_id_set"
+        case  AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_CLEARED:
+            return "customer_data_platform_id_cleared"
         default:
             return "unknown"
         }
@@ -369,6 +379,8 @@ public extension AccountStateAction {
 public extension NamiPaywallAction {
     func toFlutterString() -> String {
         switch self {
+        case NamiPaywallAction.show_paywall:
+            return "NAMI_SHOW_PAYWALL"
         case NamiPaywallAction.close_paywall:
             return "NAMI_CLOSE_PAYWALL"
         case NamiPaywallAction.restore_purchases:
