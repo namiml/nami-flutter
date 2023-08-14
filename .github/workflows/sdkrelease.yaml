@@ -6,14 +6,14 @@ on:
       ref:
         description: "Git Tag, Branch or SHA to build"
         required: true
-        default: "develop"
+        default: "main"
       earlyaccess:
         description: "Is this a early access build?"
         default: true
-        type: boolean        
+        type: boolean
     secrets:
       BUILD_USER_PAT:
-        required: true    
+        required: true
 
 jobs:
   build:
