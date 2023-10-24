@@ -546,6 +546,7 @@ private fun AccountStateAction.getFlutterString(): String {
         AccountStateAction.VENDOR_ID_CLEARED -> "vendor_id_cleared"
         AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_SET -> "customer_data_platform_id_set"
         AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_CLEARED -> "customer_data_platform_id_cleared"
+        AccountStateAction.
         else -> "unknown"
     }
 }

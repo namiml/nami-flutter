@@ -18,28 +18,25 @@ class NamiCampaignManager {
   /// Launch a campaign to raise a paywall
   ///
   /// Optionally you can provide,
-  /// - A [label] to identify a specific campaign
+  /// - A [label] to identify a campaign placement by label
+  /// - A [url] to identify a deeplink campaign placement by url
   /// - A [onPaywallAction] callback to listen for the actions triggered on paywall
   static Future<LaunchCampaignResult> launch(
       {String? label,
-      Function(NamiPaywallAction, NamiSKU?)? onPaywallAction}) async {
+        String? url,
+      Function(NamiPaywallEvent?)? onPaywallAction}) async {
     // Listen for the paywall action event
     _paywallActionEvent.receiveBroadcastStream().listen((event) {
-      NamiPaywallAction? action =
-          (event["action"] as String?)._toNamiPaywallAction();
-      Map<dynamic, dynamic>? skuMap = event["sku"] as Map<dynamic, dynamic>?;
-      NamiSKU? sku;
-      if (skuMap != null) {
-        sku = NamiSKU.fromMap(skuMap);
-      }
+      NamiPaywallEvent? paywallEvent = event._toNamiPaywallEvent();
 
-      if (action != null) {
-        onPaywallAction!(action, sku);
+      if (paywallEvent != null) {
+        onPaywallAction!(paywallEvent);
       }
     });
 
     var variableMap = {
       "label": label,
+      "url": url
     };
 
     final result = await channel.invokeMethod("launch", variableMap);
@@ -131,17 +128,29 @@ extension on String? {
 }
 
 enum NamiPaywallAction {
+  NAMI_SHOW_PAYWALL,
   NAMI_CLOSE_PAYWALL,
   NAMI_RESTORE_PURCHASES,
   NAMI_SIGN_IN,
   NAMI_BUY_SKU,
   NAMI_SELECT_SKU,
-  NAMI_PURCHASE_SELECTED_SKU
+  NAMI_PURCHASE_SELECTED_SKU,
+  NAMI_PURCHASE_SUCCESS,
+  NAMI_PURCHASE_CANCELLED,
+  NAMI_PURCHASE_FAILED,
+  NAMI_PURCHASE_PENDING,
+  NAMI_PURCHASE_UNKNOWN,
+  NAMI_PAGE_CHANGE,
+  NAMI_TOGGLE_CHANGE,
+  NAMI_SLIDE_CHANGE
+
 }
 
 extension on String? {
   NamiPaywallAction? _toNamiPaywallAction() {
-    if (this == "NAMI_CLOSE_PAYWALL") {
+    if (this == "NAMI_SHOW_PAYWALL") {
+    return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
+    } else if (this == "NAMI_CLOSE_PAYWALL") {
       return NamiPaywallAction.NAMI_CLOSE_PAYWALL;
     } else if (this == "NAMI_RESTORE_PURCHASES") {
       return NamiPaywallAction.NAMI_RESTORE_PURCHASES;
@@ -153,6 +162,22 @@ extension on String? {
       return NamiPaywallAction.NAMI_SELECT_SKU;
     } else if (this == "NAMI_PURCHASE_SELECTED_SKU") {
       return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
+    } else if (this == "NAMI_PURCHASE_SUCCESS") {
+      return NamiPaywallAction.NAMI_PURCHASE_SUCCESS;
+    } else if (this == "NAMI_PURCHASE_CANCELLED") {
+      return NamiPaywallAction.NAMI_PURCHASE_CANCELLED;
+    } else if (this == "NAMI_PURCHASE_FAILED") {
+      return NamiPaywallAction.NAMI_PURCHASE_FAILED;
+    } else if (this == "NAMI_PURCHASE_PENDING") {
+      return NamiPaywallAction.NAMI_PURCHASE_PENDING;
+    } else if (this == "NAMI_PURCHASE_UNKNOWN") {
+      return NamiPaywallAction.NAMI_PURCHASE_UNKNOWN;
+    } else if (this == "NAMI_PAGE_CHANGE") {
+      return NamiPaywallAction.NAMI_PAGE_CHANGE;
+    } else if (this == "NAMI_TOGGLE_CHANGE") {
+      return NamiPaywallAction.NAMI_TOGGLE_CHANGE;
+    } else if (this == "NAMI_SLIDE_CHANGE") {
+      return NamiPaywallAction.NAMI_SLIDE_CHANGE;
     } else {
       return null;
     }

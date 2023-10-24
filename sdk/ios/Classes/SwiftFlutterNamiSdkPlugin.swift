@@ -3,7 +3,7 @@ import UIKit
 import NamiApple
 
 struct NamiFlutterCache {
-    static var paywallActionCallback: ((NamiPaywallAction, NamiSKU?) -> Void)?
+    static var paywallActionCallback: ((NamiPaywallEvent) -> Void)?
 }
 
 public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
@@ -16,6 +16,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let accountStateEventChannel = FlutterEventChannel(name: "accountStateEvent", binaryMessenger: registrar.messenger())
         let campaignsEventChannel = FlutterEventChannel(name: "campaignsEvent", binaryMessenger: registrar.messenger())
         let closePaywallEventChannel = FlutterEventChannel(name: "closePaywallEvent", binaryMessenger: registrar.messenger())
+        let restorePaywallEventChannel = FlutterEventChannel(name: "restorePaywallEvent", binaryMessenger: registrar.messenger())
         let buySkuEventChannel = FlutterEventChannel(name: "buySkuEvent", binaryMessenger:
             registrar.messenger())
         let paywallActionEventChannel = FlutterEventChannel(name: "paywallActionEvent", binaryMessenger: registrar.messenger())
@@ -28,6 +29,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         accountStateEventChannel.setStreamHandler(AccountStateEventHandler())
         campaignsEventChannel.setStreamHandler(CampaignsEventHandler())
         closePaywallEventChannel.setStreamHandler(ClosePaywallEventHandler())
+        restorePaywallEventChannel.setStreamHandler(RestorePaywallEventHandler())
         buySkuEventChannel.setStreamHandler(BuySkuEventHandler())
         paywallActionEventChannel.setStreamHandler(PaywallActionEventHandler())
     }
@@ -42,11 +44,9 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             if let myArgs = args as? [String: Any],
                let appPlatformId = myArgs["appPlatformIdApple"] as? String,
-               let bypassStore = myArgs["bypassStore"] as? Bool,
                let namiLogLevel = myArgs["namiLogLevel"] as? String,
                let namiCommands = myArgs["extraDataList"] as? Array<String> {
                let namiConfig = NamiConfiguration(appPlatformId: appPlatformId)
-                namiConfig.bypassStore = bypassStore
                 namiConfig.namiCommands = namiCommands
                 if(namiLogLevel == "debug") {
                     namiConfig.logLevel = NamiLogLevel.debug
@@ -80,17 +80,23 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let args = call.arguments as? [String: Any]
             if let data = args {
                 let label = data["label"] as? String
+                let urlString = data["url"] as? String
+
                 let campaignLaunchHandler = { (success: Bool, error: Error?) in
                     result(handleLaunchCampaignResult(success: success, error: error))
                 }
 
-                let paywallActionHandler = { (action: NamiPaywallAction, sku: NamiSKU?, purchaseError: Error?, purchases: [NamiApple.NamiPurchase]) in
-                    NamiFlutterCache.paywallActionCallback?(action, sku)
+                let paywallActionHandler = { (paywallEvent: NamiPaywallEvent) in
+                    NamiFlutterCache.paywallActionCallback?(paywallEvent)
                     return
                 }
 
-                if(label != nil) {
+                if (label != nil) {
                     NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
+                } else if (urlString != nil) {
+                    let url = URL
+                    NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
+
                 } else {
                     NamiCampaignManager.launch(launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
                 }
@@ -110,6 +116,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let args = call.arguments as? [String: Any]
             var isAvailable = false
             if let data = args {
+            // TODO: support URL
                 let label = data["label"] as? String
                 if(label != nil){
                     isAvailable = NamiCampaignManager.isCampaignAvailable(label: label!)
@@ -124,6 +131,14 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             NamiPaywallManager.dismiss(animated: animated) {
                 result(true)
             }
+
+        case "buySkuComplete":
+            // buySkuComplete
+
+        case "buySkuCancel":
+            // buySkuCancel
+
+
         case "journeyState":
             if let state = NamiCustomerManager.journeyState() {
                 result(state.convertToMap())
@@ -157,8 +172,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             if let labels = args {
                 NamiMLManager.exitCoreContent(labels: labels)
             }
-        case "clearBypassStorePurchases":
-            NamiPurchaseManager.clearBypassStorePurchases()
         case "allPurchases":
             let allPurchases = NamiPurchaseManager.allPurchases()
             let listofMaps = allPurchases.map({ (namiPurchase: NamiPurchase) in namiPurchase.convertToMap()})
@@ -220,6 +233,22 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
+
+        class RestoreEventHandler: NSObject, FlutterStreamHandler {
+            func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+                NamiPaywallManager.registerRestoreHandler {
+                    // TODO: Figure out what the right thing to do here is.
+                    events(true)
+                }
+                return nil
+            }
+
+            func onCancel(withArguments arguments: Any?) -> FlutterError? {
+                NamiPaywallManager.registerRestoreHandler(nil)
+                return nil
+            }
+        }
+
     
     class ActiveEntitlementsEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
@@ -331,8 +360,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
 
     class PaywallActionEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-            NamiFlutterCache.paywallActionCallback = { (action: NamiPaywallAction, sku: NamiSKU?) in
-                events(self.handlePaywallAction(action: action, sku: sku))
+            NamiFlutterCache.paywallActionCallback = { (paywallEvent: NamiPaywallEvent) in
+                events(self.handlePaywallEvent(event: paywallEvent))
             }
             return nil
         }
@@ -341,10 +370,30 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
 
-        private func handlePaywallAction(action: NamiPaywallAction, sku: NamiSKU?) -> [String: Any?] {
+        private func handlePaywallEvent(event: NamiPaywallEvent) -> [String: Any?] {
             var map = [String: Any?]()
-            map["action"] = action.toFlutterString()
-            map["sku"] = sku?.convertToMap()
+            map["action"] = event.action.toFlutterString()
+            map["campaignId"] = event.campaignId
+            map["campaignName"] = event.campaignName
+            map["campaignType"] = event.campaignType.toFlutterString()
+            map["campaignLabel"] = event.campaignLabel
+            map["campaignUrl"] = event.campaignUrl
+            map["paywallId"] = event.paywallId
+            map["paywallName"] = event.paywallName
+
+            map["componentChange"] = event.componentChange.convertToMap()
+
+            map["segmentId"] = event.segmentId
+            map["externalSegmentId"] = event.externalSegmentId
+
+            map["paywallLaunchContext"] = event.paywallLaunchContext.convertToMap()
+
+            map["deeplinkUrl"] = event.externalSegmentId
+
+            map["sku"] = event.sku?.convertToMap()
+            map["purchaseError"] = event.purchaseError?.description
+            map["purchases"] = event.purchases?.convertToMap()
+
             return map
         }
     }
@@ -358,18 +407,26 @@ public extension AccountStateAction {
             return "login"
         case AccountStateAction.logout:
             return "logout"
-        case  AccountStateAction.ADVERTISING_ID_SET:
+        case  AccountStateAction.advertising_id_set:
             return "advertising_id_set"
-        case  AccountStateAction.ADVERTISING_ID_CLEARED:
+        case  AccountStateAction.advertising_id_cleared:
             return "advertising_id_cleared"
-        case  AccountStateAction.VENDOR_ID_SET:
+        case  AccountStateAction.vendor_id_set:
             return "vendor_id_set"
-        case  AccountStateAction.VENDOR_ID_CLEARED:
+        case  AccountStateAction.vendor_id_cleared:
             return "vendor_id_cleared"
-        case  AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_SET:
+        case  AccountStateAction.customer_data_platform_id_set:
             return "customer_data_platform_id_set"
-        case  AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_CLEARED:
+        case  AccountStateAction.customer_data_platform_id_cleared:
             return "customer_data_platform_id_cleared"
+        case AccountStateAction.anonymous_mode_on:
+            return "anonymous_mode_on"
+        case AccountStateAction.anonymous_mode_off:
+            return "anonymous_mode_off"
+        case AccountStateAction.nami_device_id_set:
+            return "nami_device_id_set"
+        case AccountStateAction.nami_device_id_cleared:
+            return "nami_device_id_cleared"
         default:
             return "unknown"
         }
@@ -494,10 +551,12 @@ public extension NamiCampaign {
         var map = [String: Any]()
         map["paywall"] = self.paywall
         map["segment"] = self.segment
-        if(self.type == NamiCampaignRuleType.default) {
+        if(self.type == NamiCampaignType.default) {
             map["type"] = "DEFAULT"
-        } else if (self.type == NamiCampaignRuleType.label) {
+        } else if (self.type == NamiCampaignType.label) {
             map["type"] = "LABEL"
+        } else if (self.type == NamiCampaignType.url) {
+            map["type"] = "URL"
         } else {
             map["type"] = "LABEL"
         }

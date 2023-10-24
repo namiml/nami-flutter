@@ -9,9 +9,6 @@ class NamiEntitlement {
   /// Description of entitlement
   final String? description;
 
-  /// Internal ID for use by the Nami SDK
-  final String? namiId;
-
   /// The unique ID of the entitlement defined in the Nami Control Center, use
   /// this to refer to the system when referencing an entitlement.
   final String referenceId;
@@ -27,7 +24,7 @@ class NamiEntitlement {
   /// That [NamiSKU] must reside in [purchasedSKUs].
   final List<NamiPurchase> activePurchases;
 
-  NamiEntitlement(this.name, this.description, this.namiId, this.referenceId,
+  NamiEntitlement(this.name, this.description, this.referenceId,
       this.relatedSKUs, this.purchasedSKUs, this.activePurchases);
 
   /// Return [true] if there is at least one purchase that unlocked this
@@ -65,7 +62,7 @@ class NamiEntitlement {
   @override
   String toString() {
     return 'NamiEntitlement{name: $name, description: $description, '
-        'namiId: $namiId, referenceId: $referenceId, relatedSKUs: $relatedSKUs,'
+        'referenceId: $referenceId, relatedSKUs: $relatedSKUs,'
         'purchasedSKUs: $purchasedSKUs, activePurchases: $activePurchases}';
   }
 }
