@@ -10,6 +10,8 @@ class NamiPaywallManager {
   static const EventChannel _closePaywallEvent =
       const EventChannel('closePaywallEvent');
   static const EventChannel _buySkuEvent = const EventChannel('buySkuEvent');
+  static const EventChannel _restorePaywallEvent =
+  const EventChannel('restorePaywallEvent');
 
   /// Will animate the closing of the paywall if [animated] is true. Returns
   /// [true] when paywall is dismissed, may be immediate if not presented
@@ -20,17 +22,20 @@ class NamiPaywallManager {
   }
 
   /// Stream for when user presses sign in button on a paywall
-  static Stream<NamiSignInClicked> signInEvents() {
-    var data = _signInEvent
-        .receiveBroadcastStream()
-        .map((dynamic event) => NamiSignInClicked(event));
-
+  static Stream<void> signInEvents() {
+    var data = _signInEvent.receiveBroadcastStream();
     return data;
   }
 
   // Stream for when user presses close on a paywall
   static Stream<void> registerCloseHandler() {
     var data = _closePaywallEvent.receiveBroadcastStream();
+    return data;
+  }
+
+  // Stream for when user presses restore on a paywall
+  static Stream<void> registerRestoreHandler() {
+    var data = _restorePaywallEvent.receiveBroadcastStream();
     return data;
   }
 
@@ -41,19 +46,6 @@ class NamiPaywallManager {
         .map((dynamic event) => event as String);
     return data;
   }
-}
-
-class PreparePaywallResult {
-  final bool success;
-  final PreparePaywallError? error;
-
-  PreparePaywallResult(this.success, this.error);
-}
-
-class NamiSignInClicked {
-  final bool clicked;
-
-  NamiSignInClicked(this.clicked);
 }
 
 enum PreparePaywallError {

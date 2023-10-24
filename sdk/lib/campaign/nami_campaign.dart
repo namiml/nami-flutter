@@ -20,7 +20,7 @@ class NamiCampaign {
   }
 }
 
-enum NamiCampaignRuleType { DEFAULT, LABEL }
+enum NamiCampaignRuleType { DEFAULT, LABEL, URL }
 
 extension on String? {
   NamiCampaignRuleType toNamiCampaignRuleType() {
@@ -28,6 +28,8 @@ extension on String? {
       return NamiCampaignRuleType.DEFAULT;
     } else if (this == "LABEL") {
       return NamiCampaignRuleType.LABEL;
+    } else if (this == "URL") {
+      return NamiCampaignRuleType.URL;
     } else {
       return NamiCampaignRuleType.LABEL;
     }

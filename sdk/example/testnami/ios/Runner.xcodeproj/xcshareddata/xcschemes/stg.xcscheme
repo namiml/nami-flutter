@@ -51,7 +51,7 @@
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../../Runner/Test Nami Flutter STG.storekit">
+         identifier = "../STG.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
