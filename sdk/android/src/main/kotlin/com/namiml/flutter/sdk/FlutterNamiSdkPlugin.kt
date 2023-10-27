@@ -14,6 +14,7 @@ import com.namiml.billing.NamiPurchaseCompleteResult
 import com.namiml.billing.NamiPurchaseManager
 import com.namiml.billing.NamiPurchaseState
 import com.namiml.campaign.NamiCampaignManager
+import com.namiml.paywall.model.NamiPaywallEvent
 import com.namiml.campaign.LaunchCampaignError
 import com.namiml.campaign.LaunchCampaignResult
 import com.namiml.customer.CustomerJourneyState
@@ -70,7 +71,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var context: Context
     private var currentActivityWeakReference: WeakReference<Activity>? = null
 
-    private var paywallActionCallback : ((String, String?, String, NamiPaywallAction, NamiSKU?, String?, List<NamiPurchase>?) -> Unit)? = null
+    private var paywallActionCallback : ((NamiPaywallEvent) -> Unit)? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
@@ -251,17 +252,17 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         paywallActionListener.setStreamHandler(object : StreamHandler(),
             EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
-                paywallActionCallback = { campaignId, campaignLabel, paywallId, action, sku, purchaseError, purchases ->
+                paywallActionCallback = {namiPaywallEvent ->
                     CoroutineScope(Dispatchers.Main).launch {
                         events?.success(
-                            mapOf(
-                                "campaignId" to campaignId,
-                                "campaignLabel" to campaignLabel,
-                                "paywallId" to paywallId,
-                                "action" to action.name,
-                                "sku" to sku?.convertToMap(),
-                                "purchaseError" to purchaseError,
-                                "purchases" to purchases?.map { it.convertToMap() }
+                                hashMapOf<String,Any?>(
+                                "campaignId" to namiPaywallEvent.campaignId,
+                                "campaignLabel" to namiPaywallEvent.campaignLabel,
+                                "paywallId" to namiPaywallEvent.paywallId,
+                                "action" to namiPaywallEvent.action.name,
+                                "sku" to namiPaywallEvent.sku?.convertToMap(),
+                                "purchaseError" to namiPaywallEvent.purchaseError,
+                                "purchases" to namiPaywallEvent.purchases?.map { it.convertToMap() }
                             )
                         )
                     }
@@ -327,8 +328,26 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                 }
 
-                val actionCallback = { campaignId: String, campaignLabel: String?, paywallId: String, action: NamiPaywallAction, sku: NamiSKU?, purchaseError: String?, purchases: List<NamiPurchase>? ->
-                    paywallActionCallback?.invoke(campaignId, campaignLabel, paywallId, action, sku, purchaseError, purchases)
+
+                val actionCallback  = { namiPaywallEvent: NamiPaywallEvent->
+//                    val namiPaywallEvent = NamiPayWallEvent(
+//                            action = action,
+//                            campaignId=campaignId,
+//                            campaignName=null,
+//                            campaignUrl=campaignUrl,
+//                            paywallId=paywallId,
+//                            paywallName=paywallName,
+//                            componentChange=componentChange,
+//                            segmentId=segmentId,
+//                            externalSegmentId=externalSegmentId,
+//                            deeplinkUrl=deeplinkUrl,
+//                            sku=sku,
+//                            purchaseError=purchaseError,
+//                            purchases=purchases,
+//                            skus= skus
+//                            )
+//
+                    paywallActionCallback?.invoke(namiPaywallEvent)
                     Unit
                 }
 
@@ -338,8 +357,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     NamiCampaignManager.launch(
                         activity,
                         label,
-                        actionCallback,
-                        callback
+                            actionCallback,
+                            null,
+                            null,
+                            callback
+
                     )
                 }
             }
@@ -527,6 +549,7 @@ private fun NamiPurchase.convertToMap(): Map<String, Any?> {
     )
 }
 
+
 private fun NamiPurchaseSource.getFlutterString(): String {
     return when (this) {
         NamiPurchaseSource.CAMPAIGN -> "campaign"
@@ -535,6 +558,8 @@ private fun NamiPurchaseSource.getFlutterString(): String {
         else -> ""
     }
 }
+
+//TODO: ADD ACCOUNTSTATEACTION HERE
 
 private fun AccountStateAction.getFlutterString(): String {
     return when (this) {
@@ -546,7 +571,7 @@ private fun AccountStateAction.getFlutterString(): String {
         AccountStateAction.VENDOR_ID_CLEARED -> "vendor_id_cleared"
         AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_SET -> "customer_data_platform_id_set"
         AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_CLEARED -> "customer_data_platform_id_cleared"
-        AccountStateAction.
+//        AccountStateAction.
         else -> "unknown"
     }
 }

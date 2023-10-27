@@ -28,12 +28,9 @@ class NamiCampaignManager {
       Function(NamiPaywallEvent?)? onPaywallAction}) async {
     // Listen for the paywall action event
     _paywallActionEvent.receiveBroadcastStream().listen((event) {
-      if (event != null) {
-        NamiPaywallEvent? paywallEvent = _toNamiPaywallEvent(event.cast<String?,dynamic>());
-
-        if (paywallEvent != null) {
-          onPaywallAction!(paywallEvent);
-        }
+      NamiPaywallEvent? paywallEvent = _toNamiPaywallEvent(event);
+      if (paywallEvent != null) {
+        onPaywallAction!(paywallEvent);
       }
     });
 
@@ -45,10 +42,9 @@ class NamiCampaignManager {
     return LaunchCampaignResult(result['success'] ?? false, error);
   }
 
-  static NamiPaywallEvent _toNamiPaywallEvent(Map<String?,dynamic> map){
+  static NamiPaywallEvent _toNamiPaywallEvent(Map<dynamic, dynamic> map) {
     return NamiPaywallEvent.fromMap(map);
   }
-
 
   static Future<List<NamiCampaign>> allCampaigns() async {
     List<dynamic> list = await channel.invokeMethod("allCampaigns");
@@ -87,7 +83,6 @@ class NamiCampaignManager {
     }).toList();
   }
 }
-
 
 enum LaunchCampaignError {
   /// SDK must be initialized via [Nami.configure] before launching a campaign
