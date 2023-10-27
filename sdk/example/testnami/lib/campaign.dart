@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
+import 'package:nami_flutter/campaign/nami_paywall_event.dart';
 import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
 import 'package:testnami/constants.dart';
 
@@ -121,9 +122,10 @@ class CampaignWidgetState extends State<CampaignWidget> {
           case NamiCampaignRuleType.DEFAULT:
             if (await NamiCampaignManager.isCampaignAvailable()) {
               result = await NamiCampaignManager.launch(
-                  onPaywallAction: (action, sku) {
-                print("Paywall action $action");
-              });
+                  label: campaign.value,
+                  onPaywallAction: (paywallEvent) {
+                    print("Paywall event $paywallEvent");
+                  });
 
               if (result.success) {
                 print("Campaign (no label) launched successfully");
@@ -139,8 +141,8 @@ class CampaignWidgetState extends State<CampaignWidget> {
                 label: campaign.value)) {
               result = await NamiCampaignManager.launch(
                   label: campaign.value,
-                  onPaywallAction: (action, sku) {
-                    print("Paywall action $action");
+                  onPaywallAction: (paywallEvent) {
+                    print("Paywall event $paywallEvent");
                   });
 
               if (result.success) {

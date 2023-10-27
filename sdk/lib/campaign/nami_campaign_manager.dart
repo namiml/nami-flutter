@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
-import 'package:nami_flutter/paywall/nami_sku.dart';
-
+import '../billing/nami_purchase.dart';
 import '../channel.dart';
+import '../paywall/nami_sku.dart';
+import 'nami_paywall_event.dart';
 
 /// Manager class which providing functionality related to displaying a paywall
 /// by launching a campaign
@@ -23,27 +24,31 @@ class NamiCampaignManager {
   /// - A [onPaywallAction] callback to listen for the actions triggered on paywall
   static Future<LaunchCampaignResult> launch(
       {String? label,
-        String? url,
+      String? url,
       Function(NamiPaywallEvent?)? onPaywallAction}) async {
     // Listen for the paywall action event
     _paywallActionEvent.receiveBroadcastStream().listen((event) {
-      NamiPaywallEvent? paywallEvent = event._toNamiPaywallEvent();
+      if (event != null) {
+        NamiPaywallEvent? paywallEvent = _toNamiPaywallEvent(event.cast<String?,dynamic>());
 
-      if (paywallEvent != null) {
-        onPaywallAction!(paywallEvent);
+        if (paywallEvent != null) {
+          onPaywallAction!(paywallEvent);
+        }
       }
     });
 
-    var variableMap = {
-      "label": label,
-      "url": url
-    };
+    var variableMap = {"label": label, "url": url};
 
     final result = await channel.invokeMethod("launch", variableMap);
     var error = (result['error'] as String?)._toLaunchCampaignError();
 
     return LaunchCampaignResult(result['success'] ?? false, error);
   }
+
+  static NamiPaywallEvent _toNamiPaywallEvent(Map<String?,dynamic> map){
+    return NamiPaywallEvent.fromMap(map);
+  }
+
 
   static Future<List<NamiCampaign>> allCampaigns() async {
     List<dynamic> list = await channel.invokeMethod("allCampaigns");
@@ -82,6 +87,7 @@ class NamiCampaignManager {
     }).toList();
   }
 }
+
 
 enum LaunchCampaignError {
   /// SDK must be initialized via [Nami.configure] before launching a campaign
@@ -143,43 +149,4 @@ enum NamiPaywallAction {
   NAMI_PAGE_CHANGE,
   NAMI_TOGGLE_CHANGE,
   NAMI_SLIDE_CHANGE
-
-}
-
-extension on String? {
-  NamiPaywallAction? _toNamiPaywallAction() {
-    if (this == "NAMI_SHOW_PAYWALL") {
-    return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
-    } else if (this == "NAMI_CLOSE_PAYWALL") {
-      return NamiPaywallAction.NAMI_CLOSE_PAYWALL;
-    } else if (this == "NAMI_RESTORE_PURCHASES") {
-      return NamiPaywallAction.NAMI_RESTORE_PURCHASES;
-    } else if (this == "NAMI_SIGN_IN") {
-      return NamiPaywallAction.NAMI_SIGN_IN;
-    } else if (this == "NAMI_BUY_SKU") {
-      return NamiPaywallAction.NAMI_BUY_SKU;
-    } else if (this == "NAMI_SELECT_SKU") {
-      return NamiPaywallAction.NAMI_SELECT_SKU;
-    } else if (this == "NAMI_PURCHASE_SELECTED_SKU") {
-      return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
-    } else if (this == "NAMI_PURCHASE_SUCCESS") {
-      return NamiPaywallAction.NAMI_PURCHASE_SUCCESS;
-    } else if (this == "NAMI_PURCHASE_CANCELLED") {
-      return NamiPaywallAction.NAMI_PURCHASE_CANCELLED;
-    } else if (this == "NAMI_PURCHASE_FAILED") {
-      return NamiPaywallAction.NAMI_PURCHASE_FAILED;
-    } else if (this == "NAMI_PURCHASE_PENDING") {
-      return NamiPaywallAction.NAMI_PURCHASE_PENDING;
-    } else if (this == "NAMI_PURCHASE_UNKNOWN") {
-      return NamiPaywallAction.NAMI_PURCHASE_UNKNOWN;
-    } else if (this == "NAMI_PAGE_CHANGE") {
-      return NamiPaywallAction.NAMI_PAGE_CHANGE;
-    } else if (this == "NAMI_TOGGLE_CHANGE") {
-      return NamiPaywallAction.NAMI_TOGGLE_CHANGE;
-    } else if (this == "NAMI_SLIDE_CHANGE") {
-      return NamiPaywallAction.NAMI_SLIDE_CHANGE;
-    } else {
-      return null;
-    }
-  }
 }
