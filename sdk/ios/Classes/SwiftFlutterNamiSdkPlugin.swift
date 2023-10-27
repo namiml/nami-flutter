@@ -29,7 +29,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         accountStateEventChannel.setStreamHandler(AccountStateEventHandler())
         campaignsEventChannel.setStreamHandler(CampaignsEventHandler())
         closePaywallEventChannel.setStreamHandler(ClosePaywallEventHandler())
-        restorePaywallEventChannel.setStreamHandler(RestorePaywallEventHandler())
+//         restorePaywallEventChannel.setStreamHandler(RestorePaywallEventHandler())
         buySkuEventChannel.setStreamHandler(BuySkuEventHandler())
         paywallActionEventChannel.setStreamHandler(PaywallActionEventHandler())
     }
@@ -94,9 +94,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 if (label != nil) {
                     NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
                 } else if (urlString != nil) {
-                    let url = URL
+                    let url = URL(string: urlString!)
                     NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
-
                 } else {
                     NamiCampaignManager.launch(launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
                 }
@@ -134,10 +133,11 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
 
         case "buySkuComplete":
             // buySkuComplete
+            return
 
         case "buySkuCancel":
             // buySkuCancel
-
+            return
 
         case "journeyState":
             if let state = NamiCustomerManager.journeyState() {
@@ -381,18 +381,18 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             map["paywallId"] = event.paywallId
             map["paywallName"] = event.paywallName
 
-            map["componentChange"] = event.componentChange.convertToMap()
+         //   map["componentChange"] = event.componentChange.convertToMap()
 
             map["segmentId"] = event.segmentId
             map["externalSegmentId"] = event.externalSegmentId
 
-            map["paywallLaunchContext"] = event.paywallLaunchContext.convertToMap()
+         //   map["paywallLaunchContext"] = event.paywallLaunchContext.convertToMap()
 
             map["deeplinkUrl"] = event.externalSegmentId
 
             map["sku"] = event.sku?.convertToMap()
-            map["purchaseError"] = event.purchaseError?.description
-            map["purchases"] = event.purchases?.convertToMap()
+            map["purchaseError"] = event.purchaseError
+            map["purchases"] = event.purchases.map({ $0.convertToMap() })
 
             return map
         }
@@ -450,6 +450,21 @@ public extension NamiPaywallAction {
             return "NAMI_SELECT_SKU"
         case NamiPaywallAction.purchase_selected_sku:
             return "NAMI_PURCHASE_SELECTED_SKU"
+        default:
+            return "unknown"
+        }
+    }
+}
+
+public extension NamiCampaignType {
+    func toFlutterString() -> String {
+        switch self {
+        case NamiCampaignType.default:
+            return "DEFAULT"
+        case NamiCampaignType.label:
+            return "LABEL"
+        case NamiCampaignType.url:
+            return "URL"
         default:
             return "unknown"
         }
