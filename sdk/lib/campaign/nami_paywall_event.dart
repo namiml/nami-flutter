@@ -5,32 +5,38 @@ import '../paywall/nami_sku.dart';
 import 'nami_campaign_manager.dart';
 
 class NamiPaywallEvent {
-  String campaignId;
+  NamiPaywallAction action;
+  String? campaignId;
   String? campaignName;
-  String? campaignLabel;
   NamiCampaignRuleType? campaignType;
-  String paywallId;
+  String? campaignLabel;
+  String? campaignUrl;
+  String? paywallId;
   String? paywallName;
   String? segmentId;
-  NamiPaywallAction action;
+  String? externalSegmentId;
+  String? deepLinkUrl;
   NamiSKU? sku;
   String? purchaseError;
   List<NamiPurchase>? purchases;
 
   NamiPaywallEvent(
+      this.action,
       this.campaignId,
       this.campaignName,
-      this.campaignLabel,
       this.campaignType,
+      this.campaignLabel,
+      this.campaignUrl,
       this.paywallId,
       this.paywallName,
       this.segmentId,
-      this.action,
+      this.externalSegmentId,
+      this.deepLinkUrl,
       this.sku,
       this.purchaseError,
       this.purchases);
 
-  factory NamiPaywallEvent.fromMap(Map<dynamic?, dynamic?> map) {
+  factory NamiPaywallEvent.fromMap(Map<dynamic, dynamic> map) {
     List<dynamic> dynamicPurchases = map['purchases'];
     List<NamiPurchase> namiPurchases = List.empty(growable: true);
     dynamicPurchases.forEach((element) {
@@ -38,14 +44,17 @@ class NamiPaywallEvent {
     });
 
     return NamiPaywallEvent(
+        (map['action'] as String)._toNamiPaywallAction(),
         map['campaignId'],
         map['campaignName'],
-        map['campaignLabel'],
         (map['campaignType'] as String?).toNamiCampaignRuleType(),
+        map['campaignUrl'],
+        map['campaignLabel'],
         map['paywallId'],
         map['paywallName'],
         map['segmentId'],
-        (map['action'] as String?)._toNamiPaywallAction(),
+        map['externalSegmentId'],
+        map['deepLinkUrl'],
         map['sku']!=null?NamiSKU.fromMap(map['sku']):null,
         map['purchaseError'],
         namiPurchases);
@@ -66,7 +75,7 @@ extension on String? {
   }
 }
 
-extension on String? {
+extension on String {
   NamiPaywallAction _toNamiPaywallAction() {
     if (this == "NAMI_SHOW_PAYWALL") {
       return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
