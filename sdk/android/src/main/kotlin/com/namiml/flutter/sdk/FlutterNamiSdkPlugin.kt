@@ -330,27 +330,9 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 
                 val actionCallback  = { namiPaywallEvent: NamiPaywallEvent->
-//                    val namiPaywallEvent = NamiPayWallEvent(
-//                            action = action,
-//                            campaignId=campaignId,
-//                            campaignName=null,
-//                            campaignUrl=campaignUrl,
-//                            paywallId=paywallId,
-//                            paywallName=paywallName,
-//                            componentChange=componentChange,
-//                            segmentId=segmentId,
-//                            externalSegmentId=externalSegmentId,
-//                            deeplinkUrl=deeplinkUrl,
-//                            sku=sku,
-//                            purchaseError=purchaseError,
-//                            purchases=purchases,
-//                            skus= skus
-//                            )
-//
                     paywallActionCallback?.invoke(namiPaywallEvent)
                     Unit
                 }
-
                 val label = call.argument<String>("label") ?: ""
 
                 currentActivityWeakReference?.get()?.let { activity ->
