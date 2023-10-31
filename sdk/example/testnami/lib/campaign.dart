@@ -1,9 +1,17 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:nami_flutter/billing/nami_purchase.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
-import 'package:nami_flutter/campaign/nami_paywall_event.dart';
 import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
+import 'package:nami_flutter/paywall/nami_purchase_success.dart';
+import 'package:nami_flutter/paywall/nami_sku.dart';
 import 'package:testnami/constants.dart';
+import 'package:in_app_purchase_android/in_app_purchase_android.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 
 class CampaignWidget extends StatefulWidget {
   const CampaignWidget({Key? key}) : super(key: key);
@@ -14,10 +22,26 @@ class CampaignWidget extends StatefulWidget {
 
 class CampaignWidgetState extends State<CampaignWidget> {
   List<NamiCampaign> _campaigns = [];
+  Map<String, NamiSKU> identifiers = {};
+  List<ProductDetails> productDetails = [];
+  ProductDetails? productDetail;
+  AppStoreProductDetails? appStoreProductDetails;
+  GooglePlayProductDetails? googlePlayProductDetails;
+  late final StreamSubscription<List<PurchaseDetails>> _subscription;
+  final InAppPurchase inAppPurchase = InAppPurchase.instance;
 
   @override
   void initState() {
     super.initState();
+    final Stream<List<PurchaseDetails>> _purchaseUpdated =
+        InAppPurchase.instance.purchaseStream;
+    _subscription = _purchaseUpdated.listen((purchaseDetailList) {
+      _listenToPurchaseUpdated(purchaseDetailList);
+    }, onDone: () {
+      _subscription.cancel();
+    }, onError: (error) {
+      print(error.toString());
+    });
 
     NamiCampaignManager.registerAvailableCampaignsHandler().listen((list) {
       setState(() {
@@ -31,15 +55,101 @@ class CampaignWidgetState extends State<CampaignWidget> {
         _campaigns = list;
       });
     });
-
-    NamiPaywallManager.registerBuySkuHandler().listen((sku) {
-      print('start purchase process for $sku');
-    });
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  Future<void> initStoreInfo() async {
+    final bool isAvailable = await inAppPurchase.isAvailable();
+    if (isAvailable) {
+      NamiPaywallManager.registerBuySkuHandler().listen((sku) async {
+        identifiers.addAll(Map.of({sku.skuId: sku}));
+        ProductDetailsResponse productDetailsResponse =
+            await inAppPurchase.queryProductDetails({sku.skuId});
+        productDetails = productDetailsResponse.productDetails;
+      });
+    }
+  }
+
+  //To buy any Product
+  Future<void> _buyProduct(NamiSKU sku) async {
+    productDetail = productDetails.first;
+    getProductDetail(productDetail!);
+    PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetail!);
+    if (sku.type == NamiSKUType.subscription) {
+      await inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
+    } else {
+      await inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
+    }
+  }
+
+  void getProductDetail(ProductDetails productDetails) {
+    if (productDetail is AppStoreProductDetails) {
+      appStoreProductDetails = productDetails as AppStoreProductDetails;
+    } else {
+      googlePlayProductDetails = productDetails as GooglePlayProductDetails;
+    }
+  }
+
+  void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
+    if (purchaseDetailsList.isNotEmpty) {
+      for (PurchaseDetails purchaseDetails in purchaseDetailsList) {
+        if (!purchaseDetails.pendingCompletePurchase) continue;
+        if (purchaseDetails.status == PurchaseStatus.purchased) {
+          NamiSKU namiSku = identifiers[purchaseDetails.productID]!;
+          final namiPurchaseSuccess = Platform.isIOS
+              ? handleiOSPurchase(namiSku, purchaseDetails)
+              : handleAndroidPurchase(namiSku, purchaseDetails);
+          if (namiPurchaseSuccess != null) {
+            NamiPaywallManager.buySkuComplete(namiPurchaseSuccess);
+          }
+        } else if (purchaseDetails.status == PurchaseStatus.canceled) {
+          // Handle an error caused by a user cancelling the purchase flow.
+          NamiPaywallManager.buySkuCancel();
+        }
+      }
+    }
+  }
+
+  NamiPurchaseSuccess? handleAndroidPurchase(
+      NamiSKU sku, PurchaseDetails purchaseDetails) {
+    NamiPurchaseSuccess? namiPurchaseSuccessGoogle;
+    GooglePlayPurchaseDetails googlePlayPurchaseDetails =
+        purchaseDetails as GooglePlayPurchaseDetails;
+    namiPurchaseSuccessGoogle = NamiPurchaseSuccessGoogle(
+        NamiSKU(sku.name, sku.skuId, sku.type),
+        null,
+        googlePlayPurchaseDetails.transactionDate!,
+        NamiPurchaseSource.campaign,
+        googlePlayProductDetails!.description,
+        googlePlayPurchaseDetails.purchaseID!,
+        googlePlayPurchaseDetails.verificationData.serverVerificationData);
+    return namiPurchaseSuccessGoogle;
+  }
+
+  NamiPurchaseSuccess? handleiOSPurchase(
+      NamiSKU sku, PurchaseDetails purchaseDetail) {
+    NamiPurchaseSuccess? namiPurchaseSuccessApple;
+    AppStorePurchaseDetails appStorePurchaseDetails =
+        purchaseDetail as AppStorePurchaseDetails;
+    final originalTransaction =
+        appStorePurchaseDetails.skPaymentTransaction.originalTransaction;
+    if (originalTransaction != null) {
+      namiPurchaseSuccessApple = NamiPurchaseSuccessApple(
+          NamiSKU(sku.name, sku.skuId, sku.type),
+          null,
+          appStorePurchaseDetails.transactionDate!,
+          appStorePurchaseDetails.purchaseID!,
+          originalTransaction.transactionIdentifier!,
+          originalTransaction.transactionTimeStamp.toString(),
+          appStoreProductDetails!.price,
+          appStoreProductDetails!.currencyCode,
+          appStoreProductDetails!.skProduct.localizedTitle);
+    }
+    return namiPurchaseSuccessApple;
   }
 
   @override

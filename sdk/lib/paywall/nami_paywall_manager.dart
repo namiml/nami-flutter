@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:nami_flutter/paywall/nami_purchase_success.dart';
+import 'package:nami_flutter/paywall/nami_sku.dart';
 
 import '../channel.dart';
 
@@ -11,7 +13,7 @@ class NamiPaywallManager {
       const EventChannel('closePaywallEvent');
   static const EventChannel _buySkuEvent = const EventChannel('buySkuEvent');
   static const EventChannel _restorePaywallEvent =
-  const EventChannel('restorePaywallEvent');
+      const EventChannel('restorePaywallEvent');
 
   /// Will animate the closing of the paywall if [animated] is true. Returns
   /// [true] when paywall is dismissed, may be immediate if not presented
@@ -40,10 +42,21 @@ class NamiPaywallManager {
   }
 
   // Stream of skuId for when user presses sku on a paywall
-  static Stream<String> registerBuySkuHandler() {
+  static Stream<NamiSKU> registerBuySkuHandler() {
     var data = _buySkuEvent
         .receiveBroadcastStream()
-        .map((dynamic event) => event as String);
+        .map((dynamic event) => NamiSKU.fromMap(event));
+    return data;
+  }
+
+  static Future<void> buySkuComplete(NamiPurchaseSuccess namiPurchaseSuccess) {
+    var data =
+        channel.invokeMethod<bool>("buySkuComplete", namiPurchaseSuccess);
+    return data;
+  }
+
+  static Future<void> buySkuCancel() {
+    var data = channel.invokeMethod<bool>("buySkuCancel");
     return data;
   }
 }
