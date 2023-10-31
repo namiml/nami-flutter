@@ -216,8 +216,8 @@ class CampaignWidgetState extends State<CampaignWidget> {
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
-            label: Text("Refresh"),
-            icon: new Icon(Icons.refresh),
+            label: const Text("Refresh"),
+            icon: Icon(Icons.refresh),
             backgroundColor: namiPrimaryBlue,
             onPressed: () {
               NamiCampaignManager.refresh();
