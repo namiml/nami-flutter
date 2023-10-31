@@ -25,8 +25,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
   Map<String, NamiSKU> identifiers = {};
   List<ProductDetails> productDetails = [];
   ProductDetails? productDetail;
-  AppStoreProductDetails? appStoreProductDetails;
-  GooglePlayProductDetails? googlePlayProductDetails;
+
   late final StreamSubscription<List<PurchaseDetails>> _subscription;
   final InAppPurchase inAppPurchase = InAppPurchase.instance;
 
@@ -70,27 +69,18 @@ class CampaignWidgetState extends State<CampaignWidget> {
         ProductDetailsResponse productDetailsResponse =
             await inAppPurchase.queryProductDetails({sku.skuId});
         productDetails = productDetailsResponse.productDetails;
+        _buyProduct(sku, productDetails.first);
       });
     }
   }
 
   //To buy any Product
-  Future<void> _buyProduct(NamiSKU sku) async {
-    productDetail = productDetails.first;
-    getProductDetail(productDetail!);
+  Future<void> _buyProduct(NamiSKU sku, ProductDetails productDetails) async {
     PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetail!);
     if (sku.type == NamiSKUType.subscription) {
       await inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
     } else {
       await inAppPurchase.buyConsumable(purchaseParam: purchaseParam);
-    }
-  }
-
-  void getProductDetail(ProductDetails productDetails) {
-    if (productDetail is AppStoreProductDetails) {
-      appStoreProductDetails = productDetails as AppStoreProductDetails;
-    } else {
-      googlePlayProductDetails = productDetails as GooglePlayProductDetails;
     }
   }
 
@@ -107,7 +97,6 @@ class CampaignWidgetState extends State<CampaignWidget> {
             NamiPaywallManager.buySkuComplete(namiPurchaseSuccess);
           }
         } else if (purchaseDetails.status == PurchaseStatus.canceled) {
-          // Handle an error caused by a user cancelling the purchase flow.
           NamiPaywallManager.buySkuCancel();
         }
       }
@@ -119,12 +108,14 @@ class CampaignWidgetState extends State<CampaignWidget> {
     NamiPurchaseSuccess? namiPurchaseSuccessGoogle;
     GooglePlayPurchaseDetails googlePlayPurchaseDetails =
         purchaseDetails as GooglePlayPurchaseDetails;
+    GooglePlayProductDetails googlePlayProductDetails =
+        productDetails as GooglePlayProductDetails;
     namiPurchaseSuccessGoogle = NamiPurchaseSuccessGoogle(
         NamiSKU(sku.name, sku.skuId, sku.type),
         null,
         googlePlayPurchaseDetails.transactionDate!,
         NamiPurchaseSource.campaign,
-        googlePlayProductDetails!.description,
+        googlePlayProductDetails.description,
         googlePlayPurchaseDetails.purchaseID!,
         googlePlayPurchaseDetails.verificationData.serverVerificationData);
     return namiPurchaseSuccessGoogle;
@@ -133,6 +124,8 @@ class CampaignWidgetState extends State<CampaignWidget> {
   NamiPurchaseSuccess? handleiOSPurchase(
       NamiSKU sku, PurchaseDetails purchaseDetail) {
     NamiPurchaseSuccess? namiPurchaseSuccessApple;
+    AppStoreProductDetails appStoreProductDetails =
+        productDetails as AppStoreProductDetails;
     AppStorePurchaseDetails appStorePurchaseDetails =
         purchaseDetail as AppStorePurchaseDetails;
     final originalTransaction =
@@ -145,9 +138,9 @@ class CampaignWidgetState extends State<CampaignWidget> {
           appStorePurchaseDetails.purchaseID!,
           originalTransaction.transactionIdentifier!,
           originalTransaction.transactionTimeStamp.toString(),
-          appStoreProductDetails!.price,
-          appStoreProductDetails!.currencyCode,
-          appStoreProductDetails!.skProduct.localizedTitle);
+          appStoreProductDetails.price,
+          appStoreProductDetails.currencyCode,
+          appStoreProductDetails.skProduct.localizedTitle);
     }
     return namiPurchaseSuccessApple;
   }

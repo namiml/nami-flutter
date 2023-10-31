@@ -381,12 +381,12 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             map["paywallId"] = event.paywallId
             map["paywallName"] = event.paywallName
 
-         //   map["componentChange"] = event.componentChange.convertToMap()
+            map["componentChange"] = event.componentChange.convertToMap()
 
             map["segmentId"] = event.segmentId
             map["externalSegmentId"] = event.externalSegmentId
 
-         //   map["paywallLaunchContext"] = event.paywallLaunchContext.convertToMap()
+            map["paywallLaunchContext"] = event.paywallLaunchContext.convertToMap()
 
             map["deeplinkUrl"] = event.externalSegmentId
 
@@ -398,6 +398,31 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
     }
 }
+
+public extension NamiPaywallComponentChange {
+    func convertToMap() -> [String: Any?] {
+        var map = [String: Any?]()
+        
+        map["id"] = id
+        map["name"] = name
+        
+        return map
+    }
+}
+
+
+public extension PaywallLaunchContext {
+    func convertToMap() -> [String: Any?] {
+        var map = [String: Any?]()
+        
+        map["productGroups"] = productGroups
+        map["customAttributes"] = customAttributes
+        map["urlQueryParams"] = urlQueryParams
+
+        return map
+    }
+}
+
 
 
 public extension AccountStateAction {
