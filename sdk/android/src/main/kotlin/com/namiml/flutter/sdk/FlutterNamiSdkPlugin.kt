@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.annotation.NonNull
+import com.amazon.device.iap.model.Product
+import com.android.billingclient.api.ProductDetails
 import com.namiml.Nami
 import com.namiml.NamiConfiguration
 import com.namiml.NamiLanguageCode
@@ -38,6 +40,7 @@ import com.namiml.paywall.SubscriptionPeriod
 import com.namiml.paywall.model.NamiPaywallAction
 import com.namiml.campaign.NamiCampaign
 import com.namiml.paywall.model.NamiPaywallComponentChange
+import com.namiml.paywall.model.NamiPurchaseSuccess
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -52,6 +55,7 @@ import java.util.logging.StreamHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 /** FlutterNamiSdkPlugin */
 class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -73,7 +77,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var paywallActionListener: EventChannel
     private lateinit var context: Context
     private var currentActivityWeakReference: WeakReference<Activity>? = null
-
     private var paywallActionCallback: ((NamiPaywallEvent) -> Unit)? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
@@ -374,8 +377,26 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "buySkuComplete" -> {
+                val data = call.arguments as Map<String, Any?>
+                val product = data["product"] as Map<String, Any?>
 
-                NamiPaywallManager.buySkuCompete()
+                val purchaseSuccess = data.mapValues {
+                    val expiresDate = data["expiresDate"] as String?
+                    val purchaseDate = data["purchaseDate"] as String
+                    NamiPurchaseSuccess.GooglePlay(
+                            product = product.convertToNamiSKU(),
+                            expiresDate = expiresDate?.toLongOrNull()?.let { it1 -> Date(it1) },
+                            purchaseDate = Date(purchaseDate.toLong()),
+                            purchaseSource = NamiPurchaseSource.valueOf(data["namiPurchaseSource"] as String),
+                            description = data["description"] as String?,
+                            orderId = data["orderId"] as String,
+                            purchaseToken = data["purchaseToken"] as String
+                    )
+                }
+                //TODO: Resove errors
+                currentActivityWeakReference?.get().let { activity ->
+                    NamiPaywallManager.buySkuComplete(activity, purchaseSuccess = purchaseSuccess())
+                }
             }
 
             "buySkuCancel" -> {
@@ -540,9 +561,7 @@ private fun CustomerJourneyState.convertToMap(): Map<String, Boolean> {
     )
 }
 
-private fun NamiPurchaseSuccessGoogle.convertToMap(): Map<String, Any?> {
 
-}
 
 private fun NamiPurchaseCompleteResult.convertToMap(): Map<String, Any?> {
     val purchaseState = if (isSuccessful) {
@@ -595,7 +614,7 @@ private fun NamiPurchaseSource.getFlutterString(): String {
     }
 }
 
-//TODO: ADD ACCOUNTSTATEACTION HERE
+//TODO: ADD ACCOUNT STATE ACTION HERE
 
 private fun AccountStateAction.getFlutterString(): String {
     return when (this) {
@@ -620,6 +639,25 @@ private fun NamiSKU.convertToMap(): Map<String, Any?> {
             "type" to this.type.getFlutterString(),
     )
 }
+
+
+private fun Map<String, Any?>.convertToNamiSKU(): NamiSKU {
+    return NamiSKU(
+            skuId = this["skuId"] as String,
+            productDetails = null,
+            amazonProduct = null,
+            id = null,
+            type = NamiSKUType.valueOf(this["type"] as String),
+            name = this["name"] as String,
+            featured = false,
+            rawDisplayText = null,
+            rawSubDisplayText = null,
+            entitlements = emptyList(),
+            variables = null,
+            promoId = null
+    )
+}
+
 
 private fun NamiPaywallComponentChange.convertToMap(): Map<String, Any?> {
     return hashMapOf(

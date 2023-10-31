@@ -28,8 +28,7 @@ class NamiCampaignManager {
       Function(NamiPaywallEvent?)? onPaywallAction}) async {
     // Listen for the paywall action event
     _paywallActionEvent.receiveBroadcastStream().listen((event) {
-      NamiPaywallEvent? paywallEvent = _toNamiPaywallEvent(event);
-      print(event);
+      NamiPaywallEvent paywallEvent = _toNamiPaywallEvent(event);
       if (paywallEvent != null) {
         onPaywallAction!(paywallEvent);
       }

@@ -18,6 +18,10 @@ class NamiSKU {
         (map['type'] as String?)._toNamiSKUType());
   }
 
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{"name": name, "skuId": skuId, 'type': type.name};
+  }
+
   @override
   String toString() {
     return 'NamiSKU{name: $name, skuId: $skuId, type: $type}';
