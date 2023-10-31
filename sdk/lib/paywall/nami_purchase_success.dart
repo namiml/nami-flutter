@@ -11,6 +11,8 @@ sealed class NamiPurchaseSuccess {
     this.expiresDate,
     this.purchaseDate,
   );
+
+  Map<String, dynamic> toMap();
 }
 
 /// This object represents a successful purchase passed to
@@ -43,6 +45,20 @@ class NamiPurchaseSuccessGoogle extends NamiPurchaseSuccess {
       map['orderId'],
       map['purchaseToken'],
     );
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> product = this.product.toMap();
+    return <String, dynamic>{
+      "product": product,
+      'expiresDate': expiresDate,
+      'purchaseDate': purchaseDate,
+      'namiPurchaseSource': namiPurchaseSource.name,
+      'description': description,
+      'orderId': orderId,
+      'purchaseToken': purchaseToken
+    };
   }
 
   @override
@@ -86,6 +102,21 @@ class NamiPurchaseSuccessApple extends NamiPurchaseSuccess {
         map['price'],
         map['currencyCode'],
         map['locale']);
+  }
+
+  @override
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> product = this.product.toMap();
+    return <String, dynamic>{
+      "product": product,
+      'expiresDate': expiresDate,
+      'transactionID': purchaseDate,
+      'originalTransactionID': originalTransactionID,
+      'originalPurchaseDate': originalPurchaseDate,
+      'price': price,
+      'currencyCode': currencyCode,
+      'locale': locale
+    };
   }
 
   @override
