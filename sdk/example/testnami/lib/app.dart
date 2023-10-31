@@ -20,7 +20,7 @@ Future<Widget> initializeApp(AppConfig appConfig) async {
 
 class TestNamiFlutterApp extends StatefulWidget {
   final AppConfig appConfig;
-  const TestNamiFlutterApp(this.appConfig);
+  const TestNamiFlutterApp(this.appConfig, {super.key});
 
   @override
   TestNamiFlutterAppState createState() => TestNamiFlutterAppState();
@@ -32,7 +32,7 @@ class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: this.widget.appConfig.environment == Environment.staging
+        primaryColor: widget.appConfig.environment == Environment.staging
             ? namiPrimaryBlue
             : namiYellow,
       ),
@@ -40,7 +40,7 @@ class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
         length: 3,
         child: Scaffold(
           appBar: AppBar(
-            bottom: TabBar(
+            bottom: const TabBar(
               indicatorColor: namiWhite,
               indicatorWeight: 6,
               tabs: [
@@ -51,13 +51,13 @@ class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
             ),
             centerTitle: true,
             backgroundColor:
-                this.widget.appConfig.environment == Environment.staging
-                    ? namiPrimaryBlue
+            widget.appConfig.environment == Environment.staging
+                ? namiPrimaryBlue
                     : namiYellow,
             title: SizedBox(
                 height: 24, child: Image.asset("images/nami_logo_white.png")),
           ),
-          body: TabBarView(
+          body: const TabBarView(
             children: [
               CampaignWidget(),
               ProfileWidget(),
@@ -86,9 +86,9 @@ class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
   Future<void> initPlatformState() async {
     var iosAppPlatformId = productionIosAppPlatformId;
     var androidAppPlatformId = productionAndroidAppPlatformId;
-    var extraData = null;
+    List<String> extraData = [];
 
-    if (this.widget.appConfig.environment == Environment.staging) {
+    if (widget.appConfig.environment == Environment.staging) {
       iosAppPlatformId = stagingIosAppPlatformId;
       androidAppPlatformId = stagingAndroidAppPlatformId;
       extraData = ["useStagingAPI"];
