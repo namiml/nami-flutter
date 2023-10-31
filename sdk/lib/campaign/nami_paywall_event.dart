@@ -13,12 +13,14 @@ class NamiPaywallEvent {
   String? campaignUrl;
   String? paywallId;
   String? paywallName;
+  NamiPaywallComponentChange? componentChange;
   String? segmentId;
   String? externalSegmentId;
   String? deepLinkUrl;
   NamiSKU? sku;
   String? purchaseError;
   List<NamiPurchase>? purchases;
+  List<NamiSKU>? skus;
 
   NamiPaywallEvent(
       this.action,
@@ -29,12 +31,14 @@ class NamiPaywallEvent {
       this.campaignUrl,
       this.paywallId,
       this.paywallName,
+      this.componentChange,
       this.segmentId,
       this.externalSegmentId,
       this.deepLinkUrl,
       this.sku,
       this.purchaseError,
-      this.purchases);
+      this.purchases,
+      this.skus);
 
   factory NamiPaywallEvent.fromMap(Map<dynamic, dynamic> map) {
     List<dynamic> dynamicPurchases = map['purchases'];
@@ -42,6 +46,14 @@ class NamiPaywallEvent {
     dynamicPurchases.forEach((element) {
       namiPurchases.add(NamiPurchase.fromMap(element));
     });
+    List<NamiSKU> namiSkus = List.empty(growable: true);
+
+    if (map['skus'] != null) {
+      List<dynamic> dynamicSkus = map['skus'];
+      dynamicSkus.forEach((element) {
+        namiSkus.add(NamiSKU.fromMap(element));
+      });
+    }
 
     return NamiPaywallEvent(
         (map['action'] as String)._toNamiPaywallAction(),
@@ -52,12 +64,16 @@ class NamiPaywallEvent {
         map['campaignLabel'],
         map['paywallId'],
         map['paywallName'],
+        map['componentChange'] != null
+            ? NamiPaywallComponentChange.fromMap(map['componentChange'])
+            : null,
         map['segmentId'],
         map['externalSegmentId'],
         map['deepLinkUrl'],
-        map['sku']!=null?NamiSKU.fromMap(map['sku']):null,
+        map['sku'] != null ? NamiSKU.fromMap(map['sku']) : null,
         map['purchaseError'],
-        namiPurchases);
+        namiPurchases,
+        namiSkus);
   }
 }
 
@@ -110,5 +126,16 @@ extension on String {
     } else {
       return NamiPaywallAction.NAMI_PURCHASE_UNKNOWN;
     }
+  }
+}
+
+class NamiPaywallComponentChange {
+  String? id;
+  String? name;
+
+  NamiPaywallComponentChange(this.id, this.name);
+
+  factory NamiPaywallComponentChange.fromMap(Map<dynamic, dynamic> map) {
+    return NamiPaywallComponentChange(map['id'], map['name']);
   }
 }
