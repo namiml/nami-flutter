@@ -258,6 +258,8 @@ class CampaignWidgetState extends State<CampaignWidget> {
                   "Campaign ${campaign.value} is not available on this device.");
             }
             break;
+          case NamiCampaignRuleType.URL:
+          // TODO: Handle this case.
         }
       },
       child: Container(
