@@ -72,8 +72,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var campaignsListener: EventChannel
     private lateinit var closePaywallListener: EventChannel
     private lateinit var buySkuListener: EventChannel
-    private lateinit var buySkuCompleteListener: EventChannel
-
     private lateinit var paywallActionListener: EventChannel
     private lateinit var context: Context
     private var currentActivityWeakReference: WeakReference<Activity>? = null
@@ -96,8 +94,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 EventChannel(flutterPluginBinding.binaryMessenger, "closePaywallEvent")
         buySkuListener =
                 EventChannel(flutterPluginBinding.binaryMessenger, "buySkuEvent")
-        buySkuCompleteListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "buySkuComplete")
         paywallActionListener =
                 EventChannel(flutterPluginBinding.binaryMessenger, "paywallActionEvent")
         channel.setMethodCallHandler(this)
@@ -110,7 +106,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         setCampaignStreamHandler()
         setClosePaywallStreamHandler()
         setBuySkuStreamHandler()
-        setBuySkuCompleteHandler()
         setPaywallActionStreamHandler()
     }
 
@@ -371,7 +366,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             null,
                             null,
                             callback
-
                     )
                 }
             }
@@ -379,23 +373,21 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "buySkuComplete" -> {
                 val data = call.arguments as Map<String, Any?>
                 val product = data["product"] as Map<String, Any?>
+                val expiresDate = data["expiresDate"] as String?
+                val purchaseDate = data["purchaseDate"] as String
+                val purchaseSuccess =
+                        NamiPurchaseSuccess.GooglePlay(
+                                product = product.convertToNamiSKU(),
+                                expiresDate = expiresDate?.toLongOrNull()?.let { it1 -> Date(it1) },
+                                purchaseDate = Date(purchaseDate.toLong()),
+                                purchaseSource = NamiPurchaseSource.valueOf(data["namiPurchaseSource"] as String),
+                                description = data["description"] as String?,
+                                orderId = data["orderId"] as String,
+                                purchaseToken = data["purchaseToken"] as String
+                        )
 
-                val purchaseSuccess = data.mapValues {
-                    val expiresDate = data["expiresDate"] as String?
-                    val purchaseDate = data["purchaseDate"] as String
-                    NamiPurchaseSuccess.GooglePlay(
-                            product = product.convertToNamiSKU(),
-                            expiresDate = expiresDate?.toLongOrNull()?.let { it1 -> Date(it1) },
-                            purchaseDate = Date(purchaseDate.toLong()),
-                            purchaseSource = NamiPurchaseSource.valueOf(data["namiPurchaseSource"] as String),
-                            description = data["description"] as String?,
-                            orderId = data["orderId"] as String,
-                            purchaseToken = data["purchaseToken"] as String
-                    )
-                }
-                //TODO: Resove errors
-                currentActivityWeakReference?.get().let { activity ->
-                    NamiPaywallManager.buySkuComplete(activity, purchaseSuccess = purchaseSuccess())
+                currentActivityWeakReference?.get()?.let { activity ->
+                    NamiPaywallManager.buySkuComplete(activity, purchaseSuccess = purchaseSuccess)
                 }
             }
 
