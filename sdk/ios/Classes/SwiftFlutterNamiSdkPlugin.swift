@@ -18,7 +18,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         let closePaywallEventChannel = FlutterEventChannel(name: "closePaywallEvent", binaryMessenger: registrar.messenger())
         let restorePaywallEventChannel = FlutterEventChannel(name: "restorePaywallEvent", binaryMessenger: registrar.messenger())
         let buySkuEventChannel = FlutterEventChannel(name: "buySkuEvent", binaryMessenger:
-            registrar.messenger())
+                                                        registrar.messenger())
         let paywallActionEventChannel = FlutterEventChannel(name: "paywallActionEvent", binaryMessenger: registrar.messenger())
         let instance = SwiftFlutterNamiSdkPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
@@ -29,11 +29,11 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         accountStateEventChannel.setStreamHandler(AccountStateEventHandler())
         campaignsEventChannel.setStreamHandler(CampaignsEventHandler())
         closePaywallEventChannel.setStreamHandler(ClosePaywallEventHandler())
-//         restorePaywallEventChannel.setStreamHandler(RestorePaywallEventHandler())
+        //         restorePaywallEventChannel.setStreamHandler(RestorePaywallEventHandler())
         buySkuEventChannel.setStreamHandler(BuySkuEventHandler())
         paywallActionEventChannel.setStreamHandler(PaywallActionEventHandler())
     }
-
+    
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
@@ -46,7 +46,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                let appPlatformId = myArgs["appPlatformIdApple"] as? String,
                let namiLogLevel = myArgs["namiLogLevel"] as? String,
                let namiCommands = myArgs["extraDataList"] as? Array<String> {
-               let namiConfig = NamiConfiguration(appPlatformId: appPlatformId)
+                let namiConfig = NamiConfiguration(appPlatformId: appPlatformId)
                 namiConfig.namiCommands = namiCommands
                 if(namiLogLevel == "debug") {
                     namiConfig.logLevel = NamiLogLevel.debug
@@ -68,7 +68,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         case "login":
             let args = call.arguments as? String
             if let externalIdentifier = args {
-                    NamiCustomerManager.login(withId: externalIdentifier)
+                NamiCustomerManager.login(withId: externalIdentifier)
             }
         case "loggedInId":
             result(NamiCustomerManager.loggedInId())
@@ -81,16 +81,16 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             if let data = args {
                 let label = data["label"] as? String
                 let urlString = data["url"] as? String
-
+                
                 let campaignLaunchHandler = { (success: Bool, error: Error?) in
                     result(handleLaunchCampaignResult(success: success, error: error))
                 }
-
+                
                 let paywallActionHandler = { (paywallEvent: NamiPaywallEvent) in
                     NamiFlutterCache.paywallActionCallback?(paywallEvent)
                     return
                 }
-
+                
                 if (label != nil) {
                     NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
                 } else if (urlString != nil) {
@@ -104,18 +104,18 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             let allCampaigns = NamiCampaignManager.allCampaigns()
             let listOfMaps = allCampaigns.map({ (campaign: NamiCampaign) in campaign.convertToMap()})
             result(listOfMaps)
-
+            
         case "campaigns.refresh":
             NamiCampaignManager.refresh{(campaigns: [NamiCampaign]) in
                 let listOfMaps = campaigns.map({ (campaign: NamiCampaign) in campaign.convertToMap()})
                 result(listOfMaps)
             }
-
+            
         case "isCampaignAvailable":
             let args = call.arguments as? [String: Any]
             var isAvailable = false
             if let data = args {
-            // TODO: support URL
+                // TODO: support URL
                 let label = data["label"] as? String
                 if(label != nil){
                     isAvailable = NamiCampaignManager.isCampaignAvailable(label: label!)
@@ -124,72 +124,74 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 }
             }
             result(isAvailable)
-
+            
         case "dismiss":
             let animated = call.arguments as? Bool ?? false
             NamiPaywallManager.dismiss(animated: animated) {
                 result(true)
             }
-
             
-            public extension [String: Any?]{
-                func converToNamiSku() -> NamiSKU {
-                    var namiSku = NamiSKU()
-                    if(let id = self["skuId"]) as String {
-                        namiSku.skuId = id
-                    }
-                    
-                    if let name = self["name"] as? String {
-                        namiSku.name = name
-                    }
-                    
-                    if let type = self["type"] as String {
-                        if(self.type == "one_time_purchase") {
-                            namiSku.type = NamiSKUType.one_time_purchase
-                        } else if (self.type == "subscription" ) {
-                            namiSku.type = NamiSKUType.subscription
-                        } else {
-                            namiSku.type = NamiSKUType.unknown
-                        }
-                    }
-                    return namiSku
-                }
-            }
+//            if let myArgs = args as? [String: Any],
+//               let appPlatformId = myArgs["appPlatformIdApple"] as? String,
+//               let namiLogLevel = myArgs["namiLogLevel"] as? String,
+//               let namiCommands = myArgs["extraDataList"] as? Array<String> {
+//                let namiConfig = NamiConfiguration(appPlatformId: appPlatformId)
+//                namiConfig.namiCommands = namiCommands
+//                if(namiLogLevel == "debug") {
+//                    namiConfig.logLevel = NamiLogLevel.debug
+//                } else if(namiLogLevel == "info") {
+//                    namiConfig.logLevel = NamiLogLevel.info
+//                } else if(namiLogLevel == "warn") {
+//                    namiConfig.logLevel = NamiLogLevel.warn
+//                } else {
+//                    namiConfig.logLevel = NamiLogLevel.error
+//                }
+//                Nami.configure(with: namiConfig)
+//            } else {
+//                print(FlutterError(code: "-1", message: "iOS could not extract " +
+//                                   "flutter arguments in method: (sendParams)", details: nil))
+//            }
             
             
         case "buySkuComplete":
-            let data = call.arguments as? [String: Any?]
-            let product = data["product"] as [String: Any?].converToNamiSku()
-            let transactionID = data["transactionID"] as String
-            let originalTransactionID = data["originalTransactionID"] as String
-            let originalPurchaseDate = data["originalPurchaseDate"] as? String
-            let expiresDate = data["expiresDate"] as? String
-            let purchaseDate = data["purchaseDate"] as? String
-            let price = data["price"] as? String
-            let currencyCode = data["currencyCode"] as String
-            let locale = data["locale"] as? String
-            let purchaseSource = data["purchaseSource"] as? String
-
-
-
-            var namiPurchaseSuccess = NamiPurchaseSuccess(
-                product:  product,
-                transactionId: transactionID,
-                originalTransactionID : originalTransactionID,
-                originalPurchaseDate: createDate(originalPurchaseDate),
-                expiresDate: createDate(expiresDate),
-                purchaseDate: createDate(purchaseDate),
-                price: Decimal(string:price),
-                currencyCode: currencyCode,
-                locale: Locale(locale),
-                purchaseSource: purchaseSource.convertToNamiPurchaseSource()
-            )
-           
-            NamiPaywallManager.buySkuComplete()
-
+            
+            guard let args = call.arguments else {
+                return
+            }
+            
+            if let data = args as? [String:Any],
+                let product = data["product"] as? [String: Any?],
+                let transactionID = data["transactionID"] as? String,
+                let originalTransactionID = data["originalTransactionID"] as? String,
+                let originalPurchaseDate = createDate(data["originalPurchaseDate"] as? String),
+                let expiresDate = data["expiresDate"] as? String,
+                let purchaseDate = createDate(data["purchaseDate"] as? String),
+                let price = data["price"] as? String,
+                let decimalPrice = Decimal(string: price),
+                let currencyCode = data["currencyCode"] as? String,
+                let locale = data["locale"] as? String,
+               let purchaseSource = data["purchaseSource"] as? String,
+            let skuProduct = product.converToNamiSku() {
+                
+                var namiPurchaseSuccess = NamiPurchaseSuccess(
+                    product: skuProduct,
+                    transactionID: transactionID,
+                    originalTransactionID: originalTransactionID,
+                    originalPurchaseDate: originalPurchaseDate,
+                    purchaseDate: purchaseDate,
+                    expiresDate: createDate(expiresDate),
+                    price: decimalPrice,
+                    currencyCode: currencyCode,
+                    locale: Locale(identifier: locale)
+//                    purchaseSource: purchaseSource.convertToNamiPurchaseSource()
+                )
+                
+                NamiPaywallManager.buySkuComplete(purchaseSuccess: namiPurchaseSuccess)
+                
+            }
             
         case "buySkuCancel":
-            NamipaywallManager.buySkuCancel()
+            NamiPaywallManager.buySkuCancel()
             
             
         case "journeyState":
@@ -287,22 +289,22 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
-
-        class RestoreEventHandler: NSObject, FlutterStreamHandler {
-            func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-                NamiPaywallManager.registerRestoreHandler {
-                    // TODO: Figure out what the right thing to do here is.
-                    events(true)
-                }
-                return nil
+    
+    class RestoreEventHandler: NSObject, FlutterStreamHandler {
+        func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+            NamiPaywallManager.registerRestoreHandler {
+                // TODO: Figure out what the right thing to do here is.
+                events(true)
             }
-
-            func onCancel(withArguments arguments: Any?) -> FlutterError? {
-                NamiPaywallManager.registerRestoreHandler(nil)
-                return nil
-            }
+            return nil
         }
-
+        
+        func onCancel(withArguments arguments: Any?) -> FlutterError? {
+            NamiPaywallManager.registerRestoreHandler(nil)
+            return nil
+        }
+    }
+    
     
     class ActiveEntitlementsEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
@@ -333,7 +335,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
-
+    
     class ClosePaywallEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.registerCloseHandler { (fromvc) in
@@ -341,13 +343,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             return nil
         }
-
+        
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             NamiPaywallManager.registerCloseHandler(nil)
             return nil
         }
     }
-
+    
     class BuySkuEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.registerBuySkuHandler { sku in
@@ -355,13 +357,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             return nil
         }
-
+        
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             NamiPaywallManager.registerBuySkuHandler(nil)
             return nil
         }
     }
-
+    
     class JourneyStateEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiCustomerManager.registerJourneyStateHandler { newCustomerJourneyState in
@@ -393,7 +395,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             return nil
         }
     }
-
+    
     class AccountStateEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiCustomerManager.registerAccountStateHandler { (accountStateAction: AccountStateAction, success: Bool, error: Error?) in
@@ -405,13 +407,13 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             return nil
         }
-
+        
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             NamiCustomerManager.registerAccountStateHandler(nil)
             return nil
         }
     }
-
+    
     class PaywallActionEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiFlutterCache.paywallActionCallback = { (paywallEvent: NamiPaywallEvent) in
@@ -419,11 +421,11 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             return nil
         }
-
+        
         func onCancel(withArguments arguments: Any?) -> FlutterError? {
             return nil
         }
-
+        
         private func handlePaywallEvent(event: NamiPaywallEvent) -> [String: Any?] {
             var map = [String: Any?]()
             map["action"] = event.action.toFlutterString()
@@ -434,42 +436,16 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             map["campaignUrl"] = event.campaignUrl
             map["paywallId"] = event.paywallId
             map["paywallName"] = event.paywallName
-            map["componentChange"] = event.componentChange.convertToMap()
+            map["componentChange"] = event.componentChange?.convertToMap()
             map["segmentId"] = event.segmentId
             map["externalSegmentId"] = event.externalSegmentId
-            map["paywallLaunchContext"] = event.paywallLaunchContext.convertToMap()
+//            map["paywallLaunchContext"] = event.paywallLaunchContext?.convertToMap()
             map["deeplinkUrl"] = event.externalSegmentId
             map["sku"] = event.sku?.convertToMap()
             map["purchaseError"] = event.purchaseError
             map["purchases"] = event.purchases.map({ $0.convertToMap() })
             return map
         }
-    }
-}
-
-
-
-public extension [String: Any?]{
-    func converToNamiSku() -> NamiSKU {
-        var namiSku = namiSku()
-        if(let id = self["skuId"]) as String {
-            namiSku.skuId = id
-        }
-        
-        if let name = self["name"] as? String {
-            namiSku.name = name
-        }
-        
-        if let type = self["type"] as String {
-            if(self.type == "one_time_purchase") {
-                namiSku.type = NamiSKUType.one_time_purchase
-            } else if (self.type == "subscription" ) {
-                namiSku.type = NamiSKUType.subscription
-            } else {
-                namiSku.type = NamiSKUType.unknown
-            }
-        }
-        return namiSku
     }
 }
 
@@ -483,21 +459,6 @@ public extension NamiPaywallComponentChange {
         return map
     }
 }
-
-
-public extension PaywallLaunchContext {
-    func convertToMap() -> [String: Any?] {
-        var map = [String: Any?]()
-        
-        map["productGroups"] = productGroups
-        map["customAttributes"] = customAttributes
-        map["urlQueryParams"] = urlQueryParams
-
-        return map
-    }
-}
-
-
 
 public extension AccountStateAction {
     func toFlutterString() -> String {
@@ -549,21 +510,21 @@ public extension NamiPaywallAction {
             return "NAMI_SELECT_SKU"
         case NamiPaywallAction.purchase_selected_sku:
             return "NAMI_PURCHASE_SELECTED_SKU"
-        case NamiPaywallAction.purchase_success
+        case NamiPaywallAction.purchase_success:
             return "NAMI_PURCHASE_SUCCESS"
-        case NamiPaywallAction.purchase_failed
+        case NamiPaywallAction.purchase_failed:
             return "NAMI_PURCHASE_FAILED"
-        case NamiPaywallAction.purchase_cancelled
+        case NamiPaywallAction.purchase_cancelled:
             return "NAMI_PURCHASE_CANCELLED"
-        case NamiPaywallAction.purchase_pending
+        case NamiPaywallAction.purchase_pending:
             return "NAMI_PURCHASE_PENDING"
-        case NamiPaywallAction.purchase_unknown
+        case NamiPaywallAction.purchase_unknown:
             return "NAMI_PURCHASE_UNKNOWN"
-        case NamiPaywallAction.toggle_change
+        case NamiPaywallAction.toggle_change:
             return "NAMI_TOGGLE_CHANGE"
-        case NamiPaywallAction.page_change
+        case NamiPaywallAction.page_change:
             return "NAMI_PAGE_CHANGE"
-        case NamiPaywallAction.slide_change
+        case NamiPaywallAction.slide_change:
             return "NAMI_SLIDE_CHANGE"
         default:
             return "unknown"
@@ -662,11 +623,11 @@ public extension NamiPurchase {
 
 public extension String{
     func convertToNamiPurchaseSource() -> NamiPurchaseSource {
-        if(self == "campaign"){
+        if self == "campaign" {
             return NamiPurchaseSource.campaign
-        }else if(self == "marketplace"){
+        } else if self == "marketplace" {
             return NamiPurchaseSource.marketplace
-        }else{
+        } else {
             return NamiPurchaseSource.unknown
         }
     }
@@ -690,7 +651,7 @@ public extension NamiSKU {
 
 public extension NamiCampaign {
     func convertToMap() -> [String: Any] {
-        var map = [String: Any]()
+        var map: [String: Any] = [:]
         map["paywall"] = self.paywall
         map["segment"] = self.segment
         if(self.type == NamiCampaignType.default) {
@@ -709,18 +670,38 @@ public extension NamiCampaign {
 
 extension Date {
     init?(milliseconds: Int64?) {
-        if let milliseconds = milliseconds {
+        if let milliseconds {
             self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
-        } else{
+        } else {
             return nil
         }
     }
 }
+
 func createDate(_ dateString: String?) -> Date? {
     if let string = dateString, let milliseconds = Int64(string) {
         return Date(milliseconds: milliseconds)
     } else {
         return nil
+    }
+}
+
+extension [String: Any?] {
+    func converToNamiSku() -> NamiSKU? {
+        if let id = self["skuId"] as? String,
+           let name = self["name"] as? String,
+           let type = self["type"] as? String {
+            var skuType: NamiSKUType
+            if type == "one_time_purchase" {
+                skuType = NamiSKUType.one_time_purchase
+            } else if type == "subscription" {
+                skuType = NamiSKUType.subscription
+            } else {
+                skuType = NamiSKUType.unknown
+            }
+            
+            return NamiSKU(id: id, name: name, skuType: skuType)
+        }
     }
 }
 
