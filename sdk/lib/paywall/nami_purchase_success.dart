@@ -5,12 +5,10 @@ sealed class NamiPurchaseSuccess {
   NamiSKU product;
   String? expiresDate;
   String purchaseDate;
+  NamiPurchaseSource namiPurchaseSource;
 
-  NamiPurchaseSuccess(
-    this.product,
-    this.expiresDate,
-    this.purchaseDate,
-  );
+  NamiPurchaseSuccess(this.product, this.expiresDate, this.purchaseDate,
+      this.namiPurchaseSource);
 
   Map<String, dynamic> toMap();
 }
@@ -22,18 +20,17 @@ sealed class NamiPurchaseSuccess {
 class NamiPurchaseSuccessGoogle extends NamiPurchaseSuccess {
   String orderId;
   String purchaseToken;
-  NamiPurchaseSource namiPurchaseSource;
   String? description;
 
   NamiPurchaseSuccessGoogle(
       NamiSKU product,
       String? expiresDate,
       String purchaseDate,
-      this.namiPurchaseSource,
+      NamiPurchaseSource namiPurchaseSource,
       this.description,
       this.orderId,
       this.purchaseToken)
-      : super(product, expiresDate, purchaseDate);
+      : super(product, expiresDate, purchaseDate, namiPurchaseSource);
 
   factory NamiPurchaseSuccessGoogle.fromMap(Map<dynamic, dynamic> map) {
     return NamiPurchaseSuccessGoogle(
@@ -83,19 +80,21 @@ class NamiPurchaseSuccessApple extends NamiPurchaseSuccess {
       NamiSKU product,
       String? expiresDate,
       String purchaseDate,
+      NamiPurchaseSource namiPurchaseSource,
       this.transactionID,
       this.originalTransactionID,
       this.originalPurchaseDate,
       this.price,
       this.currencyCode,
       this.locale)
-      : super(product, expiresDate, purchaseDate);
+      : super(product, expiresDate, purchaseDate, namiPurchaseSource);
 
   factory NamiPurchaseSuccessApple.fromMap(Map<dynamic, dynamic> map) {
     return NamiPurchaseSuccessApple(
         NamiSKU.fromMap(map['product'] as Map<dynamic, dynamic>),
         map['expiresDate'],
         map['purchaseDate'],
+        map['namiPurchaseSource'],
         map['transactionID'],
         map['originalTransactionID'],
         map['originalPurchaseDate'],
@@ -111,6 +110,7 @@ class NamiPurchaseSuccessApple extends NamiPurchaseSuccess {
       "product": product,
       'expiresDate': expiresDate,
       'transactionID': purchaseDate,
+      'namiPurchaseSource': namiPurchaseSource.name,
       'originalTransactionID': originalTransactionID,
       'originalPurchaseDate': originalPurchaseDate,
       'price': price,

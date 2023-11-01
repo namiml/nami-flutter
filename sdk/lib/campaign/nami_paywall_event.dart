@@ -1,7 +1,9 @@
+import 'package:nami_flutter/campaign/model/paywall_lauch_context.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 
 import '../billing/nami_purchase.dart';
 import '../paywall/nami_sku.dart';
+import 'model/nami_paywall_component_change.dart';
 import 'nami_campaign_manager.dart';
 
 class NamiPaywallEvent {
@@ -16,6 +18,7 @@ class NamiPaywallEvent {
   NamiPaywallComponentChange? componentChange;
   String? segmentId;
   String? externalSegmentId;
+  PaywallLaunchContext? paywallLaunchContext;
   String? deepLinkUrl;
   NamiSKU? sku;
   String? purchaseError;
@@ -34,6 +37,7 @@ class NamiPaywallEvent {
       this.componentChange,
       this.segmentId,
       this.externalSegmentId,
+      this.paywallLaunchContext,
       this.deepLinkUrl,
       this.sku,
       this.purchaseError,
@@ -46,8 +50,8 @@ class NamiPaywallEvent {
     dynamicPurchases.forEach((element) {
       namiPurchases.add(NamiPurchase.fromMap(element));
     });
-    List<NamiSKU> namiSkus = List.empty(growable: true);
 
+    List<NamiSKU> namiSkus = List.empty(growable: true);
     if (map['skus'] != null) {
       List<dynamic> dynamicSkus = map['skus'];
       dynamicSkus.forEach((element) {
@@ -69,6 +73,9 @@ class NamiPaywallEvent {
             : null,
         map['segmentId'],
         map['externalSegmentId'],
+        map['paywallLaunchContext'] != null
+            ? PaywallLaunchContext.fromJson(map['paywallLaunchContext'])
+            : null,
         map['deepLinkUrl'],
         map['sku'] != null ? NamiSKU.fromMap(map['sku']) : null,
         map['purchaseError'],
@@ -94,7 +101,7 @@ extension on String? {
 extension on String {
   NamiPaywallAction _toNamiPaywallAction() {
     if (this == "NAMI_SHOW_PAYWALL") {
-      return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
+      return NamiPaywallAction.NAMI_SHOW_PAYWALL;
     } else if (this == "NAMI_CLOSE_PAYWALL") {
       return NamiPaywallAction.NAMI_CLOSE_PAYWALL;
     } else if (this == "NAMI_RESTORE_PURCHASES") {
@@ -126,16 +133,5 @@ extension on String {
     } else {
       return NamiPaywallAction.NAMI_PURCHASE_UNKNOWN;
     }
-  }
-}
-
-class NamiPaywallComponentChange {
-  String? id;
-  String? name;
-
-  NamiPaywallComponentChange(this.id, this.name);
-
-  factory NamiPaywallComponentChange.fromMap(Map<dynamic, dynamic> map) {
-    return NamiPaywallComponentChange(map['id'], map['name']);
   }
 }
