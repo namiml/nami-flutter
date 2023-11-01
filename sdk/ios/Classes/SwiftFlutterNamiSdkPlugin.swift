@@ -131,20 +131,74 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 result(true)
             }
 
+            
+            public extension [String: Any?]{
+                func converToNamiSku() -> NamiSKU {
+                    var namiSku = NamiSKU()
+                    if(let id = self["skuId"]) as String {
+                        namiSku.skuId = id
+                    }
+                    
+                    if let name = self["name"] as? String {
+                        namiSku.name = name
+                    }
+                    
+                    if let type = self["type"] as String {
+                        if(self.type == "one_time_purchase") {
+                            namiSku.type = NamiSKUType.one_time_purchase
+                        } else if (self.type == "subscription" ) {
+                            namiSku.type = NamiSKUType.subscription
+                        } else {
+                            namiSku.type = NamiSKUType.unknown
+                        }
+                    }
+                    return namiSku
+                }
+            }
+            
+            
         case "buySkuComplete":
-            // buySkuComplete
-            return
+            let data = call.arguments as? [String: Any?]
+            let product = data["product"] as [String: Any?].converToNamiSku()
+            let transactionID = data["transactionID"] as String
+            let originalTransactionID = data["originalTransactionID"] as String
+            let originalPurchaseDate = data["originalPurchaseDate"] as? String
+            let expiresDate = data["expiresDate"] as? String
+            let purchaseDate = data["purchaseDate"] as? String
+            let price = data["price"] as? String
+            let currencyCode = data["currencyCode"] as String
+            let locale = data["locale"] as? String
+            let purchaseSource = data["purchaseSource"] as? String
 
+
+
+            var namiPurchaseSuccess = NamiPurchaseSuccess(
+                product:  product,
+                transactionId: transactionID,
+                originalTransactionID : originalTransactionID,
+                originalPurchaseDate: createDate(originalPurchaseDate),
+                expiresDate: createDate(expiresDate),
+                purchaseDate: createDate(purchaseDate),
+                price: Decimal(string:price),
+                currencyCode: currencyCode,
+                locale: Locale(locale),
+                purchaseSource: purchaseSource.convertToNamiPurchaseSource()
+            )
+           
+            NamiPaywallManager.buySkuComplete()
+
+            
         case "buySkuCancel":
-            // buySkuCancel
-            return
-
+            NamipaywallManager.buySkuCancel()
+            
+            
         case "journeyState":
             if let state = NamiCustomerManager.journeyState() {
                 result(state.convertToMap())
             } else {
                 result(nil)
             }
+            
         case "isEntitlementActive":
             result(NamiEntitlementManager.isEntitlementActive(call.arguments as! String))
         case "active":
@@ -380,22 +434,42 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             map["campaignUrl"] = event.campaignUrl
             map["paywallId"] = event.paywallId
             map["paywallName"] = event.paywallName
-
             map["componentChange"] = event.componentChange.convertToMap()
-
             map["segmentId"] = event.segmentId
             map["externalSegmentId"] = event.externalSegmentId
-
             map["paywallLaunchContext"] = event.paywallLaunchContext.convertToMap()
-
             map["deeplinkUrl"] = event.externalSegmentId
-
             map["sku"] = event.sku?.convertToMap()
             map["purchaseError"] = event.purchaseError
             map["purchases"] = event.purchases.map({ $0.convertToMap() })
-
             return map
         }
+    }
+}
+
+
+
+public extension [String: Any?]{
+    func converToNamiSku() -> NamiSKU {
+        var namiSku = namiSku()
+        if(let id = self["skuId"]) as String {
+            namiSku.skuId = id
+        }
+        
+        if let name = self["name"] as? String {
+            namiSku.name = name
+        }
+        
+        if let type = self["type"] as String {
+            if(self.type == "one_time_purchase") {
+                namiSku.type = NamiSKUType.one_time_purchase
+            } else if (self.type == "subscription" ) {
+                namiSku.type = NamiSKUType.subscription
+            } else {
+                namiSku.type = NamiSKUType.unknown
+            }
+        }
+        return namiSku
     }
 }
 
@@ -475,6 +549,22 @@ public extension NamiPaywallAction {
             return "NAMI_SELECT_SKU"
         case NamiPaywallAction.purchase_selected_sku:
             return "NAMI_PURCHASE_SELECTED_SKU"
+        case NamiPaywallAction.purchase_success
+            return "NAMI_PURCHASE_SUCCESS"
+        case NamiPaywallAction.purchase_failed
+            return "NAMI_PURCHASE_FAILED"
+        case NamiPaywallAction.purchase_cancelled
+            return "NAMI_PURCHASE_CANCELLED"
+        case NamiPaywallAction.purchase_pending
+            return "NAMI_PURCHASE_PENDING"
+        case NamiPaywallAction.purchase_unknown
+            return "NAMI_PURCHASE_UNKNOWN"
+        case NamiPaywallAction.toggle_change
+            return "NAMI_TOGGLE_CHANGE"
+        case NamiPaywallAction.page_change
+            return "NAMI_PAGE_CHANGE"
+        case NamiPaywallAction.slide_change
+            return "NAMI_SLIDE_CHANGE"
         default:
             return "unknown"
         }
@@ -570,6 +660,18 @@ public extension NamiPurchase {
     }
 }
 
+public extension String{
+    func convertToNamiPurchaseSource() -> NamiPurchaseSource {
+        if(self == "campaign"){
+            return NamiPurchaseSource.campaign
+        }else if(self == "marketplace"){
+            return NamiPurchaseSource.marketplace
+        }else{
+            return NamiPurchaseSource.unknown
+        }
+    }
+}
+
 public extension NamiSKU {
     func convertToMap() -> [String: Any] {
         var map = [String: Any]()
@@ -604,3 +706,21 @@ public extension NamiCampaign {
         return map
     }
 }
+
+extension Date {
+    init?(milliseconds: Int64?) {
+        if let milliseconds = milliseconds {
+            self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
+        } else{
+            return nil
+        }
+    }
+}
+func createDate(_ dateString: String?) -> Date? {
+    if let string = dateString, let milliseconds = Int64(string) {
+        return Date(milliseconds: milliseconds)
+    } else {
+        return nil
+    }
+}
+
