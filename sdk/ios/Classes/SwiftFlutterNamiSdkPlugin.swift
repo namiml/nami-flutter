@@ -686,22 +686,26 @@ func createDate(_ dateString: String?) -> Date? {
     }
 }
 
-extension [String: Any?] {
-    func converToNamiSku() -> NamiSKU? {
-        if let id = self["skuId"] as? String,
-           let name = self["name"] as? String,
-           let type = self["type"] as? String {
-            var skuType: NamiSKUType
-            if type == "one_time_purchase" {
-                skuType = NamiSKUType.one_time_purchase
-            } else if type == "subscription" {
-                skuType = NamiSKUType.subscription
-            } else {
-                skuType = NamiSKUType.unknown
-            }
-            
-            return NamiSKU(id: id, name: name, skuType: skuType)
+public extension String{
+    func convertToNamiSKYType() -> NamiSKUType {
+        if self == "one_time_purchase" {
+            return NamiSKUType.one_time_purchase
+        } else if self == "subscription" {
+            return NamiSKUType.subscription
+        } else {
+            return NamiSKUType.unknown
         }
     }
 }
 
+public extension [String: Any?] {
+    func converToNamiSku() -> NamiSKU? {
+        if let skuId = self["skuId"] as? String,
+           let name = self["name"] as? String,
+           let type = self["type"] as? String,
+           let id = self["id"] as? String {
+            return NamiSKU(namiId: id, storeId: skuId, skuType: type.convertToNamiSKYType())
+        }
+        return nil
+    }
+}

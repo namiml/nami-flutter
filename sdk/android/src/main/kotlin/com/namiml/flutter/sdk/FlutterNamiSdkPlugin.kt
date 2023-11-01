@@ -638,7 +638,7 @@ private fun Map<String, Any?>.convertToNamiSKU(): NamiSKU {
             skuId = this["skuId"] as String,
             productDetails = null,
             amazonProduct = null,
-            id = null,
+            id = this["id"] as String?,
             type = NamiSKUType.valueOf(this["type"] as String),
             name = this["name"] as String,
             featured = false,
