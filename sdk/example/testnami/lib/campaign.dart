@@ -111,7 +111,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
     GooglePlayProductDetails googlePlayProductDetails =
         productDetails as GooglePlayProductDetails;
     namiPurchaseSuccessGoogle = NamiPurchaseSuccessGoogle(
-        NamiSKU(sku.name, sku.skuId, sku.type),
+        NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
         null,
         googlePlayPurchaseDetails.transactionDate!,
         NamiPurchaseSource.campaign,
@@ -132,7 +132,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
         appStorePurchaseDetails.skPaymentTransaction.originalTransaction;
     if (originalTransaction != null) {
       namiPurchaseSuccessApple = NamiPurchaseSuccessApple(
-          NamiSKU(sku.name, sku.skuId, sku.type),
+          NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
           null,
           appStorePurchaseDetails.transactionDate!,
           NamiPurchaseSource.campaign,
