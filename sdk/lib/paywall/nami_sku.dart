@@ -11,20 +11,27 @@ class NamiSKU {
   /// The store platform reference ID of the SKU
   final String skuId;
 
-  NamiSKU(this.name, this.skuId, this.type);
+  final String? id;
+
+  NamiSKU(this.name, this.skuId, this.type, this.id);
 
   factory NamiSKU.fromMap(Map<dynamic, dynamic> map) {
     return NamiSKU((map['name'] as String?) ?? "", map['skuId'],
-        (map['type'] as String?)._toNamiSKUType());
+        (map['type'] as String?)._toNamiSKUType(), map['id']);
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{"name": name, "skuId": skuId, 'type': type.name};
+    return <String, dynamic>{
+      "name": name,
+      "skuId": skuId,
+      'type': type.name,
+      'id': id
+    };
   }
 
   @override
   String toString() {
-    return 'NamiSKU{name: $name, skuId: $skuId, type: $type}';
+    return 'NamiSKU{name: $name, skuId: $skuId, type: $type,id: $id}';
   }
 }
 
