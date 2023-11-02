@@ -141,25 +141,17 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 let product = data["product"] as? [String: Any?],
                 let transactionID = data["transactionID"] as? String,
                 let originalTransactionID = data["originalTransactionID"] as? String,
-                let originalPurchaseDate = createDate(data["originalPurchaseDate"] as? String),
-                let expiresDate = data["expiresDate"] as? String,
-                let purchaseDate = createDate(data["purchaseDate"] as? String),
                 let price = data["price"] as? String,
                 let decimalPrice = Decimal(string: price),
                 let currencyCode = data["currencyCode"] as? String,
-                let purchaseSource = data["purchaseSource"] as? String,
-                let skuProduct = product.converToNamiSku() {
+                let skuProduct = product.convertToNamiSku() {
                 
                 var namiPurchaseSuccess = NamiPurchaseSuccess(
                     product: skuProduct,
                     transactionID: transactionID,
                     originalTransactionID: originalTransactionID,
-                    originalPurchaseDate: originalPurchaseDate,
-                    purchaseDate: purchaseDate,
-                    expiresDate: createDate(expiresDate),
                     price: decimalPrice,
                     currencyCode: currencyCode
-//                    purchaseSource: purchaseSource.convertToNamiPurchaseSource()
                 )
                 
                 NamiPaywallManager.buySkuComplete(purchaseSuccess: namiPurchaseSuccess)
@@ -597,18 +589,6 @@ public extension NamiPurchase {
     }
 }
 
-public extension String{
-    func convertToNamiPurchaseSource() -> NamiPurchaseSource {
-        if self == "campaign" {
-            return NamiPurchaseSource.campaign
-        } else if self == "marketplace" {
-            return NamiPurchaseSource.marketplace
-        } else {
-            return NamiPurchaseSource.unknown
-        }
-    }
-}
-
 public extension NamiSKU {
     func convertToMap() -> [String: Any] {
         var map = [String: Any]()
@@ -644,24 +624,6 @@ public extension NamiCampaign {
     }
 }
 
-extension Date {
-    init?(milliseconds: Int64?) {
-        if let milliseconds {
-            self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
-        } else {
-            return nil
-        }
-    }
-}
-
-func createDate(_ dateString: String?) -> Date? {
-    if let string = dateString, let milliseconds = Int64(string) {
-        return Date(milliseconds: milliseconds)
-    } else {
-        return nil
-    }
-}
-
 public extension String{
     func convertToNamiSKYType() -> NamiSKUType {
         if self == "one_time_purchase" {
@@ -675,7 +637,7 @@ public extension String{
 }
 
 public extension [String: Any?] {
-    func converToNamiSku() -> NamiSKU? {
+    func convertToNamiSku() -> NamiSKU? {
         if let skuId = self["skuId"] as? String,
            let name = self["name"] as? String,
            let type = self["type"] as? String,
