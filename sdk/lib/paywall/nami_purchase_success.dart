@@ -52,36 +52,24 @@ class NamiPurchaseSuccessGoogle extends NamiPurchaseSuccess {
 class NamiPurchaseSuccessApple extends NamiPurchaseSuccess {
   final String transactionID;
   final String originalTransactionID;
-  final String originalPurchaseDate;
-  final String? expiresDate;
-  final String purchaseDate;
   final String price;
   final String currencyCode;
-  final NamiPurchaseSource namiPurchaseSource;
 
   NamiPurchaseSuccessApple(
       NamiSKU product,
       this.transactionID,
       this.originalTransactionID,
-      this.originalPurchaseDate,
-      this.expiresDate,
-      this.purchaseDate,
       this.price,
       this.currencyCode,
-      this.namiPurchaseSource)
-      : super(product);
+      ) : super(product);
 
   factory NamiPurchaseSuccessApple.fromMap(Map<dynamic, dynamic> map) {
     return NamiPurchaseSuccessApple(
       NamiSKU.fromMap(map['product'] as Map<dynamic, dynamic>),
       map['transactionID'],
       map['originalTransactionID'],
-      map['originalPurchaseDate'],
-      map['expiresDate'],
-      map['purchaseDate'],
       map['price'],
       map['currencyCode'],
-      map['namiPurchaseSource'],
     );
   }
 
@@ -92,20 +80,15 @@ class NamiPurchaseSuccessApple extends NamiPurchaseSuccess {
       "product": product,
       'transactionID': transactionID,
       'originalTransactionID': originalTransactionID,
-      'originalPurchaseDate': originalPurchaseDate,
-      'expiresDate': expiresDate,
-      'purchaseDate': purchaseDate,
       'price': price,
       'currencyCode': currencyCode,
-      'namiPurchaseSource': namiPurchaseSource.name,
     };
   }
 
   @override
   String toString() {
     return 'NamiPurchaseSuccessApple{product: $product,transactionID: $transactionID, originalTransactionID: $originalTransactionID, '
-        'originalPurchaseDate : $originalPurchaseDate, expiresDate: $expiresDate, purchaseDate: $purchaseDate'
-        'price: $price, currencyCode: $currencyCode, namiPurchaseSource: $namiPurchaseSource'
+        'price: $price, currencyCode: $currencyCode'
         '}';
   }
 }
