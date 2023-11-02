@@ -112,10 +112,6 @@ class CampaignWidgetState extends State<CampaignWidget> {
         productDetails as GooglePlayProductDetails;
     namiPurchaseSuccessGoogle = NamiPurchaseSuccessGoogle(
         NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
-        null,
-        googlePlayPurchaseDetails.transactionDate!,
-        NamiPurchaseSource.campaign,
-        googlePlayProductDetails.description,
         googlePlayPurchaseDetails.purchaseID!,
         googlePlayPurchaseDetails.verificationData.serverVerificationData);
     return namiPurchaseSuccessGoogle;
@@ -132,16 +128,16 @@ class CampaignWidgetState extends State<CampaignWidget> {
         appStorePurchaseDetails.skPaymentTransaction.originalTransaction;
     if (originalTransaction != null) {
       namiPurchaseSuccessApple = NamiPurchaseSuccessApple(
-          NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
-          null,
-          appStorePurchaseDetails.transactionDate!,
-          NamiPurchaseSource.campaign,
-          appStorePurchaseDetails.purchaseID!,
-          originalTransaction.transactionIdentifier!,
-          originalTransaction.transactionTimeStamp.toString(),
-          appStoreProductDetails.price,
-          appStoreProductDetails.currencyCode,
-          appStoreProductDetails.skProduct.priceLocale.countryCode);
+        NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
+        appStorePurchaseDetails.purchaseID!,
+        originalTransaction.transactionIdentifier!,
+        originalTransaction.transactionTimeStamp.toString(),
+        null,
+        appStorePurchaseDetails.transactionDate!,
+        appStoreProductDetails.price,
+        appStoreProductDetails.currencyCode,
+        NamiPurchaseSource.campaign,
+      );
     }
     return namiPurchaseSuccessApple;
   }

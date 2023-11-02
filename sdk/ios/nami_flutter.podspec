@@ -18,21 +18,33 @@ Pod::Spec.new do |s|
 
 Requires an account with Nami. The free tier is generous and includes everything you need to get up and running.
 
-See https://www.namiml.com for more details and to create a free account.
-                       DESC
-  s.homepage         = 'https://www.namiml.com/'
-  s.license          = { :file => '../LICENSE' }
-  s.author           = { 'namiml' => 'hello@namiml.com' }
-  s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
-  s.dependency 'Flutter'
-  s.platform = :ios, '15.0'
-  s.dependency 'Nami', '3.1.14'
+See https
+://www.namiml.com for more details and to create a free account.
+DESC
+        s
+.
+homepage = 'https://www.namiml.com/'
+s.
+license = {:file => '../LICENSE'}
+s.
+author = {'namiml' => 'hello@namiml.com'}
+s.
+source = {:path => '.'}
+s.
+source_files = 'Classes/**/*'
+s.dependency 'Flutter'
+s.
+platform =
+:ios, '15.0'
+s.dependency 'Nami', '3.1.17'
 
-  s.vendored_frameworks = 'NamiApple.xcframework'
+s.
+vendored_frameworks = 'NamiApple.xcframework'
 
-  # Flutter.framework does not contain a i386 slice.
+# Flutter.framework does not contain a i386 slice.
 
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
-  s.swift_version = '5.7'
+s.
+pod_target_xcconfig = {'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386'}
+s.
+swift_version = '5.7'
 end
