@@ -3,12 +3,8 @@ import 'package:nami_flutter/paywall/nami_sku.dart';
 
 sealed class NamiPurchaseSuccess {
   NamiSKU product;
-  String? expiresDate;
-  String purchaseDate;
-  NamiPurchaseSource namiPurchaseSource;
 
-  NamiPurchaseSuccess(this.product, this.expiresDate, this.purchaseDate,
-      this.namiPurchaseSource);
+  NamiPurchaseSuccess(this.product);
 
   Map<String, dynamic> toMap();
 }
@@ -22,23 +18,12 @@ class NamiPurchaseSuccessGoogle extends NamiPurchaseSuccess {
   String purchaseToken;
   String? description;
 
-  NamiPurchaseSuccessGoogle(
-      NamiSKU product,
-      String? expiresDate,
-      String purchaseDate,
-      NamiPurchaseSource namiPurchaseSource,
-      this.description,
-      this.orderId,
-      this.purchaseToken)
-      : super(product, expiresDate, purchaseDate, namiPurchaseSource);
+  NamiPurchaseSuccessGoogle(NamiSKU product, this.orderId, this.purchaseToken)
+      : super(product);
 
   factory NamiPurchaseSuccessGoogle.fromMap(Map<dynamic, dynamic> map) {
     return NamiPurchaseSuccessGoogle(
       NamiSKU.fromMap(map['product'] as Map<dynamic, dynamic>),
-      map['expiresDate'],
-      map['purchaseDate'],
-      map['namiPurchaseSource'],
-      map['description'],
       map['orderId'],
       map['purchaseToken'],
     );
@@ -49,10 +34,6 @@ class NamiPurchaseSuccessGoogle extends NamiPurchaseSuccess {
     Map<String, dynamic> product = this.product.toMap();
     return <String, dynamic>{
       "product": product,
-      'expiresDate': expiresDate,
-      'purchaseDate': purchaseDate,
-      'namiPurchaseSource': namiPurchaseSource.name,
-      'description': description,
       'orderId': orderId,
       'purchaseToken': purchaseToken
     };
@@ -72,35 +53,36 @@ class NamiPurchaseSuccessApple extends NamiPurchaseSuccess {
   final String transactionID;
   final String originalTransactionID;
   final String originalPurchaseDate;
+  final String? expiresDate;
+  final String purchaseDate;
   final String price;
   final String currencyCode;
-  final String locale;
+  final NamiPurchaseSource namiPurchaseSource;
 
   NamiPurchaseSuccessApple(
       NamiSKU product,
-      String? expiresDate,
-      String purchaseDate,
-      NamiPurchaseSource namiPurchaseSource,
       this.transactionID,
       this.originalTransactionID,
       this.originalPurchaseDate,
+      this.expiresDate,
+      this.purchaseDate,
       this.price,
       this.currencyCode,
-      this.locale)
-      : super(product, expiresDate, purchaseDate, namiPurchaseSource);
+      this.namiPurchaseSource)
+      : super(product);
 
   factory NamiPurchaseSuccessApple.fromMap(Map<dynamic, dynamic> map) {
     return NamiPurchaseSuccessApple(
-        NamiSKU.fromMap(map['product'] as Map<dynamic, dynamic>),
-        map['expiresDate'],
-        map['purchaseDate'],
-        map['namiPurchaseSource'],
-        map['transactionID'],
-        map['originalTransactionID'],
-        map['originalPurchaseDate'],
-        map['price'],
-        map['currencyCode'],
-        map['locale']);
+      NamiSKU.fromMap(map['product'] as Map<dynamic, dynamic>),
+      map['transactionID'],
+      map['originalTransactionID'],
+      map['originalPurchaseDate'],
+      map['expiresDate'],
+      map['purchaseDate'],
+      map['price'],
+      map['currencyCode'],
+      map['namiPurchaseSource'],
+    );
   }
 
   @override
@@ -108,19 +90,22 @@ class NamiPurchaseSuccessApple extends NamiPurchaseSuccess {
     Map<String, dynamic> product = this.product.toMap();
     return <String, dynamic>{
       "product": product,
-      'expiresDate': expiresDate,
-      'transactionID': purchaseDate,
-      'namiPurchaseSource': namiPurchaseSource.name,
+      'transactionID': transactionID,
       'originalTransactionID': originalTransactionID,
       'originalPurchaseDate': originalPurchaseDate,
+      'expiresDate': expiresDate,
+      'purchaseDate': purchaseDate,
       'price': price,
       'currencyCode': currencyCode,
-      'locale': locale
+      'namiPurchaseSource': namiPurchaseSource.name,
     };
   }
 
   @override
   String toString() {
-    return 'NamiPurchaseSuccessApple{product: $product, originalTransactionID: $originalTransactionID}';
+    return 'NamiPurchaseSuccessApple{product: $product,transactionID: $transactionID, originalTransactionID: $originalTransactionID, '
+        'originalPurchaseDate : $originalPurchaseDate, expiresDate: $expiresDate, purchaseDate: $purchaseDate'
+        'price: $price, currencyCode: $currencyCode, namiPurchaseSource: $namiPurchaseSource'
+        '}';
   }
 }

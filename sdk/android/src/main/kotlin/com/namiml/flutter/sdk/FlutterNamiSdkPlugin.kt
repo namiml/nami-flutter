@@ -378,10 +378,6 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val purchaseSuccess =
                         NamiPurchaseSuccess.GooglePlay(
                                 product = product.convertToNamiSKU(),
-                                expiresDate = expiresDate?.toLongOrNull()?.let { it1 -> Date(it1) },
-                                purchaseDate = Date(purchaseDate.toLong()),
-                                purchaseSource = NamiPurchaseSource.valueOf(data["namiPurchaseSource"] as String),
-                                description = data["description"] as String?,
                                 orderId = data["orderId"] as String,
                                 purchaseToken = data["purchaseToken"] as String
                         )
@@ -618,7 +614,6 @@ private fun AccountStateAction.getFlutterString(): String {
         AccountStateAction.VENDOR_ID_CLEARED -> "vendor_id_cleared"
         AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_SET -> "customer_data_platform_id_set"
         AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_CLEARED -> "customer_data_platform_id_cleared"
-//        AccountStateAction.
         else -> "unknown"
     }
 }
