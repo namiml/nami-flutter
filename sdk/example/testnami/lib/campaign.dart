@@ -131,12 +131,8 @@ class CampaignWidgetState extends State<CampaignWidget> {
         NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
         appStorePurchaseDetails.purchaseID!,
         originalTransaction.transactionIdentifier!,
-        originalTransaction.transactionTimeStamp.toString(),
-        null,
-        appStorePurchaseDetails.transactionDate!,
         appStoreProductDetails.price,
         appStoreProductDetails.currencyCode,
-        NamiPurchaseSource.campaign,
       );
     }
     return namiPurchaseSuccessApple;
