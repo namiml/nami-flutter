@@ -130,29 +130,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             NamiPaywallManager.dismiss(animated: animated) {
                 result(true)
             }
-            
-//            if let myArgs = args as? [String: Any],
-//               let appPlatformId = myArgs["appPlatformIdApple"] as? String,
-//               let namiLogLevel = myArgs["namiLogLevel"] as? String,
-//               let namiCommands = myArgs["extraDataList"] as? Array<String> {
-//                let namiConfig = NamiConfiguration(appPlatformId: appPlatformId)
-//                namiConfig.namiCommands = namiCommands
-//                if(namiLogLevel == "debug") {
-//                    namiConfig.logLevel = NamiLogLevel.debug
-//                } else if(namiLogLevel == "info") {
-//                    namiConfig.logLevel = NamiLogLevel.info
-//                } else if(namiLogLevel == "warn") {
-//                    namiConfig.logLevel = NamiLogLevel.warn
-//                } else {
-//                    namiConfig.logLevel = NamiLogLevel.error
-//                }
-//                Nami.configure(with: namiConfig)
-//            } else {
-//                print(FlutterError(code: "-1", message: "iOS could not extract " +
-//                                   "flutter arguments in method: (sendParams)", details: nil))
-//            }
-            
-            
+
         case "buySkuComplete":
             
             guard let args = call.arguments else {
@@ -169,9 +147,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 let price = data["price"] as? String,
                 let decimalPrice = Decimal(string: price),
                 let currencyCode = data["currencyCode"] as? String,
-                let locale = data["locale"] as? String,
-               let purchaseSource = data["purchaseSource"] as? String,
-            let skuProduct = product.converToNamiSku() {
+                let purchaseSource = data["purchaseSource"] as? String,
+                let skuProduct = product.converToNamiSku() {
                 
                 var namiPurchaseSuccess = NamiPurchaseSuccess(
                     product: skuProduct,
@@ -181,8 +158,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     purchaseDate: purchaseDate,
                     expiresDate: createDate(expiresDate),
                     price: decimalPrice,
-                    currencyCode: currencyCode,
-                    locale: Locale(identifier: locale)
+                    currencyCode: currencyCode
 //                    purchaseSource: purchaseSource.convertToNamiPurchaseSource()
                 )
                 
