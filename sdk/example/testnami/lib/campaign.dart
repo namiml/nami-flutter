@@ -252,7 +252,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
             }
             break;
           case NamiCampaignRuleType.URL:
-          // TODO: Handle this case.
+            // TODO: Handle this case.
         }
       },
       child: Container(

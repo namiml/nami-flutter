@@ -356,7 +356,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     paywallActionCallback?.invoke(namiPaywallEvent)
                     Unit
                 }
-                val label = call.argument<String>("label") ?: ""
+                val label = call.argument<String?>("label") ?: ""
+                val url = call.argument<String?>("url")
 
                 currentActivityWeakReference?.get()?.let { activity ->
                     NamiCampaignManager.launch(
@@ -364,7 +365,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                             label,
                             actionCallback,
                             null,
-                            null,
+                            if (url != null) Uri.parse(url) else null,
                             callback
                     )
                 }
