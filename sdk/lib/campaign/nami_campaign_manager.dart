@@ -68,12 +68,15 @@ class NamiCampaignManager {
 
   /// Returns true if a campaign is available matching the provided label or default
   /// @param provided label or null if default campaign
-  static Future<bool> isCampaignAvailable({String? label}) async {
-    var variableMap = {
-      "label": label,
-    };
-    bool available =
-        await channel.invokeMethod("isCampaignAvailable", variableMap);
+  static Future<bool> isCampaignAvailable({String? label, String? url}) async {
+    Map<String, dynamic> map = <String, dynamic>{};
+    if (label != null) {
+      map.addAll({"label": label});
+    } else if (url != null) {
+      map.addAll({"url": url});
+    }
+
+    bool available = await channel.invokeMethod("isCampaignAvailable", map);
     return available;
   }
 
