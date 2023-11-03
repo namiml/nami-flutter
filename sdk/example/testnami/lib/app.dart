@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
+import 'package:nami_flutter/campaign/nami_paywall_event.dart';
 
 // Test Nami Flutter app code
 import 'package:testnami/app_config.dart';
@@ -12,6 +15,7 @@ import 'package:testnami/entitlements.dart';
 import 'package:nami_flutter/nami.dart';
 import 'package:nami_flutter/nami_configuration.dart';
 import 'package:nami_flutter/nami_log_level.dart';
+import 'package:uni_links/uni_links.dart';
 
 Future<Widget> initializeApp(AppConfig appConfig) async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +24,7 @@ Future<Widget> initializeApp(AppConfig appConfig) async {
 
 class TestNamiFlutterApp extends StatefulWidget {
   final AppConfig appConfig;
+
   const TestNamiFlutterApp(this.appConfig, {super.key});
 
   @override
@@ -28,6 +33,8 @@ class TestNamiFlutterApp extends StatefulWidget {
 
 class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
     with WidgetsBindingObserver {
+  StreamSubscription? _subscription;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -50,10 +57,9 @@ class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
               ],
             ),
             centerTitle: true,
-            backgroundColor:
-            widget.appConfig.environment == Environment.staging
+            backgroundColor: widget.appConfig.environment == Environment.staging
                 ? namiPrimaryBlue
-                    : namiYellow,
+                : namiYellow,
             title: SizedBox(
                 height: 24, child: Image.asset("images/nami_logo_white.png")),
           ),
@@ -74,11 +80,14 @@ class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     initPlatformState();
+    _getInitialUrl();
+    _handleUrlStream();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _subscription?.cancel();
     super.dispose();
   }
 
@@ -104,5 +113,41 @@ class TestNamiFlutterAppState extends State<TestNamiFlutterApp>
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
     if (!mounted) return;
+  }
+
+  Future<void> _getInitialUrl() async {
+    try {
+      final initialLink = await getInitialLink();
+      await _launchUrl(initialLink);
+    } on PlatformException {
+      // Handle the exception flow
+    }
+  }
+
+  Future<void> _handleUrlStream() async {
+    _subscription =
+        linkStream.listen((String? url) => _launchUrl, onError: (error) {
+      // Handle exception by warning the user their action did not succeed
+    });
+  }
+
+  Future<void> _launchUrl(String? url) async {
+    if (!mounted) return;
+    if (url != null) {
+      if (await NamiCampaignManager.isCampaignAvailable(url: url)) {
+        LaunchCampaignResult result = await NamiCampaignManager.launch(
+            url: url,
+            onPaywallAction: (payWallEvent) {
+              print(payWallEvent.toString());
+            });
+        if (result.success) {
+          print("Campaign launched successfully");
+        } else {
+          print("Campaign launched failed");
+        }
+      } else {
+        print("Campaign is not available on this device.");
+      }
+    }
   }
 }

@@ -56,6 +56,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import android.net.Uri;
+
 
 /** FlutterNamiSdkPlugin */
 class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {

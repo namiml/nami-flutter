@@ -93,9 +93,11 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 
                 if (label != nil) {
                     NamiCampaignManager.launch(label: label, launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
-                } else if (urlString != nil) {
-                    let url = URL(string: urlString!)
+                }
+                else if (urlString != nil) {
+                   if let url = URL(string: urlString!){
                     NamiCampaignManager.launch(url:url, launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
+                   }
                 } else {
                     NamiCampaignManager.launch(launchHandler: campaignLaunchHandler, paywallActionHandler: paywallActionHandler)
                 }
