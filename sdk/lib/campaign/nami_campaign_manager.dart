@@ -75,7 +75,6 @@ class NamiCampaignManager {
     } else if (url != null) {
       map.addAll({"url": url});
     }
-
     bool available = await channel.invokeMethod("isCampaignAvailable", map);
     return available;
   }

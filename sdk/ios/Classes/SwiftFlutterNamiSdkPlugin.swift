@@ -114,13 +114,15 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
             
         case "isCampaignAvailable":
-            let args = call.arguments as? [String: Any]
+            let args = call.arguments as? [String: Any?]
             var isAvailable = false
             if let data = args {
-                // TODO: support URL
                 let label = data["label"] as? String
-                if(label != nil){
-                    isAvailable = NamiCampaignManager.isCampaignAvailable(label: label!)
+                let urlData = data["url"] as? String
+                if let label = label {
+                    isAvailable = NamiCampaignManager.isCampaignAvailable(label: label)
+                } else if let urlData = urlData, let url = URL(string: urlData){
+                    isAvailable = NamiCampaignManager.isCampaignAvailable(url:url)
                 } else {
                     isAvailable = NamiCampaignManager.isCampaignAvailable()
                 }

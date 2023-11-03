@@ -407,10 +407,16 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
 
             "isCampaignAvailable" -> {
-                val label = call.argument<String>("label")
+                val data = call.arguments as Map<String, Any?>
+
+                val label = data["label"] as String?
+                val url = data["url"] as String?
                 result.success(
                         if (label != null) {
                             NamiCampaignManager.isCampaignAvailable(label = label)
+                        } else if (url != null) {
+                            val uri = Uri.parse(url)
+                            NamiCampaignManager.isCampaignAvailable(uri = uri)
                         } else {
                             NamiCampaignManager.isCampaignAvailable()
                         }
