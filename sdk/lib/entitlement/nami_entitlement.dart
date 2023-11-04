@@ -55,8 +55,8 @@ class NamiEntitlement {
       NamiPurchase namiPurchase = NamiPurchase.fromMap(element);
       activePurchases.add(namiPurchase);
     });
-    return NamiEntitlement(map['name'], map['description'],
-        map['referenceId'], relatedSkus, purchasedSkus, activePurchases);
+    return NamiEntitlement(map['name'], map['description'], map['referenceId'],
+        relatedSkus, purchasedSkus, activePurchases);
   }
 
   @override
