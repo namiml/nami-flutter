@@ -8,16 +8,13 @@ class EntitlementsWidget extends StatefulWidget {
   const EntitlementsWidget({Key? key}) : super(key: key);
 
   @override
-  _EntitlementsWidgetState createState() => new _EntitlementsWidgetState();
-
-  @override
-  setState() {}
+  EntitlementsWidgetState createState() => EntitlementsWidgetState();
 }
 
-class _EntitlementsWidgetState extends State<EntitlementsWidget>
+class EntitlementsWidgetState extends State<EntitlementsWidget>
     with WidgetsBindingObserver {
   List<NamiEntitlement> _activeEntitlements = [];
-  List<StreamSubscription> _subscriptions = [];
+  final List<StreamSubscription> _subscriptions = [];
 
   void _handleActiveEntitlements(List<NamiEntitlement> activeEntitlements) {
     if (activeEntitlements.isNotEmpty) {
@@ -25,17 +22,17 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
     } else {}
   }
 
-  void _handleActiveEntitlementsFuture(
-      Future<List<NamiEntitlement>> activeEntitlementsFuture) async {
-    _handleActiveEntitlements(await activeEntitlementsFuture);
-  }
+  // void _handleActiveEntitlementsFuture(
+  //     Future<List<NamiEntitlement>> activeEntitlementsFuture) async {
+  //   _handleActiveEntitlements(await activeEntitlementsFuture);
+  // }
 
   List<DataRow> _getActiveEntitlementsRows() {
     List<DataRow> dataRows = [];
 
-    _activeEntitlements.forEach((entitlement) {
+    for (var entitlement in _activeEntitlements) {
       dataRows.add(dataRowItem(entitlement.referenceId));
-    });
+    }
     return dataRows;
   }
 
@@ -64,9 +61,9 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _subscriptions.forEach((subscription) {
+    for (var subscription in _subscriptions) {
       subscription.cancel();
-    });
+    }
     super.dispose();
   }
 
@@ -74,7 +71,7 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
     return DataRow(
       cells: <DataCell>[
         DataCell(Text(entitlementRefId)),
-        DataCell(Icon(Icons.check_circle, color: namiGreen)),
+        const DataCell(Icon(Icons.check_circle, color: namiGreen)),
       ],
     );
   }
@@ -83,38 +80,38 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Container(
+        child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                SizedBox(height: 10),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
-                  _activeEntitlements.length > 0
+                  _activeEntitlements.isNotEmpty
                       ? "Current Entitlements for User"
                       : "No Active Entitlements for User",
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 DataTable(
                   showCheckboxColumn: false,
                   columns: <DataColumn>[
                     DataColumn(
                       label: Expanded(
                         child: Text(
-                          _activeEntitlements.length > 0
+                          _activeEntitlements.isNotEmpty
                               ? "Active Entitlements"
                               : "",
-                          style: TextStyle(fontStyle: FontStyle.italic),
+                          style: const TextStyle(fontStyle: FontStyle.italic),
                         ),
                       ),
                     ),
-                    DataColumn(
+                    const DataColumn(
                       label: Expanded(
                         child: Text(
                           '',
@@ -129,8 +126,8 @@ class _EntitlementsWidgetState extends State<EntitlementsWidget>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        label: Text("Refresh"),
-        icon: new Icon(Icons.refresh),
+        label: const Text("Refresh"),
+        icon: const Icon(Icons.refresh),
         backgroundColor: namiPrimaryBlue,
         onPressed: () {
           NamiEntitlementManager.refresh();

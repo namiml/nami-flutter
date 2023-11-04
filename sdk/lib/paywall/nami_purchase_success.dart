@@ -1,4 +1,3 @@
-import 'package:nami_flutter/billing/nami_purchase.dart';
 import 'package:nami_flutter/paywall/nami_sku.dart';
 
 sealed class NamiPurchaseSuccess {
