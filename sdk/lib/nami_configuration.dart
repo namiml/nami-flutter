@@ -1,4 +1,4 @@
- import 'nami_log_level.dart';
+import 'nami_log_level.dart';
 
 class NamiConfiguration {
   /// A UUID for the Apple app. You can find the Nami App Platform ID in the App

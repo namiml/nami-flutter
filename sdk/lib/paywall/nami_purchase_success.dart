@@ -55,12 +55,12 @@ class NamiPurchaseSuccessApple extends NamiPurchaseSuccess {
   final String currencyCode;
 
   NamiPurchaseSuccessApple(
-      NamiSKU product,
-      this.transactionID,
-      this.originalTransactionID,
-      this.price,
-      this.currencyCode,
-      ) : super(product);
+    NamiSKU product,
+    this.transactionID,
+    this.originalTransactionID,
+    this.price,
+    this.currencyCode,
+  ) : super(product);
 
   factory NamiPurchaseSuccessApple.fromMap(Map<dynamic, dynamic> map) {
     return NamiPurchaseSuccessApple(
