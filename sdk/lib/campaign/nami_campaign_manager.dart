@@ -2,9 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
-import '../billing/nami_purchase.dart';
 import '../channel.dart';
-import '../paywall/nami_sku.dart';
 import 'nami_paywall_event.dart';
 
 /// Manager class which providing functionality related to displaying a paywall
@@ -69,13 +67,9 @@ class NamiCampaignManager {
   /// Returns true if a campaign is available matching the provided label or default
   /// @param provided label or null if default campaign
   static Future<bool> isCampaignAvailable({String? label, String? url}) async {
-    Map<String, dynamic> map = <String, dynamic>{};
-    if (label != null) {
-      map.addAll({"label": label});
-    } else if (url != null) {
-      map.addAll({"url": url});
-    }
-    bool available = await channel.invokeMethod("isCampaignAvailable", map);
+    var variableMap = {"label": label, "url": url};
+    bool available =
+        await channel.invokeMethod("isCampaignAvailable", variableMap);
     return available;
   }
 
