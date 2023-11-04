@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
-import 'package:nami_flutter/campaign/nami_paywall_event.dart';
 
 // Test Nami Flutter app code
 import 'package:testnami/app_config.dart';

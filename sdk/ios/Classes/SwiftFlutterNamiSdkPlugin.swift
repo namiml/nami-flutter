@@ -29,7 +29,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         accountStateEventChannel.setStreamHandler(AccountStateEventHandler())
         campaignsEventChannel.setStreamHandler(CampaignsEventHandler())
         closePaywallEventChannel.setStreamHandler(ClosePaywallEventHandler())
-        //         restorePaywallEventChannel.setStreamHandler(RestorePaywallEventHandler())
+        restorePaywallEventChannel.setStreamHandler(RestorePaywallEventHandler())
         buySkuEventChannel.setStreamHandler(BuySkuEventHandler())
         paywallActionEventChannel.setStreamHandler(PaywallActionEventHandler())
     }
@@ -262,7 +262,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
     }
     
-    class RestoreEventHandler: NSObject, FlutterStreamHandler {
+    class RestorePaywallEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.registerRestoreHandler {
                 // TODO: Figure out what the right thing to do here is.
@@ -325,7 +325,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     class BuySkuEventHandler: NSObject, FlutterStreamHandler {
         func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
             NamiPaywallManager.registerBuySkuHandler { sku in
-                events(sku.id)
+                events(sku.convertToMap())
             }
             return nil
         }
