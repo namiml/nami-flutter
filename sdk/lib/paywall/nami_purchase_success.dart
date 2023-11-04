@@ -1,6 +1,6 @@
 import 'package:nami_flutter/paywall/nami_sku.dart';
 
-sealed class NamiPurchaseSuccess {
+abstract class NamiPurchaseSuccess {
   NamiSKU product;
 
   NamiPurchaseSuccess(this.product);
