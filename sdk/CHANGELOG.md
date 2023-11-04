@@ -1,3 +1,22 @@
+# 3.1.0 (Nov 6, 2023)
+
+#Changelog
+
+- Update bridge to support Apple SDk 3.1.17 and Android SDK 3.1.17
+
+## Bug Fixes
+- Fix compile time errors for Android and iOS
+
+## Enhancements
+- Add NamiPaywallEvent for paywall action callback
+- Implement NamiPaywallManager.buySkuComplete
+- Implement NamiPaywallManager.buySkuCancel
+- Add url support for NamiCampaignManager.launch
+- Add Sample app example for deeplinks using url style of NamiCampaignManager.launch
+- Add url style of NamiCampaignManager.isCampaignAvailable
+- Add NamiPurchaseSuccessGoogle
+- Demonstrate use of NamiPaywallManager.registerBuySkuHandler and NamiPaywallManager.buySkuComplete and NamiPaywallManager.buySkuCancel to sample app.
+
 # 3.0.9 (May 15, 2023)
 
 # Changelog
