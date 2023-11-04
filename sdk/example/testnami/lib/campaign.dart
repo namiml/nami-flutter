@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:nami_flutter/billing/nami_purchase.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
 import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
@@ -32,9 +31,9 @@ class CampaignWidgetState extends State<CampaignWidget> {
   @override
   void initState() {
     super.initState();
-    final Stream<List<PurchaseDetails>> _purchaseUpdated =
+    final Stream<List<PurchaseDetails>> purchaseUpdated =
         InAppPurchase.instance.purchaseStream;
-    _subscription = _purchaseUpdated.listen((purchaseDetailList) {
+    _subscription = purchaseUpdated.listen((purchaseDetailList) {
       _listenToPurchaseUpdated(purchaseDetailList);
     }, onDone: () {
       _subscription.cancel();
@@ -108,8 +107,6 @@ class CampaignWidgetState extends State<CampaignWidget> {
     NamiPurchaseSuccess? namiPurchaseSuccessGoogle;
     GooglePlayPurchaseDetails googlePlayPurchaseDetails =
         purchaseDetails as GooglePlayPurchaseDetails;
-    GooglePlayProductDetails googlePlayProductDetails =
-        productDetails as GooglePlayProductDetails;
     namiPurchaseSuccessGoogle = NamiPurchaseSuccessGoogle(
         NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
         googlePlayPurchaseDetails.purchaseID!,
@@ -203,7 +200,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
         ),
         floatingActionButton: FloatingActionButton.extended(
             label: const Text("Refresh"),
-            icon: Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             backgroundColor: namiPrimaryBlue,
             onPressed: () {
               NamiCampaignManager.refresh();
