@@ -9,14 +9,11 @@ class ProfileWidget extends StatefulWidget {
 
   @override
   ProfileWidgetState createState() => ProfileWidgetState();
-
-  @override
-  setState() {}
 }
 
 class ProfileWidgetState extends State<ProfileWidget>
     with WidgetsBindingObserver {
-  List<StreamSubscription> _subscriptions = [];
+  final List<StreamSubscription> _subscriptions = [];
   String _deviceId = "";
   String? _externalId;
   bool _isLoggedIn = false;
@@ -121,9 +118,9 @@ class ProfileWidgetState extends State<ProfileWidget>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _subscriptions.forEach((subscription) {
+    for (var subscription in _subscriptions) {
       subscription.cancel();
-    });
+    }
     super.dispose();
   }
 
@@ -142,31 +139,30 @@ class ProfileWidgetState extends State<ProfileWidget>
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Container(
+        child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                SizedBox(height: 10),
-                SizedBox(height: 10),
+                const SizedBox(height: 20),
                 Text(
                   _isLoggedIn ? "Registered User" : "Anonymous User",
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
                   ),
                 ),
-                SizedBox(height: 3),
+                const SizedBox(height: 3),
                 Text(
                   _isLoggedIn
-                      ? "External Id: ${_externalId}"
-                      : "Device Id: ${_deviceId}",
-                  style: TextStyle(
+                      ? "External Id: $_externalId"
+                      : "Device Id: $_deviceId",
+                  style: const TextStyle(
                     fontSize: 10,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 DataTable(
                   showCheckboxColumn: false,
                   columns: const <DataColumn>[
