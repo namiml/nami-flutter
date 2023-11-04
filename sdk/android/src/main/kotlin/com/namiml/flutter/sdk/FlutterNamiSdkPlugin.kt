@@ -57,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import android.net.Uri;
+import com.namiml.flutter.sdk.convertToMap
 
 
 /** FlutterNamiSdkPlugin */
@@ -243,7 +244,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiPaywallManager.registerBuySkuHandler { _, sku ->
                     CoroutineScope(Dispatchers.Main).launch {
-                        events?.success(sku)
+                        events?.success(sku.convertToMap())
                     }
                 }
             }
@@ -261,30 +262,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 paywallActionCallback = { namiPaywallEvent ->
                     CoroutineScope(Dispatchers.Main).launch {
-                        events?.success(
-                                hashMapOf<String, Any?>(
-                                        "action" to namiPaywallEvent.action.name,
-                                        "campaignId" to namiPaywallEvent.campaignId,
-                                        "campaignName" to namiPaywallEvent.campaignName,
-                                        "campaignType" to namiPaywallEvent.campaignType,
-                                        "campaignLabel" to namiPaywallEvent.campaignLabel,
-                                        "campaignUrl" to namiPaywallEvent.campaignUrl,
-                                        "paywallId" to namiPaywallEvent.paywallId,
-                                        "paywallName" to namiPaywallEvent.paywallName,
-                                        "componentChange" to namiPaywallEvent.componentChange?.convertToMap(),
-                                        "segmentId" to namiPaywallEvent.segmentId,
-                                        "externalSegmentid" to namiPaywallEvent.externalSegmentId,
-                                        "deeplinkUrl" to namiPaywallEvent.deeplinkUrl,
-                                        "sku" to namiPaywallEvent.sku?.convertToMap(),
-                                        "purchaseError" to namiPaywallEvent.purchaseError,
-                                        "purchases" to namiPaywallEvent.purchases?.map { it.convertToMap() },
-                                        "skus" to namiPaywallEvent.skus?.map { it.convertToMap() }
-                                )
-                        )
+                        events?.success(namiPaywallEvent.converToMap())
                     }
                 }
             }
-
             override fun onCancel(arguments: Any?) {
             }
         })
@@ -559,7 +540,6 @@ private fun CustomerJourneyState.convertToMap(): Map<String, Boolean> {
 }
 
 
-
 private fun NamiPurchaseCompleteResult.convertToMap(): Map<String, Any?> {
     val purchaseState = if (isSuccessful) {
         "purchased"
@@ -601,6 +581,26 @@ private fun NamiPurchase.convertToMap(): Map<String, Any?> {
     )
 }
 
+private fun NamiPaywallEvent.converToMap(): Map<String, Any?> {
+    return hashMapOf<String, Any?>(
+            "action" to this.action.name,
+            "campaignId" to this.campaignId,
+            "campaignName" to this.campaignName,
+            "campaignType" to this.campaignType,
+            "campaignLabel" to this.campaignLabel,
+            "campaignUrl" to this.campaignUrl,
+            "paywallId" to this.paywallId,
+            "paywallName" to this.paywallName,
+            "componentChange" to this.componentChange?.convertToMap(),
+            "segmentId" to this.segmentId,
+            "externalSegmentid" to this.externalSegmentId,
+            "deeplinkUrl" to this.deeplinkUrl,
+            "sku" to this.sku?.convertToMap(),
+            "purchaseError" to this.purchaseError,
+            "purchases" to this.purchases?.map { it.convertToMap() },
+            "skus" to this.skus?.map { it.convertToMap() }
+    )
+}
 
 private fun NamiPurchaseSource.getFlutterString(): String {
     return when (this) {
@@ -610,8 +610,6 @@ private fun NamiPurchaseSource.getFlutterString(): String {
         else -> ""
     }
 }
-
-//TODO: ADD ACCOUNT STATE ACTION HERE
 
 private fun AccountStateAction.getFlutterString(): String {
     return when (this) {
