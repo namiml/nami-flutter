@@ -76,6 +76,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private lateinit var closePaywallListener: EventChannel
     private lateinit var buySkuListener: EventChannel
     private lateinit var paywallActionListener: EventChannel
+    private lateinit var restorePaywallListener: EventChannel
     private lateinit var context: Context
     private var currentActivityWeakReference: WeakReference<Activity>? = null
     private var paywallActionCallback: ((NamiPaywallEvent) -> Unit)? = null
@@ -97,11 +98,14 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 EventChannel(flutterPluginBinding.binaryMessenger, "closePaywallEvent")
         buySkuListener =
                 EventChannel(flutterPluginBinding.binaryMessenger, "buySkuEvent")
+        restorePaywallListener=
+                EventChannel(flutterPluginBinding.binaryMessenger, "restorePaywallEvent")
         paywallActionListener =
                 EventChannel(flutterPluginBinding.binaryMessenger, "paywallActionEvent")
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
+        setRestorePaywallStreamHandler()
         setActiveEntitlementsStreamHandler()
         setPurchaseChangeStreamHandler()
         setCustomerJourneyStateHandler()
@@ -142,6 +146,21 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             override fun onCancel(arguments: Any?) {
                 NamiPaywallManager.registerSignInHandler(null)
+            }
+        })
+    }
+
+    private fun setRestorePaywallStreamHandler(){
+        restorePaywallListener.setStreamHandler(object: StreamHandler(), EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?){
+                NamiPaywallManager.registerRestoreHandler { context->
+                    CoroutineScope(Dispatchers.Main).launch {
+                        events?.success(true)
+                    }
+                }
+            }
+            override fun onCancel(arguments: Any?){
+                NamiPaywallManager.registerRestoreHandler { null }
             }
         })
     }
