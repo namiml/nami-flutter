@@ -11,6 +11,9 @@ on:
         description: "Is this a early access build?"
         default: true
         type: boolean
+      version:
+        description: "Version number (no 'v' prefix)"
+        required: true
     secrets:
       BUILD_USER_PAT:
         required: true
@@ -31,7 +34,7 @@ jobs:
           channel: stable
           version: 3.3.5
 
-      # clone the repo at a specific version
+      # clone the repo at a specific
       - name: Checkout ${{ inputs.ref }}
         uses: actions/checkout@v2
         with:
@@ -52,18 +55,6 @@ jobs:
           python build-utils/preflight.py
         env:
           NAMI_SDK_VERSION: ${{ inputs.version }}
-
-      - name: Write credentials
-        run: |
-          mkdir ~/.config/dart/
-          echo $PUB_DEV_CREDENTIAL_JSON >> ~/.config/dart/pub-credentials.json
-        env:
-          PUB_DEV_CREDENTIAL_JSON: ${{ secrets.PUB_DEV_CREDENTIAL_JSON }}
-
-      - name: Publish
-        run: |
-          cd sdk
-          dart pub publish -f
 
       - name: Create Github Release
         run: |-
