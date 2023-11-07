@@ -22,7 +22,7 @@ class CampaignWidget extends StatefulWidget {
 class CampaignWidgetState extends State<CampaignWidget> {
   List<NamiCampaign> _campaigns = [];
   Map<String, NamiSKU> identifiers = {};
-  List<ProductDetails> productDetails = [];
+  ProductDetails? productDetails ;
 
   late final StreamSubscription<List<PurchaseDetails>> _subscription;
   final InAppPurchase inAppPurchase = InAppPurchase.instance;
@@ -69,11 +69,10 @@ class CampaignWidgetState extends State<CampaignWidget> {
         identifiers.addAll(Map.of({sku.skuId: sku}));
         ProductDetailsResponse productDetailsResponse =
             await inAppPurchase.queryProductDetails({sku.skuId});
-        productDetails = productDetailsResponse.productDetails;
-        print(productDetails.length);
-        AppStoreProductDetails appStoreProductDetails =
-            productDetails.first as AppStoreProductDetails;
-        await _buyProduct(sku, appStoreProductDetails);
+        productDetails = productDetailsResponse.productDetails.first;
+        print(productDetails);
+
+        await _buyProduct(sku, productDetails!);
       });
     }
   }
@@ -81,6 +80,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
   //To buy any Product
   Future<void> _buyProduct(NamiSKU sku, ProductDetails productDetails) async {
     PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
+
 
     if (sku.type == NamiSKUType.subscription) {
       await inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
@@ -91,13 +91,12 @@ class CampaignWidgetState extends State<CampaignWidget> {
 
   void _listenToPurchaseUpdated(
       List<PurchaseDetails> purchaseDetailsList) async {
-    print('listenToPurchaseDetail Stream: ${purchaseDetailsList.length}');
     if (purchaseDetailsList.isNotEmpty) {
       for (PurchaseDetails purchaseDetails in purchaseDetailsList) {
-        print('PurchaseDetails: ${purchaseDetails.status}');
-        if (!purchaseDetails.pendingCompletePurchase) {
+        if(purchaseDetails.pendingCompletePurchase){
           await inAppPurchase.completePurchase(purchaseDetails);
-        } else if (purchaseDetails.status == PurchaseStatus.purchased) {
+        }
+       if (purchaseDetails.status == PurchaseStatus.purchased) {
           NamiSKU namiSku = identifiers[purchaseDetails.productID]!;
           final namiPurchaseSuccess = Platform.isIOS
               ? handleiOSPurchase(namiSku, purchaseDetails)
