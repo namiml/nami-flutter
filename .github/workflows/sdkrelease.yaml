@@ -61,3 +61,12 @@ jobs:
           sh gh-release-command.sh
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+  publish:
+    permissions:
+      id-token: write # Required for authentication using OIDC
+    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    with:
+      # Specify the github actions deployment environment
+      environment: pub.dev
+      # working-directory: path/to/package/within/repository
