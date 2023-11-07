@@ -56,17 +56,20 @@ jobs:
         env:
           NAMI_SDK_VERSION: ${{ inputs.version }}
 
+      - name: Write credentials
+        run: |
+          mkdir ~/.config/dart/
+          echo $PUB_DEV_CREDENTIAL_JSON >> ~/.config/dart/pub-credentials.json
+        env:
+           PUB_DEV_CREDENTIAL_JSON: ${{ secrets.PUB_DEV_CREDENTIAL_JSON }}
+
+      - name: Publish
+        run: |
+          cd sdk
+          dart pub publish -f
+           
       - name: Create Github Release
         run: |-
           sh gh-release-command.sh
         env:
           GITHUB_TOKEN: ${{ github.token }}
-
-  publish:
-    permissions:
-      id-token: write # Required for authentication using OIDC
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
-    with:
-      # Specify the github actions deployment environment
-      environment: pub.dev
-      working-directory: sdk/
