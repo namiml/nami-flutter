@@ -69,4 +69,4 @@ jobs:
     with:
       # Specify the github actions deployment environment
       environment: pub.dev
-      # working-directory: path/to/package/within/repository
+      working-directory: sdk/
