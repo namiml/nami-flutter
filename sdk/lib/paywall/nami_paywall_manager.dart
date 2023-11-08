@@ -53,11 +53,7 @@ class NamiPaywallManager {
     print(namiPurchaseSuccess.toString());
     return channel
         .invokeMethod<bool>("buySkuComplete", namiPurchaseSuccess.toMap())
-        .then<bool>((bool? value) {
-
-          print(value);
-          return value??false;
-    });
+        .then<bool>((bool? value) =>value??false);
   }
 
   static Future<void> buySkuCancel() {
