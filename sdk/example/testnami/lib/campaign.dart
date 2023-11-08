@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
+import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
 import 'package:nami_flutter/paywall/nami_purchase_success.dart';
 import 'package:nami_flutter/paywall/nami_sku.dart';
@@ -53,6 +54,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
         _campaigns = list;
       });
     });
+    NamiCustomerManager.setCustomerAttribute({"creatorCode":"Taylor"});
   }
 
   @override
