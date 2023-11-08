@@ -81,22 +81,22 @@ class NamiCustomerManager {
   }
 
   static Future<void> setCustomerAttribute(Map<String, dynamic> map) async {
-   return await channel.invokeMethod("setCustomerAttribute",map);
+    return await channel.invokeMethod("setCustomerAttribute", map);
   }
 
   static Future<String?> getCustomerAttribute(String attributeName) async {
-    final String? data = await channel.invokeMethod("getCustomerAttribute",attributeName);
+    final String? data =
+        await channel.invokeMethod("getCustomerAttribute", attributeName);
     return data;
   }
 
   static Future<void> clearCustomerAttribute(String attributeName) async {
-    await channel.invokeMethod("clearCustomerAttribute",attributeName);
+    await channel.invokeMethod("clearCustomerAttribute", attributeName);
   }
 
-  static Future<void> clearAllCustomerAttribute()async{
-   return await channel.invokeMethod("clearAllCustomerAttribute");
+  static Future<void> clearAllCustomerAttribute() async {
+    return await channel.invokeMethod("clearAllCustomerAttribute");
   }
-
 }
 
 /// This data class represents a customer's subscription journey state

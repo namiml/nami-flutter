@@ -54,7 +54,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
         _campaigns = list;
       });
     });
-    NamiCustomerManager.setCustomerAttribute({"creatorCode":"Taylor"});
+    NamiCustomerManager.setCustomerAttribute({"creatorCode": "Taylor"});
   }
 
   @override
