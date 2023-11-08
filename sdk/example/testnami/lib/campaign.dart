@@ -53,6 +53,10 @@ class CampaignWidgetState extends State<CampaignWidget> {
         _campaigns = list;
       });
     });
+
+    NamiPaywallManager.registerRestoreHandler().listen((event) async {
+      await inAppPurchase.restorePurchases();
+    });
   }
 
   @override
@@ -217,7 +221,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
               result = await NamiCampaignManager.launch(
                   label: campaign.value,
                   onPaywallAction: (paywallEvent) {
-                    print("Paywall event $paywallEvent");
+                    print("Paywall event ${paywallEvent?.action}");
                   });
 
               if (result.success) {
