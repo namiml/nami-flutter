@@ -76,6 +76,31 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             result(NamiCustomerManager.isLoggedIn())
         case "deviceId":
             result(NamiCustomerManager.deviceId())
+            
+        case "setCustomerAttribute":
+            if let args = call.arguments as? [String: String] {
+                args.forEach({
+                    NamiCustomerManager.setCustomerAttribute($0.key, $0.value)
+                })
+            }
+            
+        case "getCustomerAttribute":
+            let args = call.arguments as? String
+            if let data = args {
+                result(NamiCustomerManager.getCustomerAttribute(key: data))
+            }
+            
+        case "clearCustomerAttribute":
+            let args = call.arguments as? String
+            if let data = args {
+                print("=== call received");
+
+                NamiCustomerManager.clearCustomerAttribute(data)
+            }
+            
+        case "clearAllCustomerAttribute":
+            NamiCustomerManager.clearAllCustomerAttributes()
+            
         case "launch":
             let args = call.arguments as? [String: Any]
             if let data = args {
