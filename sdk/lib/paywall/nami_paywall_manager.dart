@@ -49,10 +49,15 @@ class NamiPaywallManager {
     return data;
   }
 
-  static Future<void> buySkuComplete(NamiPurchaseSuccess namiPurchaseSuccess) {
-    var data = channel.invokeMethod<bool>(
-        "buySkuComplete", namiPurchaseSuccess.toMap());
-    return data;
+  static Future<bool> buySkuComplete(NamiPurchaseSuccess namiPurchaseSuccess) {
+    print(namiPurchaseSuccess.toString());
+    return channel
+        .invokeMethod<bool>("buySkuComplete", namiPurchaseSuccess.toMap())
+        .then<bool>((bool? value) {
+
+          print(value);
+          return value??false;
+    });
   }
 
   static Future<void> buySkuCancel() {

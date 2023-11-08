@@ -37,7 +37,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
     }, onDone: () {
       _subscription.cancel();
     }, onError: (error) {
-      print('Error: ${error}');
+      print('Error: $error');
     });
 
     NamiCampaignManager.registerAvailableCampaignsHandler().listen((list) {
@@ -102,7 +102,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
               ? handleiOSPurchase(namiSku, purchaseDetails)
               : handleAndroidPurchase(namiSku, purchaseDetails);
           if (namiPurchaseSuccess != null) {
-            await NamiPaywallManager.buySkuComplete(namiPurchaseSuccess);
+         await NamiPaywallManager.buySkuComplete(namiPurchaseSuccess);
           }
         } else if (purchaseDetails.status == PurchaseStatus.canceled) {
           await NamiPaywallManager.buySkuCancel();
@@ -130,17 +130,13 @@ class CampaignWidgetState extends State<CampaignWidget> {
         productDetails as AppStoreProductDetails;
     AppStorePurchaseDetails appStorePurchaseDetails =
         purchaseDetail as AppStorePurchaseDetails;
-    final originalTransaction =
-        appStorePurchaseDetails.skPaymentTransaction.originalTransaction;
-    if (originalTransaction != null) {
-      namiPurchaseSuccessApple = NamiPurchaseSuccessApple(
+    namiPurchaseSuccessApple = NamiPurchaseSuccessApple(
         NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
         appStorePurchaseDetails.purchaseID!,
-        originalTransaction.transactionIdentifier!,
-        appStoreProductDetails.price,
+        appStorePurchaseDetails.skPaymentTransaction.transactionIdentifier!,
+        appStoreProductDetails.skProduct.price,
         appStoreProductDetails.currencyCode,
       );
-    }
     return namiPurchaseSuccessApple;
   }
 
@@ -243,7 +239,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
               result = await NamiCampaignManager.launch(
                   label: campaign.value,
                   onPaywallAction: (paywallEvent) {
-                    print("Paywall event ${paywallEvent.toString()}");
+                 //   print("Paywall event ${paywallEvent.toString()}");
                   });
 
               if (result.success) {

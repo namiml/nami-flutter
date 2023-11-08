@@ -85,7 +85,7 @@ class NamiPaywallEvent {
 
   @override
   String toString() {
-    return 'NamiPaywallEvent {action: ${action}, orderId $campaignId'
+    return 'NamiPaywallEvent {action: $action, orderId $campaignId'
         ' campaignName: $campaignName, campaignType: $campaignType, '
         ' campaignLabel: $campaignLabel, paywallId: $paywallId,paywallName: $paywallName,'
         ' componentChange: $componentChange, segmentId: $segmentId,'

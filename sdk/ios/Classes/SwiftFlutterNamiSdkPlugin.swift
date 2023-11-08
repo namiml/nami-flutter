@@ -136,12 +136,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
 
         case "buySkuComplete":
-            
-            guard let args = call.arguments else {
-                return
-            }
-            
-            if let data = args as? [String:Any],
+            if let data = call.arguments as? [String:Any?],
                 let product = data["product"] as? [String: Any?],
                 let transactionID = data["transactionID"] as? String,
                 let originalTransactionID = data["originalTransactionID"] as? String,
@@ -157,9 +152,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     price: decimalPrice,
                     currencyCode: currencyCode
                 )
-                
                 NamiPaywallManager.buySkuComplete(purchaseSuccess: namiPurchaseSuccess)
-                
+                result(true);
             }
             
         case "buySkuCancel":
@@ -643,10 +637,9 @@ public extension String{
 public extension [String: Any?] {
     func convertToNamiSku() -> NamiSKU? {
         if let skuId = self["skuId"] as? String,
-           let name = self["name"] as? String,
-           let type = self["type"] as? String,
-           let id = self["id"] as? String {
-            return NamiSKU(namiId: id, storeId: skuId, skuType: type.convertToNamiSKYType())
+           let type = self["type"] as? String  {
+            let id = self["id"] as? String
+            return NamiSKU(namiId: id ?? UUID().uuidString, storeId: skuId, skuType: type.convertToNamiSKYType())
         }
         return nil
     }
