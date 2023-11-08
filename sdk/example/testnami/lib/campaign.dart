@@ -33,7 +33,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
     final Stream<List<PurchaseDetails>> purchaseUpdated =
         InAppPurchase.instance.purchaseStream;
     _subscription = purchaseUpdated.listen((purchaseDetailList) async {
-      _listenToPurchaseUpdated(purchaseDetailList);
+     await _listenToPurchaseUpdated(purchaseDetailList);
     }, onDone: () {
       _subscription.cancel();
     }, onError: (error) {
@@ -85,7 +85,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
     }
   }
 
-  void _listenToPurchaseUpdated(
+  Future<void> _listenToPurchaseUpdated(
       List<PurchaseDetails> purchaseDetailsList) async {
     if (purchaseDetailsList.isNotEmpty) {
       for (PurchaseDetails purchaseDetails in purchaseDetailsList) {
@@ -99,6 +99,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
               : handleAndroidPurchase(namiSku, purchaseDetails);
           if (namiPurchaseSuccess != null) {
             await NamiPaywallManager.buySkuComplete(namiPurchaseSuccess);
+            await inAppPurchase.completePurchase(purchaseDetails);
           }
         } else if (purchaseDetails.status == PurchaseStatus.canceled) {
           await NamiPaywallManager.buySkuCancel();
