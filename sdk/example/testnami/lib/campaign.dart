@@ -116,7 +116,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
     namiPurchaseSuccessGoogle = NamiPurchaseSuccessGoogle(
         NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
         googlePlayPurchaseDetails.purchaseID!,
-        googlePlayPurchaseDetails.verificationData.serverVerificationData);
+        googlePlayPurchaseDetails.billingClientPurchase.purchaseToken);
     return namiPurchaseSuccessGoogle;
   }
 
