@@ -1,3 +1,18 @@
+# 3.1.1 (Nov 8, 2023)
+
+# Changelog
+
+## Bug Fixes
+- Update sample app with additional improvements for `NamiPaywallManager.buySkuComplete`
+
+## Enhancements
+- Support the following methods in NamiCustomerManager
+
+  - setCustomerAttribute
+  - getCustomerAttribute
+  - clearCustomerAttribute
+  - clearAllCustomerAttributes
+
 # 3.1.0 (Nov 6, 2023)
 
 #Changelog

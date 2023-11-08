@@ -24,7 +24,7 @@ class NamiSKU {
     return <String, dynamic>{
       "name": name,
       "skuId": skuId,
-      'type': type.name,
+      'type': type,
       'id': id
     };
   }
