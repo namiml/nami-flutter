@@ -33,7 +33,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
     final Stream<List<PurchaseDetails>> purchaseUpdated =
         InAppPurchase.instance.purchaseStream;
     _subscription = purchaseUpdated.listen((purchaseDetailList) async {
-     await _listenToPurchaseUpdated(purchaseDetailList);
+      await _listenToPurchaseUpdated(purchaseDetailList);
     }, onDone: () {
       _subscription.cancel();
     }, onError: (error) {
