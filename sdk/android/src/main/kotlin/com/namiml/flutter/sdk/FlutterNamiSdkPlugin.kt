@@ -98,7 +98,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 EventChannel(flutterPluginBinding.binaryMessenger, "closePaywallEvent")
         buySkuListener =
                 EventChannel(flutterPluginBinding.binaryMessenger, "buySkuEvent")
-        restorePaywallListener=
+        restorePaywallListener =
                 EventChannel(flutterPluginBinding.binaryMessenger, "restorePaywallEvent")
         paywallActionListener =
                 EventChannel(flutterPluginBinding.binaryMessenger, "paywallActionEvent")
@@ -150,16 +150,17 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         })
     }
 
-    private fun setRestorePaywallStreamHandler(){
-        restorePaywallListener.setStreamHandler(object: StreamHandler(), EventChannel.StreamHandler {
-            override fun onListen(arguments: Any?, events: EventChannel.EventSink?){
-                NamiPaywallManager.registerRestoreHandler { context->
+    private fun setRestorePaywallStreamHandler() {
+        restorePaywallListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+            override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                NamiPaywallManager.registerRestoreHandler { context ->
                     CoroutineScope(Dispatchers.Main).launch {
                         events?.success(true)
                     }
                 }
             }
-            override fun onCancel(arguments: Any?){
+
+            override fun onCancel(arguments: Any?) {
                 NamiPaywallManager.registerRestoreHandler { null }
             }
         })
@@ -285,6 +286,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     }
                 }
             }
+
             override fun onCancel(arguments: Any?) {
             }
         })
@@ -334,6 +336,34 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             "deviceId" -> {
                 result.success(NamiCustomerManager.deviceId())
             }
+
+            "setCustomerAttribute" -> {
+                val data = call.arguments as? Map<String, String>
+                data?.forEach {
+                    NamiCustomerManager.setCustomerAttribute(it.key, it.value)
+                }
+
+            }
+
+            "getCustomerAttribute" -> {
+                val attributeName = call.arguments as? String
+                if (attributeName != null) {
+                    result.success(NamiCustomerManager.getCustomerAttribute(attributeName))
+                }
+            }
+
+            "clearCustomerAttribute" -> {
+                val attributeName = call.arguments as? String
+                if (attributeName != null) {
+                    result.success(NamiCustomerManager.clearCustomerAttribute(attributeName))
+                }
+
+            }
+
+            "clearAllCustomerAttribute" -> {
+                NamiCustomerManager.clearAllCustomerAttributes()
+            }
+
 
             "launch" -> {
                 val callback = { launchResult: LaunchCampaignResult ->
