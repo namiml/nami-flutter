@@ -97,6 +97,14 @@ class NamiCustomerManager {
   static Future<void> clearAllCustomerAttribute() async {
     return await channel.invokeMethod("clearAllCustomerAttribute");
   }
+
+  static Future<void> setAnonymousMode(bool anonymousMode) async {
+    return await channel.invokeMethod("setAnonymousMode", anonymousMode);
+  }
+
+  static Future<bool> inAnonymousMode() async {
+    return await channel.invokeMethod("inAnonymousMode").then((value) => value);
+  }
 }
 
 /// This data class represents a customer's subscription journey state
