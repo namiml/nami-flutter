@@ -24,8 +24,9 @@ class CampaignWidgetState extends State<CampaignWidget> {
   List<NamiCampaign> _campaigns = [];
   Map<String, NamiSKU> identifiers = {};
   ProductDetails? productDetails;
+  final List<StreamSubscription> _subscriptions = [];
 
-  late final StreamSubscription<List<PurchaseDetails>> _subscription;
+  StreamSubscription? _purchaseStreamSubscription;
   final InAppPurchase inAppPurchase = InAppPurchase.instance;
 
   @override
@@ -33,38 +34,51 @@ class CampaignWidgetState extends State<CampaignWidget> {
     super.initState();
     final Stream<List<PurchaseDetails>> purchaseUpdated =
         InAppPurchase.instance.purchaseStream;
-    _subscription = purchaseUpdated.listen((purchaseDetailList) async {
+
+    _purchaseStreamSubscription =
+        purchaseUpdated.listen((purchaseDetailList) async {
       await _listenToPurchaseUpdated(purchaseDetailList);
     }, onDone: () {
-      _subscription.cancel();
+      _purchaseStreamSubscription?.cancel();
     }, onError: (error) {
       print('Error: $error');
     });
 
-    NamiCampaignManager.registerAvailableCampaignsHandler().listen((list) {
+    _subscriptions.add(_purchaseStreamSubscription!);
+
+    StreamSubscription availableCampaignStreamSubscription =
+        NamiCampaignManager.registerAvailableCampaignsHandler().listen((list) {
       setState(() {
         print("registerAvailableCampaignsHandler triggered");
         _campaigns = list;
       });
     });
 
+    _subscriptions.add(availableCampaignStreamSubscription);
+
     NamiCampaignManager.allCampaigns().then((list) {
       setState(() {
         _campaigns = list;
       });
     });
-    initStoreInfo();
 
     NamiCustomerManager.setCustomerAttribute({"creatorCode": "Taylor"});
 
-    NamiPaywallManager.registerRestoreHandler().listen((event) async {
+    StreamSubscription restoreStateSubscription =
+        NamiPaywallManager.registerRestoreHandler().listen((event) async {
       await inAppPurchase.restorePurchases();
     });
+    _subscriptions.add(restoreStateSubscription);
+
+    initStoreInfo();
+
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    for (var subscription in _subscriptions) {
+      subscription.cancel();
+    }
     super.dispose();
   }
 
