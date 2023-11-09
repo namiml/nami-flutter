@@ -93,13 +93,20 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         case "clearCustomerAttribute":
             let args = call.arguments as? String
             if let data = args {
-                print("=== call received");
-
                 NamiCustomerManager.clearCustomerAttribute(data)
             }
             
         case "clearAllCustomerAttribute":
             NamiCustomerManager.clearAllCustomerAttributes()
+
+        case "setCustomerDataPlatformId":
+           let args = call.arguments as? String
+           if let withId = args {
+              NamiCustomerManager.setCustomerDataPlatformId(with: withId)
+           }
+
+        case "clearCustomerDataPlatformId":
+             NamiCustomerManager.clearCustomerDataPlatformId()
             
         case "launch":
             let args = call.arguments as? [String: Any]

@@ -364,6 +364,16 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 NamiCustomerManager.clearAllCustomerAttributes()
             }
 
+            "setCustomerDataPlatformId" -> {
+                val withId = call.arguments as? String
+                if(withId != null){
+                    NamiCustomerManager.setCustomerDataPlatformId(withId)
+                }
+            }
+
+            "clearCustomerDataPlatformId" -> {
+                NamiCustomerManager.clearCustomerDataPlatformId()
+            }
 
             "launch" -> {
                 val callback = { launchResult: LaunchCampaignResult ->

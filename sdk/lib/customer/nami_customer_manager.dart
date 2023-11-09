@@ -97,6 +97,14 @@ class NamiCustomerManager {
   static Future<void> clearAllCustomerAttribute() async {
     return await channel.invokeMethod("clearAllCustomerAttribute");
   }
+
+  static Future<void> setCustomerDataPlatformId(String withId) async {
+    return await channel.invokeMethod("setCustomerDataPlatformId", withId);
+  }
+
+  static Future<void> clearCustomerDataPlatformId() async {
+    return await channel.invokeMethod("clearCustomerDataPlatformId");
+  }
 }
 
 /// This data class represents a customer's subscription journey state
