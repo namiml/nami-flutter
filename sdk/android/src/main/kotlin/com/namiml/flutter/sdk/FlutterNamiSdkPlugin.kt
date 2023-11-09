@@ -373,6 +373,16 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             "clearCustomerDataPlatformId" -> {
                 NamiCustomerManager.clearCustomerDataPlatformId()
+
+              "setAnonymousMode" -> {
+                var anonymousMode = call.arguments as? Boolean
+                if(anonymousMode != null){
+                    NamiCustomerManager.setAnonymousMode(anonymousMode)
+                }
+            }
+
+            "isAnonymousMode" -> {
+                result.success(NamiCustomerManager.inAnonymousMode())
             }
 
             "launch" -> {
@@ -680,6 +690,10 @@ private fun AccountStateAction.getFlutterString(): String {
         AccountStateAction.VENDOR_ID_CLEARED -> "vendor_id_cleared"
         AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_SET -> "customer_data_platform_id_set"
         AccountStateAction.CUSTOMER_DATA_PLATFORM_ID_CLEARED -> "customer_data_platform_id_cleared"
+        AccountStateAction.NAMI_DEVICE_ID_SET -> "nami_device_id_set"
+        AccountStateAction.NAMI_DEVICE_ID_CLEARED -> "nami_device_id_cleared"
+        AccountStateAction.ANONYMOUS_MODE_ON -> "anonymous_mode_on"
+        AccountStateAction.ANONYMOUS_MODE_OFF -> "anonymous_mode_off"
         else -> "unknown"
     }
 }
