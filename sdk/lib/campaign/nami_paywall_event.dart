@@ -82,6 +82,17 @@ class NamiPaywallEvent {
         namiPurchases,
         namiSkus);
   }
+
+  @override
+  String toString() {
+    return 'NamiPaywallEvent {action: $action, orderId $campaignId'
+        ' campaignName: $campaignName, campaignType: $campaignType, '
+        ' campaignLabel: $campaignLabel, paywallId: $paywallId,paywallName: $paywallName,'
+        ' componentChange: $componentChange, segmentId: $segmentId,'
+        ' externalSegmentId: $externalSegmentId, paywallLaunchContext : $paywallLaunchContext,'
+        ' deepLinkUrl: $deepLinkUrl, sku: $sku, purchaseError: $purchaseError, '
+        ' purchases: $purchases, skus: $skus}';
+  }
 }
 
 extension on String? {

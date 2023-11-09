@@ -76,6 +76,31 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             result(NamiCustomerManager.isLoggedIn())
         case "deviceId":
             result(NamiCustomerManager.deviceId())
+            
+        case "setCustomerAttribute":
+            if let args = call.arguments as? [String: String] {
+                args.forEach({
+                    NamiCustomerManager.setCustomerAttribute($0.key, $0.value)
+                })
+            }
+            
+        case "getCustomerAttribute":
+            let args = call.arguments as? String
+            if let data = args {
+                result(NamiCustomerManager.getCustomerAttribute(key: data))
+            }
+            
+        case "clearCustomerAttribute":
+            let args = call.arguments as? String
+            if let data = args {
+                print("=== call received");
+
+                NamiCustomerManager.clearCustomerAttribute(data)
+            }
+            
+        case "clearAllCustomerAttribute":
+            NamiCustomerManager.clearAllCustomerAttributes()
+            
         case "launch":
             let args = call.arguments as? [String: Any]
             if let data = args {
@@ -136,12 +161,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             }
 
         case "buySkuComplete":
-            
-            guard let args = call.arguments else {
-                return
-            }
-            
-            if let data = args as? [String:Any],
+            if let data = call.arguments as? [String:Any?],
                 let product = data["product"] as? [String: Any?],
                 let transactionID = data["transactionID"] as? String,
                 let originalTransactionID = data["originalTransactionID"] as? String,
@@ -157,9 +177,8 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                     price: decimalPrice,
                     currencyCode: currencyCode
                 )
-                
                 NamiPaywallManager.buySkuComplete(purchaseSuccess: namiPurchaseSuccess)
-                
+                result(true);
             }
             
         case "buySkuCancel":
@@ -643,10 +662,9 @@ public extension String{
 public extension [String: Any?] {
     func convertToNamiSku() -> NamiSKU? {
         if let skuId = self["skuId"] as? String,
-           let name = self["name"] as? String,
-           let type = self["type"] as? String,
-           let id = self["id"] as? String {
-            return NamiSKU(namiId: id, storeId: skuId, skuType: type.convertToNamiSKYType())
+           let type = self["type"] as? String  {
+            let id = self["id"] as? String
+            return NamiSKU(namiId: id ?? UUID().uuidString, storeId: skuId, skuType: type.convertToNamiSKYType())
         }
         return nil
     }

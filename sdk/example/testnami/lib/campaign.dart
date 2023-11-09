@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 import 'package:nami_flutter/campaign/nami_campaign_manager.dart';
+import 'package:nami_flutter/customer/nami_customer_manager.dart';
 import 'package:nami_flutter/paywall/nami_paywall_manager.dart';
 import 'package:nami_flutter/paywall/nami_purchase_success.dart';
 import 'package:nami_flutter/paywall/nami_sku.dart';
@@ -22,8 +23,7 @@ class CampaignWidget extends StatefulWidget {
 class CampaignWidgetState extends State<CampaignWidget> {
   List<NamiCampaign> _campaigns = [];
   Map<String, NamiSKU> identifiers = {};
-  List<ProductDetails> productDetails = [];
-  ProductDetails? productDetail;
+  ProductDetails? productDetails;
 
   late final StreamSubscription<List<PurchaseDetails>> _subscription;
   final InAppPurchase inAppPurchase = InAppPurchase.instance;
@@ -33,12 +33,12 @@ class CampaignWidgetState extends State<CampaignWidget> {
     super.initState();
     final Stream<List<PurchaseDetails>> purchaseUpdated =
         InAppPurchase.instance.purchaseStream;
-    _subscription = purchaseUpdated.listen((purchaseDetailList) {
-      _listenToPurchaseUpdated(purchaseDetailList);
+    _subscription = purchaseUpdated.listen((purchaseDetailList) async {
+      await _listenToPurchaseUpdated(purchaseDetailList);
     }, onDone: () {
       _subscription.cancel();
     }, onError: (error) {
-      print(error.toString());
+      print('Error: $error');
     });
 
     NamiCampaignManager.registerAvailableCampaignsHandler().listen((list) {
@@ -53,14 +53,19 @@ class CampaignWidgetState extends State<CampaignWidget> {
         _campaigns = list;
       });
     });
+    initStoreInfo();
+
+    NamiCustomerManager.setCustomerAttribute({"creatorCode": "Taylor"});
 
     NamiPaywallManager.registerRestoreHandler().listen((event) async {
       await inAppPurchase.restorePurchases();
     });
+
   }
 
   @override
   void dispose() {
+    _subscription.cancel();
     super.dispose();
   }
 
@@ -71,15 +76,15 @@ class CampaignWidgetState extends State<CampaignWidget> {
         identifiers.addAll(Map.of({sku.skuId: sku}));
         ProductDetailsResponse productDetailsResponse =
             await inAppPurchase.queryProductDetails({sku.skuId});
-        productDetails = productDetailsResponse.productDetails;
-        _buyProduct(sku, productDetails.first);
+        productDetails = productDetailsResponse.productDetails.first;
+        await _buyProduct(sku, productDetails!);
       });
     }
   }
 
   //To buy any Product
   Future<void> _buyProduct(NamiSKU sku, ProductDetails productDetails) async {
-    PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetail!);
+    PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
     if (sku.type == NamiSKUType.subscription) {
       await inAppPurchase.buyNonConsumable(purchaseParam: purchaseParam);
     } else {
@@ -87,20 +92,24 @@ class CampaignWidgetState extends State<CampaignWidget> {
     }
   }
 
-  void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
+  Future<void> _listenToPurchaseUpdated(
+      List<PurchaseDetails> purchaseDetailsList) async {
     if (purchaseDetailsList.isNotEmpty) {
       for (PurchaseDetails purchaseDetails in purchaseDetailsList) {
-        if (!purchaseDetails.pendingCompletePurchase) continue;
+        if (purchaseDetails.pendingCompletePurchase) {
+          await inAppPurchase.completePurchase(purchaseDetails);
+        }
         if (purchaseDetails.status == PurchaseStatus.purchased) {
           NamiSKU namiSku = identifiers[purchaseDetails.productID]!;
           final namiPurchaseSuccess = Platform.isIOS
               ? handleiOSPurchase(namiSku, purchaseDetails)
               : handleAndroidPurchase(namiSku, purchaseDetails);
           if (namiPurchaseSuccess != null) {
-            NamiPaywallManager.buySkuComplete(namiPurchaseSuccess);
+            await NamiPaywallManager.buySkuComplete(namiPurchaseSuccess);
+            await inAppPurchase.completePurchase(purchaseDetails);
           }
         } else if (purchaseDetails.status == PurchaseStatus.canceled) {
-          NamiPaywallManager.buySkuCancel();
+          await NamiPaywallManager.buySkuCancel();
         }
       }
     }
@@ -114,7 +123,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
     namiPurchaseSuccessGoogle = NamiPurchaseSuccessGoogle(
         NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
         googlePlayPurchaseDetails.purchaseID!,
-        googlePlayPurchaseDetails.verificationData.serverVerificationData);
+        googlePlayPurchaseDetails.billingClientPurchase.purchaseToken);
     return namiPurchaseSuccessGoogle;
   }
 
@@ -125,17 +134,13 @@ class CampaignWidgetState extends State<CampaignWidget> {
         productDetails as AppStoreProductDetails;
     AppStorePurchaseDetails appStorePurchaseDetails =
         purchaseDetail as AppStorePurchaseDetails;
-    final originalTransaction =
-        appStorePurchaseDetails.skPaymentTransaction.originalTransaction;
-    if (originalTransaction != null) {
-      namiPurchaseSuccessApple = NamiPurchaseSuccessApple(
-        NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
-        appStorePurchaseDetails.purchaseID!,
-        originalTransaction.transactionIdentifier!,
-        appStoreProductDetails.price,
-        appStoreProductDetails.currencyCode,
-      );
-    }
+    namiPurchaseSuccessApple = NamiPurchaseSuccessApple(
+      NamiSKU(sku.name, sku.skuId, sku.type, sku.id),
+      appStorePurchaseDetails.purchaseID!,
+      appStorePurchaseDetails.skPaymentTransaction.transactionIdentifier!,
+      appStoreProductDetails.skProduct.price,
+      appStoreProductDetails.currencyCode,
+    );
     return namiPurchaseSuccessApple;
   }
 
@@ -221,9 +226,8 @@ class CampaignWidgetState extends State<CampaignWidget> {
               result = await NamiCampaignManager.launch(
                   label: campaign.value,
                   onPaywallAction: (paywallEvent) {
-                    print("Paywall event ${paywallEvent?.action}");
+                    print("Paywall event ${paywallEvent.toString()}");
                   });
-
               if (result.success) {
                 print("Campaign (no label) launched successfully");
               } else {
@@ -239,7 +243,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
               result = await NamiCampaignManager.launch(
                   label: campaign.value,
                   onPaywallAction: (paywallEvent) {
-                    print("Paywall event $paywallEvent");
+                    print("Paywall event ${paywallEvent.toString()}");
                   });
 
               if (result.success) {

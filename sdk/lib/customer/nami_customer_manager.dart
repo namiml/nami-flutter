@@ -13,7 +13,6 @@ class NamiCustomerManager {
     var data = _journeyStateEvent
         .receiveBroadcastStream()
         .map((dynamic event) => CustomerJourneyState.fromMap(event));
-
     return data;
   }
 
@@ -80,6 +79,24 @@ class NamiCustomerManager {
     final String deviceId = await channel.invokeMethod("deviceId");
     return deviceId;
   }
+
+  static Future<void> setCustomerAttribute(Map<String, dynamic> map) async {
+    return await channel.invokeMethod("setCustomerAttribute", map);
+  }
+
+  static Future<String?> getCustomerAttribute(String attributeName) async {
+    final String? data =
+        await channel.invokeMethod("getCustomerAttribute", attributeName);
+    return data;
+  }
+
+  static Future<void> clearCustomerAttribute(String attributeName) async {
+    await channel.invokeMethod("clearCustomerAttribute", attributeName);
+  }
+
+  static Future<void> clearAllCustomerAttribute() async {
+    return await channel.invokeMethod("clearAllCustomerAttribute");
+  }
 }
 
 /// This data class represents a customer's subscription journey state
@@ -135,17 +152,11 @@ enum AccountStateAction {
 
   /// The account state being required relates to [NamiCustomerManager.logout]
   logout,
-
   advertising_id_set,
-
   advertising_id_cleared,
-
   vendor_id_set,
-
   vendor_id_cleared,
-
   customer_data_platform_id_set,
-
   customer_data_platform_id_cleared,
 
   /// Unknown account state
