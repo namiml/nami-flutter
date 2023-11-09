@@ -166,6 +166,10 @@ enum AccountStateAction {
   vendor_id_cleared,
   customer_data_platform_id_set,
   customer_data_platform_id_cleared,
+  nami_device_id_set,
+  nami_device_id_cleared,
+  anonymous_mode_on,
+  anonymous_mode_off,
 
   /// Unknown account state
   unknown
@@ -189,6 +193,14 @@ extension on String {
       return AccountStateAction.customer_data_platform_id_set;
     } else if (this == "customer_data_platform_id_cleared") {
       return AccountStateAction.customer_data_platform_id_cleared;
+    } else if (this == "nami_device_id_set") {
+      return AccountStateAction.nami_device_id_set;
+    } else if (this == "nami_device_id_cleared") {
+      return AccountStateAction.nami_device_id_cleared;
+    } else if (this == "anonymous_mode_on") {
+      return AccountStateAction.anonymous_mode_on;
+    } else if (this == "anonymous_mode_off") {
+      return AccountStateAction.anonymous_mode_off;
     } else {
       return AccountStateAction.unknown;
     }
