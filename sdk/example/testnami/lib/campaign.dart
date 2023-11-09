@@ -60,7 +60,6 @@ class CampaignWidgetState extends State<CampaignWidget> {
     NamiPaywallManager.registerRestoreHandler().listen((event) async {
       await inAppPurchase.restorePurchases();
     });
-
   }
 
   @override
