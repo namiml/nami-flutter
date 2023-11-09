@@ -24,7 +24,7 @@ class NamiSKU {
     return <String, dynamic>{
       "name": name,
       "skuId": skuId,
-      'type': type,
+      'type': type._toNamiSKUTypeName(),
       'id': id
     };
   }
@@ -48,6 +48,18 @@ extension on String? {
       return NamiSKUType.subscription;
     } else {
       return NamiSKUType.unknown;
+    }
+  }
+}
+
+extension on NamiSKUType? {
+  String _toNamiSKUTypeName() {
+    if (this == NamiSKUType.one_time_purchase) {
+      return "one_time_purchase";
+    } else if (this == NamiSKUType.subscription) {
+      return "subscription";
+    } else {
+      return "unknown";
     }
   }
 }
