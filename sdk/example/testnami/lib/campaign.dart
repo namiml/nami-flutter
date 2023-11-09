@@ -71,7 +71,6 @@ class CampaignWidgetState extends State<CampaignWidget> {
     _subscriptions.add(restoreStateSubscription);
 
     initStoreInfo();
-
   }
 
   @override
