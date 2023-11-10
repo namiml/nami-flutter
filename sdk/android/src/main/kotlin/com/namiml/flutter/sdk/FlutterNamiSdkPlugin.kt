@@ -373,6 +373,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             "clearCustomerDataPlatformId" -> {
                 NamiCustomerManager.clearCustomerDataPlatformId()
+            }
 
               "setAnonymousMode" -> {
                 var anonymousMode = call.arguments as? Boolean
