@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:core';
 
 import 'package:flutter/services.dart';
 
@@ -96,6 +96,14 @@ class NamiCustomerManager {
 
   static Future<void> clearAllCustomerAttribute() async {
     return await channel.invokeMethod("clearAllCustomerAttribute");
+  }
+
+  static Future<void> setCustomerDataPlatformId(String withId) async {
+    return await channel.invokeMethod("setCustomerDataPlatformId", withId);
+  }
+
+  static Future<void> clearCustomerDataPlatformId() async {
+    return await channel.invokeMethod("clearCustomerDataPlatformId");
   }
 
   static Future<void> setAnonymousMode(bool anonymousMode) async {

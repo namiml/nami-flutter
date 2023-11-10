@@ -364,7 +364,18 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 NamiCustomerManager.clearAllCustomerAttributes()
             }
 
-            "setAnonymousMode" -> {
+            "setCustomerDataPlatformId" -> {
+                val withId = call.arguments as? String
+                if(withId != null){
+                    NamiCustomerManager.setCustomerDataPlatformId(withId)
+                }
+            }
+
+            "clearCustomerDataPlatformId" -> {
+                NamiCustomerManager.clearCustomerDataPlatformId()
+            }
+
+              "setAnonymousMode" -> {
                 var anonymousMode = call.arguments as? Boolean
                 if(anonymousMode != null){
                     NamiCustomerManager.setAnonymousMode(anonymousMode)
