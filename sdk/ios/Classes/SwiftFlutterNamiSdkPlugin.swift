@@ -107,8 +107,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
 
         case "clearCustomerDataPlatformId":
              NamiCustomerManager.clearCustomerDataPlatformId()
-            
-               NamiCustomerManager.clearAllCustomerAttributes()
 
         case "setAnonymousMode":
             let args = call.arguments as? Bool
@@ -118,6 +116,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
 
         case "inAnonymousMode":
               result(NamiCustomerManager.inAnonymousMode())
+
 
         case "launch":
             let args = call.arguments as? [String: Any]
