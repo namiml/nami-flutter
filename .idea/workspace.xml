@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="34fb21cf-9b67-4f62-9817-2b763ecb6c16" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="upgrade-dependencies" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2Xt78gvKTjFemi99B3ZQAkp01Iv" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Git.Branch.Popup.ShowAllRemotes": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "io.flutter.reload.alreadyRun": "true",
+    "last_opened_file_path": "/Users/sneha/StudioProjects/nami-flutter/sdk/android/libs",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "dart.settings",
+    "show.migrate.to.gradle.popup": "false"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/sdk/android/libs" />
+      <recent name="$PROJECT_DIR$/sdk/android" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="app" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="additionalArgs" value="--flavor stg" />
+      <option name="filePath" value="$PROJECT_DIR$/sdk/example/testnami/lib/main_staging.dart" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task id="LOCAL-00001" summary="iOS: Fix parsing to NamiPurchaseSuccess from Map">
+      <created>1699427998001</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1699427998001</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Clean up">
+      <created>1699428254300</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1699428254300</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Format file to fix CI">
+      <created>1699428635492</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1699428635492</updated>
+    </task>
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="34fb21cf-9b67-4f62-9817-2b763ecb6c16" name="Changes" comment="" />
+      <created>1699436365037</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1699436365037</updated>
+    </task>
+    <task id="LOCAL-00004" summary="iOS: Add methods in NamiCustomerManager">
+      <created>1699436919191</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1699436919191</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Android: Add methods in NamiCustomerManager">
+      <created>1699437870341</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1699437870341</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Clean up">
+      <created>1699438030919</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1699438030919</updated>
+    </task>
+    <task id="LOCAL-00007" summary="WIP- Add example of Restore Purchase">
+      <created>1699446421659</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1699446421659</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Call completePurchase after purchase completed">
+      <created>1699447506562</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1699447506562</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Format dart file to fix CI">
+      <created>1699447682502</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1699447682502</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Pass Purchase-token from BillingClientResponse">
+      <created>1699447989936</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1699447989936</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Format file to fix CI">
+      <created>1699507814490</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1699507814490</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Refactor- Cancel stream-subscription">
+      <created>1699509689633</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1699509689633</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Format file">
+      <created>1699509902059</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1699509902059</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Add AnonymousMode methods in NamiCustomerManager">
+      <created>1699510458612</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1699510458612</updated>
+    </task>
+    <task id="LOCAL-00015" summary="Add AccountStateAction for Anonymous mode">
+      <created>1699512913160</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1699512913160</updated>
+    </task>
+    <task id="LOCAL-00016" summary="Add Customer Data Platform Methods">
+      <created>1699514878301</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1699514878301</updated>
+    </task>
+    <task id="LOCAL-00017" summary="NamiSku: Convert NamiSkuType enum to string">
+      <created>1699522358605</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1699522358605</updated>
+    </task>
+    <task id="LOCAL-00018" summary="Resolve formatting errors">
+      <created>1699593730352</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1699593730352</updated>
+    </task>
+    <task id="LOCAL-00019" summary="Resolve formatting errors in android">
+      <created>1699594171166</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1699594171166</updated>
+    </task>
+    <task id="LOCAL-00020" summary="Clean up">
+      <created>1699602857389</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1699602857389</updated>
+    </task>
+    <task id="LOCAL-00021" summary="Upgrade Flutter Version">
+      <created>1711437397391</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1711437397391</updated>
+    </task>
+    <task id="LOCAL-00022" summary="Upgrade Flutter sdk version">
+      <created>1711444704227</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1711444704227</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="iOS: Fix parsing to NamiPurchaseSuccess from Map" />
+    <MESSAGE value="iOS: Add methods in NamiCustomerManager" />
+    <MESSAGE value="Android: Add methods in NamiCustomerManager" />
+    <MESSAGE value="WIP- Add example of Restore Purchase" />
+    <MESSAGE value="Call completePurchase after purchase completed" />
+    <MESSAGE value="Format dart file to fix CI" />
+    <MESSAGE value="Pass Purchase-token from BillingClientResponse" />
+    <MESSAGE value="Format file to fix CI" />
+    <MESSAGE value="Refactor- Cancel stream-subscription" />
+    <MESSAGE value="Format file" />
+    <MESSAGE value="Add AnonymousMode methods in NamiCustomerManager" />
+    <MESSAGE value="Add AccountStateAction for Anonymous mode" />
+    <MESSAGE value="Add Customer Data Platform Methods" />
+    <MESSAGE value="NamiSku: Convert NamiSkuType enum to string" />
+    <MESSAGE value="Resolve formatting errors" />
+    <MESSAGE value="Resolve formatting errors in android" />
+    <MESSAGE value="Clean up" />
+    <MESSAGE value="Upgrade Flutter Version" />
+    <MESSAGE value="Upgrade Flutter sdk version" />
+    <option name="LAST_COMMIT_MESSAGE" value="Upgrade Flutter sdk version" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/sdk/example/testnami/lib/campaign.dart</url>
+          <line>23</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

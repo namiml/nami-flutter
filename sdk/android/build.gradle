@@ -1,20 +1,20 @@
 group 'com.namiml.flutter.sdk'
-version '3.0.9'
+version '3.1.32'
 
-buildscript {
-    ext.kotlin_version = '1.6.10'
-    ext.nami_sdk_version = '3.1.17'
-    repositories {
-        mavenCentral()
-        google()
-        mavenLocal()
-    }
-
-    dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.4'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
-}
+//buildscript {
+//    ext.kotlin_version = '1.6.10'
+//    ext.nami_sdk_version = '3.1.32'
+//    repositories {
+//        mavenCentral()
+//        google()
+//        mavenLocal()
+//    }
+//
+//    dependencies {
+//        classpath 'com.android.tools.build:gradle:7.0.4'
+//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+//    }
+//}
 
 rootProject.allprojects {
     repositories {
@@ -44,5 +44,5 @@ android {
 }
 
 dependencies {
-    implementation "com.namiml:sdk-android:$nami_sdk_version"
+    implementation "com.namiml:sdk-android:3.1.32"
 }

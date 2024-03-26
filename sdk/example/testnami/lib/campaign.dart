@@ -83,12 +83,13 @@ class CampaignWidgetState extends State<CampaignWidget> {
 
   Future<void> initStoreInfo() async {
     final bool isAvailable = await inAppPurchase.isAvailable();
+
     if (isAvailable) {
       NamiPaywallManager.registerBuySkuHandler().listen((sku) async {
         identifiers.addAll(Map.of({sku.skuId: sku}));
         ProductDetailsResponse productDetailsResponse =
             await inAppPurchase.queryProductDetails({sku.skuId});
-        productDetails = productDetailsResponse.productDetails.first;
+        productDetails = productDetailsResponse.productDetails.where((ProductDetails product) => product.id == sku.skuId).first;
         await _buyProduct(sku, productDetails!);
       });
     }

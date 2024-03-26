@@ -9,7 +9,7 @@ import '../channel.dart';
 /// StoreKit or local Nami Bypass Store service
 class NamiPurchaseManager {
   static const EventChannel _purchasesResponseHandlerData =
-      const EventChannel('purchasesResponseHandlerData');
+      EventChannel('purchasesResponseHandlerData');
 
   /// Clears out any purchases made while bypassStore was enabled. This clears
   /// out bypassStore purchases only, it cannot clear out production purchases
@@ -30,14 +30,14 @@ class NamiPurchaseManager {
   }
 
   /// Check if a specific product SKU has been purchased
-  static Future<bool> skuPurchased(String skuID) {
+  static Future<bool> skuPurchased(String skuID) async {
     return channel
         .invokeMethod<bool>("skuPurchased", skuID)
         .then<bool>((bool? value) => value ?? false);
   }
 
   /// Ask Nami if it knows if a set of product SKU IDs has been purchased
-  static Future<bool> anySkuPurchased(List<String> skuIDs) {
+  static Future<bool> anySkuPurchased(List<String> skuIDs) async {
     return channel
         .invokeMethod<bool>("anySkuPurchased", skuIDs)
         .then<bool>((bool? value) => value ?? false);
