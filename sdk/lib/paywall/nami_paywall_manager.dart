@@ -6,7 +6,6 @@ import 'package:nami_flutter/paywall/nami_sku.dart';
 
 import '../channel.dart';
 
-
 /// Class responsible for managing all aspects of a paywall in the Nami SDK
 class NamiPaywallManager {
   static const EventChannel _signInEvent = EventChannel('signInEvent');

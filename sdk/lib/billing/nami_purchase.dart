@@ -3,7 +3,6 @@ class NamiPurchase {
   /// The date and time when the purchase was initiated
   final int purchaseInitiatedTimestamp;
 
-
   /// The unique identifier for this NamiPurchase
   final String skuId;
 
@@ -17,11 +16,8 @@ class NamiPurchase {
       this.transactionIdentifier, this.localizedDescription);
 
   factory NamiPurchase.fromMap(Map<dynamic, dynamic> map) {
-    return NamiPurchase(
-        map['purchaseInitiatedTimestamp'],
-        map['skuId'],
-        map['transactionIdentifier'],
-        map['localizedDescription']);
+    return NamiPurchase(map['purchaseInitiatedTimestamp'], map['skuId'],
+        map['transactionIdentifier'], map['localizedDescription']);
   }
 
   @override
@@ -32,5 +28,3 @@ class NamiPurchase {
         '$localizedDescription}';
   }
 }
-
-

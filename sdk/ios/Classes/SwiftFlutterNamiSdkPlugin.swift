@@ -454,7 +454,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             map["componentChange"] = event.componentChange?.convertToMap()
             map["segmentId"] = event.segmentId
             map["externalSegmentId"] = event.externalSegmentId
-//             map["paywallLaunchContext"] = event.paywallLaunchContext?.convertToMap()
+//            map["paywallLaunchContext"] = event.paywallLaunchContext?.convertToMap()
             map["deeplinkUrl"] = event.externalSegmentId
             map["sku"] = event.sku?.convertToMap()
             map["purchaseError"] = event.purchaseError
