@@ -2,13 +2,6 @@
   <library name="Dart Packages" type="DartPackagesLibraryType">
     <properties>
       <option name="packageNameToDirsMap">
-        <entry key="animated_reorderable_demo">
-          <value>
-            <list>
-              <option value="$PROJECT_DIR$/../lib" />
-            </list>
-          </value>
-        </entry>
         <entry key="async">
           <value>
             <list>
@@ -308,7 +301,6 @@
       <root url="file://$USER_HOME$/Downloads/flutter/packages/flutter/lib" />
       <root url="file://$USER_HOME$/Downloads/flutter/packages/flutter_test/lib" />
       <root url="file://$USER_HOME$/Downloads/flutter/packages/flutter_web_plugins/lib" />
-      <root url="file://$PROJECT_DIR$/../lib" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
