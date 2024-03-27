@@ -89,7 +89,7 @@ class CampaignWidgetState extends State<CampaignWidget> {
         identifiers.addAll(Map.of({sku.skuId: sku}));
         ProductDetailsResponse productDetailsResponse =
             await inAppPurchase.queryProductDetails({sku.skuId});
-        productDetails = productDetailsResponse.productDetails.where((ProductDetails product) => product.id == sku.skuId).first;
+        productDetails = productDetailsResponse.productDetails.first;
         await _buyProduct(sku, productDetails!);
       });
     }
