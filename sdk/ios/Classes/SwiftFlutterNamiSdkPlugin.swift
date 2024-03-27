@@ -243,15 +243,22 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         case "skuPurchased":
             let args = call.arguments as? String
             if let skuId = args {
-                result(NamiPurchaseManager.skuPurchased(skuId))
+            Task {
+                let success = await NamiPurchaseManager.skuPurchased(skuId)
+                 result(success)
+            }
             }
         case "anySkuPurchased":
             let args = call.arguments as? [String]
             if let skuIds = args {
-                result(NamiPurchaseManager.anySkuPurchased(skuIds))
+               Task {
+                   let success = await NamiPurchaseManager.anySkuPurchased(skuIds)
+                         result(success)
+                    }
             }
         case "presentCodeRedemptionSheet":
-            NamiPurchaseManager.presentCodeRedemptionSheet()
+
+           NamiPurchaseManager.presentCodeRedemptionSheet()
         case "consumePurchasedSku":
             let args = call.arguments as? String
             if let skuId = args {
@@ -616,13 +623,6 @@ public extension NamiPurchase {
         var map = [String: Any]()
         map["purchaseInitiatedTimestamp"] = Int.init(self.purchaseInitiatedTimestamp.timeIntervalSince1970)
         map["expires"] = expiry
-        if(self.purchaseSource == NamiPurchaseSource.campaign) {
-            map["purchaseSource"] = "campaign"
-        } else if(self.purchaseSource == NamiPurchaseSource.marketplace) {
-            map["purchaseSource"] = "marketplace"
-        } else {
-            map["purchaseSource"] = "unknown"
-        }
         map["transactionIdentifier"] = self.transactionIdentifier
         map["skuId"] = self.skuId
         return map
