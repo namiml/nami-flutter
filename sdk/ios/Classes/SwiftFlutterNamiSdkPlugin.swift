@@ -442,7 +442,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
         
         private func handlePaywallEvent(event: NamiPaywallEvent) -> [String: Any?] {
-            print("--------- \(event.paywallLaunchContext)")
             var map = [String: Any?]()
             map["action"] = event.action.toFlutterString()
             map["campaignId"] = event.campaignId
@@ -455,7 +454,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             map["componentChange"] = event.componentChange?.convertToMap()
             map["segmentId"] = event.segmentId
             map["externalSegmentId"] = event.externalSegmentId
-          //  map["paywallLaunchContext"] = event.paywallLaunchContext?.convertToMap()
+//             map["paywallLaunchContext"] = event.paywallLaunchContext?.convertToMap()
             map["deeplinkUrl"] = event.externalSegmentId
             map["sku"] = event.sku?.convertToMap()
             map["purchaseError"] = event.purchaseError
@@ -464,7 +463,6 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
         }
     }
 }
-
 
 public extension NamiPaywallComponentChange {
     func convertToMap() -> [String: Any?] {

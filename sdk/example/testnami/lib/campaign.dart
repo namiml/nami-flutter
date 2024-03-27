@@ -83,7 +83,6 @@ class CampaignWidgetState extends State<CampaignWidget> {
 
   Future<void> initStoreInfo() async {
     final bool isAvailable = await inAppPurchase.isAvailable();
-
     if (isAvailable) {
       NamiPaywallManager.registerBuySkuHandler().listen((sku) async {
         identifiers.addAll(Map.of({sku.skuId: sku}));
