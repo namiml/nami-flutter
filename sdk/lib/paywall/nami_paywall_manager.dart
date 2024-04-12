@@ -8,12 +8,12 @@ import '../channel.dart';
 
 /// Class responsible for managing all aspects of a paywall in the Nami SDK
 class NamiPaywallManager {
-  static const EventChannel _signInEvent = const EventChannel('signInEvent');
+  static const EventChannel _signInEvent = EventChannel('signInEvent');
   static const EventChannel _closePaywallEvent =
-      const EventChannel('closePaywallEvent');
-  static const EventChannel _buySkuEvent = const EventChannel('buySkuEvent');
+      EventChannel('closePaywallEvent');
+  static const EventChannel _buySkuEvent = EventChannel('buySkuEvent');
   static const EventChannel _restorePaywallEvent =
-      const EventChannel('restorePaywallEvent');
+      EventChannel('restorePaywallEvent');
 
   /// Will animate the closing of the paywall if [animated] is true. Returns
   /// [true] when paywall is dismissed, may be immediate if not presented
