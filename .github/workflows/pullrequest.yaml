@@ -15,13 +15,13 @@ jobs:
     steps:
       - uses: actions/setup-java@v1
         with:
-          java-version: 12.x
+          java-version: 17.0.6
 
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v2
         with:
           channel: stable
-          version: 3.3.5
+          version: 3.19.0
 
       - uses: actions/checkout@v2
         with:
