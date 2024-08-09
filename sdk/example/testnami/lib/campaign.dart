@@ -206,8 +206,8 @@ class CampaignWidgetState extends State<CampaignWidget> {
             const SizedBox(height: 20),
             Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.only(bottom: 40),
-                  children: campaignItems,
+              padding: const EdgeInsets.only(bottom: 40),
+              children: campaignItems,
             ))
           ],
         ),
