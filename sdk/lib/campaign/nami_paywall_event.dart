@@ -15,7 +15,7 @@ class NamiPaywallEvent {
   String? campaignUrl;
   String? paywallId;
   String? paywallName;
-  NamiPaywallComponentChange? componentChange;
+  NamiPaywallEventComponentChange? componentChange;
   String? segmentId;
   String? externalSegmentId;
   PaywallLaunchContext? paywallLaunchContext;
@@ -69,7 +69,7 @@ class NamiPaywallEvent {
         map['paywallId'],
         map['paywallName'],
         map['componentChange'] != null
-            ? NamiPaywallComponentChange.fromMap(map['componentChange'])
+            ? NamiPaywallEventComponentChange.fromMap(map['componentChange'])
             : null,
         map['segmentId'],
         map['externalSegmentId'],
