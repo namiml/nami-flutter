@@ -1,5 +1,5 @@
 group 'com.namiml.flutter.sdk'
-version '3.1.32'
+version '3.2.2'
 
 rootProject.allprojects {
     repositories {
@@ -15,7 +15,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -29,5 +29,5 @@ android {
 }
 
 dependencies {
-    implementation "com.namiml:sdk-android:3.1.32"
+    implementation "com.namiml:sdk-android:3.2.2"
 }

@@ -3,7 +3,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'nami_flutter'
-  s.version          = '3.1.32'
+  s.version          = '3.2.2'
   s.summary          = 'Easy subscriptions & in-app purchases for Flutter, with powerful built-in paywalls and A/B testing.'
   s.description      = <<-DESC
   This library helps you offer subscriptions & IAPs for Flutter apps published to the App Store and Google Play.
@@ -36,7 +36,7 @@ s.dependency 'Flutter'
 s.
 platform =
 :ios, '15.0'
-s.dependency 'Nami', '3.1.32'
+s.dependency 'Nami', '3.2.2'
 
 s.
 vendored_frameworks = 'NamiApple.xcframework'
