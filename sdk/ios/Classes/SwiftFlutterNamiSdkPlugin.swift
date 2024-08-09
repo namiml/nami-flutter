@@ -187,7 +187,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 let currencyCode = data["currencyCode"] as? String,
                 let skuProduct = product.convertToNamiSku() {
                 
-                var namiPurchaseSuccess = NamiPurchaseSuccess(
+                let namiPurchaseSuccess = NamiPurchaseSuccess(
                     product: skuProduct,
                     transactionID: transactionID,
                     originalTransactionID: originalTransactionID,
@@ -464,7 +464,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
     }
 }
 
-public extension NamiPaywallComponentChange {
+public extension NamiPaywallEventComponentChange {
     func convertToMap() -> [String: Any?] {
         var map = [String: Any?]()
         
