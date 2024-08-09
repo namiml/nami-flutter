@@ -1,3 +1,4 @@
+import 'package:nami_flutter/campaign/model/nami_paywall_event_video_metadata.dart';
 import 'package:nami_flutter/campaign/model/paywall_lauch_context.dart';
 import 'package:nami_flutter/campaign/nami_campaign.dart';
 
@@ -24,6 +25,8 @@ class NamiPaywallEvent {
   String? purchaseError;
   List<NamiPurchase>? purchases;
   List<NamiSKU>? skus;
+  NamiPaywallEventVideoMetadata? videoMetadata;
+  double? timeSpentOnPaywall;
 
   NamiPaywallEvent(
       this.action,
@@ -37,12 +40,13 @@ class NamiPaywallEvent {
       this.componentChange,
       this.segmentId,
       this.externalSegmentId,
-      this.paywallLaunchContext,
       this.deepLinkUrl,
       this.sku,
       this.purchaseError,
       this.purchases,
-      this.skus);
+      this.skus,
+      this.videoMetadata,
+      this.timeSpentOnPaywall);
 
   factory NamiPaywallEvent.fromMap(Map<dynamic, dynamic> map) {
     List<dynamic> dynamicPurchases = map['purchases'];
@@ -73,14 +77,15 @@ class NamiPaywallEvent {
             : null,
         map['segmentId'],
         map['externalSegmentId'],
-        map['paywallLaunchContext'] != null
-            ? PaywallLaunchContext.fromJson(map['paywallLaunchContext'])
-            : null,
         map['deepLinkUrl'],
         map['sku'] != null ? NamiSKU.fromMap(map['sku']) : null,
         map['purchaseError'],
         namiPurchases,
-        namiSkus);
+        namiSkus,
+        map['videoMetadata'] != null
+            ? NamiPaywallEventVideoMetadata.fromMap(map['videoMetadata'])
+            : null,
+        map['timeSpentOnPaywall']);
   }
 
   @override
@@ -89,9 +94,9 @@ class NamiPaywallEvent {
         ' campaignName: $campaignName, campaignType: $campaignType, '
         ' campaignLabel: $campaignLabel, paywallId: $paywallId,paywallName: $paywallName,'
         ' componentChange: $componentChange, segmentId: $segmentId,'
-        ' externalSegmentId: $externalSegmentId, paywallLaunchContext : $paywallLaunchContext,'
+        ' externalSegmentId: $externalSegmentId,'
         ' deepLinkUrl: $deepLinkUrl, sku: $sku, purchaseError: $purchaseError, '
-        ' purchases: $purchases, skus: $skus}';
+        ' purchases: $purchases, skus: $skus timeSpentOnPaywall: $timeSpentOnPaywall}';
   }
 }
 
@@ -127,6 +132,8 @@ extension on String {
       return NamiPaywallAction.NAMI_PURCHASE_SELECTED_SKU;
     } else if (this == "NAMI_PURCHASE_SUCCESS") {
       return NamiPaywallAction.NAMI_PURCHASE_SUCCESS;
+    } else if (this == "NAMI_PURCHASE_DEFERRED") {
+      return NamiPaywallAction.NAMI_PURCHASE_DEFERRED;
     } else if (this == "NAMI_PURCHASE_CANCELLED") {
       return NamiPaywallAction.NAMI_PURCHASE_CANCELLED;
     } else if (this == "NAMI_PURCHASE_FAILED") {
@@ -135,14 +142,36 @@ extension on String {
       return NamiPaywallAction.NAMI_PURCHASE_PENDING;
     } else if (this == "NAMI_PURCHASE_UNKNOWN") {
       return NamiPaywallAction.NAMI_PURCHASE_UNKNOWN;
+    } else if (this == "NAMI_DEEPLINK") {
+      return NamiPaywallAction.NAMI_DEEPLINK;
     } else if (this == "NAMI_PAGE_CHANGE") {
       return NamiPaywallAction.NAMI_PAGE_CHANGE;
     } else if (this == "NAMI_TOGGLE_CHANGE") {
       return NamiPaywallAction.NAMI_TOGGLE_CHANGE;
     } else if (this == "NAMI_SLIDE_CHANGE") {
       return NamiPaywallAction.NAMI_SLIDE_CHANGE;
+    } else if (this == "NAMI_RELOAD_PRODUCTS") {
+      return NamiPaywallAction.NAMI_RELOAD_PRODUCTS;
+    } else if (this == "NAMI_COLLAPSIBLE_DRAWER_OPEN") {
+      return NamiPaywallAction.NAMI_COLLAPSIBLE_DRAWER_OPEN;
+    } else if (this == "NAMI_COLLAPSIBLE_DRAWER_CLOSE") {
+      return NamiPaywallAction.NAMI_COLLAPSIBLE_DRAWER_CLOSE;
+    } else if (this == "NAMI_VIDEO_PLAY") {
+      return NamiPaywallAction.NAMI_VIDEO_PLAY;
+    } else if (this == "NAMI_VIDEO_PAUSE") {
+      return NamiPaywallAction.NAMI_VIDEO_PAUSE;
+    } else if (this == "NAMI_VIDEO_RESUME") {
+      return NamiPaywallAction.NAMI_VIDEO_RESUME;
+    } else if (this == "NAMI_VIDEO_END") {
+      return NamiPaywallAction.NAMI_VIDEO_END;
+    } else if (this == "NAMI_VIDEO_CHANGE") {
+      return NamiPaywallAction.NAMI_VIDEO_CHANGE;
+    } else if (this == "NAMI_VIDEO_MUTE") {
+      return NamiPaywallAction.NAMI_VIDEO_MUTE;
+    } else if (this == "NAMI_VIDEO_UNMUTE") {
+      return NamiPaywallAction.NAMI_VIDEO_UNMUTE;
     } else {
-      return NamiPaywallAction.NAMI_PURCHASE_UNKNOWN;
+      return NamiPaywallAction.NAMI_UNKNOWN;
     }
   }
 }

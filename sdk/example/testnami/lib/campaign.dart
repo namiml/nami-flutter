@@ -184,40 +184,32 @@ class CampaignWidgetState extends State<CampaignWidget> {
     }
 
     return Scaffold(
-        body: SingleChildScrollView(
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                const SizedBox(height: 10),
-                const SizedBox(height: 10),
-                const Text(
-                  "Launch a Campaign",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                const Text(
-                  "Tap a campaign to show a paywall",
-                  style: TextStyle(
-                    fontSize: 10,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                    child: SingleChildScrollView(
-                  child: Column(
-                    children: campaignItems,
-                  ),
-                ))
-              ],
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            const SizedBox(height: 20),
+            const Text(
+              "Launch a Campaign",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
             ),
-          ),
+            const SizedBox(height: 3),
+            const Text(
+              "Tap a campaign to show a paywall",
+              style: TextStyle(
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.only(bottom: 40),
+                  children: campaignItems,
+            ))
+          ],
         ),
         floatingActionButton: FloatingActionButton.extended(
             label: const Text("Refresh"),
