@@ -661,14 +661,16 @@ private fun NamiPaywallEvent.converToMap(): Map<String, Any?> {
             "campaignUrl" to this.campaignUrl,
             "paywallId" to this.paywallId,
             "paywallName" to this.paywallName,
-            "componentChange" to this.componentChange?.convertToMap(),
+            "componentChange" to this.componentChange?.(),
             "segmentId" to this.segmentId,
             "externalSegmentid" to this.externalSegmentId,
             "deeplinkUrl" to this.deeplinkUrl,
             "sku" to this.sku?.convertToMap(),
             "purchaseError" to this.purchaseError,
             "purchases" to this.purchases?.map { it.convertToMap() },
-            "skus" to this.skus?.map { it.convertToMap() }
+            "skus" to this.skus?.map { it.convertToMap() },
+            "videoMetadata" to this.videoMetadata?.convertToMap(),
+            "timeSpentOnPaywall" to this.timeSpentOnPaywall
     )
 }
 
