@@ -187,7 +187,7 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
                 let currencyCode = data["currencyCode"] as? String,
                 let skuProduct = product.convertToNamiSku() {
                 
-                var namiPurchaseSuccess = NamiPurchaseSuccess(
+                let namiPurchaseSuccess = NamiPurchaseSuccess(
                     product: skuProduct,
                     transactionID: transactionID,
                     originalTransactionID: originalTransactionID,
@@ -454,17 +454,19 @@ public class SwiftFlutterNamiSdkPlugin: NSObject, FlutterPlugin {
             map["componentChange"] = event.componentChange?.convertToMap()
             map["segmentId"] = event.segmentId
             map["externalSegmentId"] = event.externalSegmentId
-//            map["paywallLaunchContext"] = event.paywallLaunchContext?.convertToMap()
             map["deeplinkUrl"] = event.externalSegmentId
             map["sku"] = event.sku?.convertToMap()
             map["purchaseError"] = event.purchaseError
             map["purchases"] = event.purchases.map({ $0.convertToMap() })
+            map["videoMetadata"] = event.videoMetadata?.convertToMap()
+            map["timeSpentOnPaywall"] = event.timeSpentOnPaywall
+
             return map
         }
     }
 }
 
-public extension NamiPaywallComponentChange {
+public extension NamiPaywallEventComponentChange {
     func convertToMap() -> [String: Any?] {
         var map = [String: Any?]()
         
@@ -527,6 +529,8 @@ public extension NamiPaywallAction {
             return "NAMI_PURCHASE_SELECTED_SKU"
         case NamiPaywallAction.purchase_success:
             return "NAMI_PURCHASE_SUCCESS"
+        case NamiPaywallAction.purchase_deferred:
+            return "NAMI_PURCHASE_DEFERRED"
         case NamiPaywallAction.purchase_failed:
             return "NAMI_PURCHASE_FAILED"
         case NamiPaywallAction.purchase_cancelled:
@@ -535,12 +539,34 @@ public extension NamiPaywallAction {
             return "NAMI_PURCHASE_PENDING"
         case NamiPaywallAction.purchase_unknown:
             return "NAMI_PURCHASE_UNKNOWN"
+        case NamiPaywallAction.deeplink:
+            return "NAMI_DEEPLINK"
         case NamiPaywallAction.toggle_change:
             return "NAMI_TOGGLE_CHANGE"
         case NamiPaywallAction.page_change:
             return "NAMI_PAGE_CHANGE"
         case NamiPaywallAction.slide_change:
             return "NAMI_SLIDE_CHANGE"
+        case NamiPaywallAction.nami_reload_products:
+            return "NAMI_RELOAD_PRODUCTS"
+        case NamiPaywallAction.nami_collapsible_drawer_open:
+            return "NAMI_COLLAPSIBLE_DRAWER_OPEN"
+        case NamiPaywallAction.nami_collapsible_drawer_close:
+            return "NAMI_COLLAPSIBLE_DRAWER_CLOSE"
+        case NamiPaywallAction.video_play:
+            return "NAMI_VIDEO_PLAY"
+        case NamiPaywallAction.video_pause:
+            return "NAMI_VIDEO_PAUSE"
+        case NamiPaywallAction.video_resume:
+            return "NAMI_VIDEO_RESUME"
+        case NamiPaywallAction.video_end:
+            return "NAMI_VIDEO_END"
+        case NamiPaywallAction.video_change:
+            return "NAMI_VIDEO_CHANGE"
+        case NamiPaywallAction.video_mute:
+            return "NAMI_VIDEO_MUTE"
+        case NamiPaywallAction.video_unmute:
+            return "NAMI_VIDEO_UNMUTE"
         default:
             return "unknown"
         }
@@ -584,6 +610,21 @@ public extension NamiPurchaseState {
         default:
             return "unknown"
         }
+    }
+}
+
+public extension NamiPaywallEventVideoMetadata{
+    func convertToMap() -> [String: Any]{
+        var map = [String: Any]()
+        map["id"] = self.id
+        map["name"] = self.name
+        map["url"] = self.url
+        map["loopVideo"] = self.loopVideo
+        map["muteByDefault"] = self.muteByDefault
+        map["autoplayVideo"] = self.autoplayVideo
+        map["contentTimecode"] = self.contentTimecode
+        map["contentDuration"] = self.contentDuration
+        return map
     }
 }
 

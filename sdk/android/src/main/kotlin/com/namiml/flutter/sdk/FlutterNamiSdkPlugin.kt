@@ -668,7 +668,9 @@ private fun NamiPaywallEvent.converToMap(): Map<String, Any?> {
             "sku" to this.sku?.convertToMap(),
             "purchaseError" to this.purchaseError,
             "purchases" to this.purchases?.map { it.convertToMap() },
-            "skus" to this.skus?.map { it.convertToMap() }
+            "skus" to this.skus?.map { it.convertToMap() },
+            "videoMetadata" to this.videoMetadata?.convertToMap(),
+            "timeSpentOnPaywall" to this.timeSpentOnPaywall
     )
 }
 

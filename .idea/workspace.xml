@@ -4,15 +4,20 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34fb21cf-9b67-4f62-9817-2b763ecb6c16" name="Changes" comment="">
+    <list default="true" id="34fb21cf-9b67-4f62-9817-2b763ecb6c16" name="Changes" comment="Upgrade android sdk">
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/nami-flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/nami-flutter.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sdk/android/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/android/settings.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sdk/example/testnami/android/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/example/testnami/android/settings.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sdk/ios/Classes/SwiftFlutterNamiSdkPlugin.swift" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/ios/Classes/SwiftFlutterNamiSdkPlugin.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sdk/lib/campaign/nami_campaign_manager.dart" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/lib/campaign/nami_campaign_manager.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -23,6 +28,12 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="UPDATE_TYPE" value="REBASE" />
   </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/namiml/nami-flutter.git",
+    "accountId": "3483718f-cac6-4f78-a022-ae53116431e0"
+  }
+}]]></component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/sdk/ios/Classes/SwiftFlutterNamiSdkPlugin.swift" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -30,28 +41,31 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="2Xt78gvKTjFemi99B3ZQAkp01Iv" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Git.Branch.Popup.ShowAllRemotes&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
-    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/sneha/StudioProjects/nami-flutter/sdk/android/libs&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;dart.settings&quot;,
-    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Flutter.app.executor": "Run",
+    "Git.Branch.Popup.ShowAllRemotes": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "cidr.known.project.marker": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
+    "dart.analysis.tool.window.visible": "false",
+    "git-widget-placeholder": "upgrade-sdk-3.2.2",
+    "io.flutter.reload.alreadyRun": "true",
+    "last_opened_file_path": "/Users/sneha/StudioProjects/nami-flutter/sdk/android/libs",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
+    "settings.editor.selected.configurable": "dart.settings",
+    "show.migrate.to.gradle.popup": "false"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/sdk/android/libs" />
