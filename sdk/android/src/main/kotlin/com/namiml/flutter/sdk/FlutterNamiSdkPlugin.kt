@@ -661,7 +661,7 @@ private fun NamiPaywallEvent.converToMap(): Map<String, Any?> {
             "campaignUrl" to this.campaignUrl,
             "paywallId" to this.paywallId,
             "paywallName" to this.paywallName,
-            "componentChange" to this.componentChange?.(),
+            "componentChange" to this.componentChange?.convertToMap(),
             "segmentId" to this.segmentId,
             "externalSegmentid" to this.externalSegmentId,
             "deeplinkUrl" to this.deeplinkUrl,

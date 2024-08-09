@@ -202,7 +202,6 @@ class ProfileWidgetState extends State<ProfileWidget>
         backgroundColor: namiPrimaryBlue,
         onPressed: () {
           if (_isLoggedIn == false) {
-            print("xxx   -- $testExternalIdentifier");
             NamiCustomerManager.login(withId: testExternalIdentifier);
           } else {
             NamiCustomerManager.logout();
