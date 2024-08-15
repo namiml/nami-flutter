@@ -40,6 +40,7 @@ import com.namiml.paywall.SubscriptionPeriod
 import com.namiml.paywall.model.NamiPaywallAction
 import com.namiml.campaign.NamiCampaign
 import com.namiml.paywall.model.NamiPaywallComponentChange
+import com.namiml.paywall.model.NamiPaywallEventVideoMetadata
 import com.namiml.paywall.model.NamiPurchaseSuccess
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -85,23 +86,23 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "nami")
         signInListener = EventChannel(flutterPluginBinding.binaryMessenger, "signInEvent")
         activeEntitlementsListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "activeEntitlementsEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "activeEntitlementsEvent")
         purchaseChangeListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "purchasesResponseHandlerData")
+            EventChannel(flutterPluginBinding.binaryMessenger, "purchasesResponseHandlerData")
         journeyStateListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "journeyStateEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "journeyStateEvent")
         accountStateListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "accountStateEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "accountStateEvent")
         campaignsListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "campaignsEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "campaignsEvent")
         closePaywallListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "closePaywallEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "closePaywallEvent")
         buySkuListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "buySkuEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "buySkuEvent")
         restorePaywallListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "restorePaywallEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "restorePaywallEvent")
         paywallActionListener =
-                EventChannel(flutterPluginBinding.binaryMessenger, "paywallActionEvent")
+            EventChannel(flutterPluginBinding.binaryMessenger, "paywallActionEvent")
         channel.setMethodCallHandler(this)
         context = flutterPluginBinding.applicationContext
         setSignInStreamHandler()
@@ -118,7 +119,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun setPurchaseChangeStreamHandler() {
         purchaseChangeListener.setStreamHandler(object : StreamHandler(),
-                EventChannel.StreamHandler {
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiPurchaseManager.registerPurchasesChangedHandler { activePurchases, namiPurchaseState, errorMsg ->
                     val eventMap = mutableMapOf<String, Any?>()
@@ -151,7 +152,8 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun setRestorePaywallStreamHandler() {
-        restorePaywallListener.setStreamHandler(object : StreamHandler(), EventChannel.StreamHandler {
+        restorePaywallListener.setStreamHandler(object : StreamHandler(),
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiPaywallManager.registerRestoreHandler { context ->
                     CoroutineScope(Dispatchers.Main).launch {
@@ -168,7 +170,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun setActiveEntitlementsStreamHandler() {
         activeEntitlementsListener.setStreamHandler(object : StreamHandler(),
-                EventChannel.StreamHandler {
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiEntitlementManager.registerActiveEntitlementsHandler { namiEntitlements ->
                     CoroutineScope(Dispatchers.Main).launch {
@@ -185,7 +187,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun setCustomerJourneyStateHandler() {
         journeyStateListener.setStreamHandler(object : StreamHandler(),
-                EventChannel.StreamHandler {
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiCustomerManager.registerJourneyStateHandler { journeyState ->
                     CoroutineScope(Dispatchers.Main).launch {
@@ -224,7 +226,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun setCampaignStreamHandler() {
         campaignsListener.setStreamHandler(object : StreamHandler(),
-                EventChannel.StreamHandler {
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiCampaignManager.registerAvailableCampaignsHandler { namiCampaigns ->
                     CoroutineScope(Dispatchers.Main).launch {
@@ -243,7 +245,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun setClosePaywallStreamHandler() {
         closePaywallListener.setStreamHandler(object : StreamHandler(),
-                EventChannel.StreamHandler {
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiPaywallManager.registerCloseHandler {
                     CoroutineScope(Dispatchers.Main).launch {
@@ -260,7 +262,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun setBuySkuStreamHandler() {
         buySkuListener.setStreamHandler(object : StreamHandler(),
-                EventChannel.StreamHandler {
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 NamiPaywallManager.registerBuySkuHandler { _, sku ->
                     CoroutineScope(Dispatchers.Main).launch {
@@ -278,7 +280,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private fun setPaywallActionStreamHandler() {
         paywallActionListener.setStreamHandler(object : StreamHandler(),
-                EventChannel.StreamHandler {
+            EventChannel.StreamHandler {
             override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
                 paywallActionCallback = { namiPaywallEvent ->
                     CoroutineScope(Dispatchers.Main).launch {
@@ -306,10 +308,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     else -> NamiLogLevel.ERROR
                 }
                 configure(
-                        context,
-                        call.argument<String>("appPlatformIdAndroid"),
-                        namiLogLevel,
-                        call.argument<List<String>>("extraDataList")
+                    context,
+                    call.argument<String>("appPlatformIdAndroid"),
+                    namiLogLevel,
+                    call.argument<List<String>>("extraDataList")
                 )
                 result.success(true)
             }
@@ -366,7 +368,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             "setCustomerDataPlatformId" -> {
                 val withId = call.arguments as? String
-                if(withId != null){
+                if (withId != null) {
                     NamiCustomerManager.setCustomerDataPlatformId(withId)
                 }
             }
@@ -375,9 +377,9 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 NamiCustomerManager.clearCustomerDataPlatformId()
             }
 
-              "setAnonymousMode" -> {
+            "setAnonymousMode" -> {
                 var anonymousMode = call.arguments as? Boolean
-                if(anonymousMode != null){
+                if (anonymousMode != null) {
                     NamiCustomerManager.setAnonymousMode(anonymousMode)
                 }
             }
@@ -414,12 +416,12 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
                 currentActivityWeakReference?.get()?.let { activity ->
                     NamiCampaignManager.launch(
-                            activity,
-                            label,
-                            actionCallback,
-                            null,
-                            if (url != null) Uri.parse(url) else null,
-                            callback
+                        activity,
+                        label,
+                        actionCallback,
+                        null,
+                        if (url != null) Uri.parse(url) else null,
+                        callback
                     )
                 }
             }
@@ -430,11 +432,11 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val expiresDate = data["expiresDate"] as String?
                 val purchaseDate = data["purchaseDate"] as String
                 val purchaseSuccess =
-                        NamiPurchaseSuccess.GooglePlay(
-                                product = product.convertToNamiSKU(),
-                                orderId = data["orderId"] as String,
-                                purchaseToken = data["purchaseToken"] as String
-                        )
+                    NamiPurchaseSuccess.GooglePlay(
+                        product = product.convertToNamiSKU(),
+                        orderId = data["orderId"] as String,
+                        purchaseToken = data["purchaseToken"] as String
+                    )
 
                 currentActivityWeakReference?.get()?.let { activity ->
                     NamiPaywallManager.buySkuComplete(activity, purchaseSuccess = purchaseSuccess)
@@ -447,7 +449,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             "allCampaigns" -> {
                 result.success(
-                        NamiCampaignManager.allCampaigns().map { it.convertToMap() }
+                    NamiCampaignManager.allCampaigns().map { it.convertToMap() }
                 )
             }
 
@@ -463,14 +465,14 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val label = data["label"] as String?
                 val url = data["url"] as String?
                 result.success(
-                        if (label != null) {
-                            NamiCampaignManager.isCampaignAvailable(label = label)
-                        } else if (url != null) {
-                            val uri = Uri.parse(url)
-                            NamiCampaignManager.isCampaignAvailable(uri = uri)
-                        } else {
-                            NamiCampaignManager.isCampaignAvailable()
-                        }
+                    if (label != null) {
+                        NamiCampaignManager.isCampaignAvailable(label = label)
+                    } else if (url != null) {
+                        val uri = Uri.parse(url)
+                        NamiCampaignManager.isCampaignAvailable(uri = uri)
+                    } else {
+                        NamiCampaignManager.isCampaignAvailable()
+                    }
                 )
             }
 
@@ -489,7 +491,7 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             "active" -> {
                 result.success(
-                        NamiEntitlementManager.active().map { it.convertToMap() })
+                    NamiEntitlementManager.active().map { it.convertToMap() })
             }
 
             "refresh" -> {
@@ -559,10 +561,10 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun configure(
-            context: Context,
-            platformId: String?,
-            namiLogLevel: NamiLogLevel,
-            extraDataList: List<String>?
+        context: Context,
+        platformId: String?,
+        namiLogLevel: NamiLogLevel,
+        extraDataList: List<String>?
     ) {
         if (platformId == null) {
             return
@@ -599,13 +601,13 @@ class FlutterNamiSdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
 private fun CustomerJourneyState.convertToMap(): Map<String, Boolean> {
     return mapOf(
-            "former_subscriber" to formerSubscriber,
-            "in_grace_period" to inGracePeriod,
-            "in_trial_period" to inTrialPeriod,
-            "in_intro_offer_period" to inIntroOfferPeriod,
-            "is_cancelled" to isCancelled,
-            "in_pause" to inPause,
-            "in_account_hold" to inAccountHold
+        "former_subscriber" to formerSubscriber,
+        "in_grace_period" to inGracePeriod,
+        "in_trial_period" to inTrialPeriod,
+        "in_intro_offer_period" to inIntroOfferPeriod,
+        "is_cancelled" to isCancelled,
+        "in_pause" to inPause,
+        "in_account_hold" to inAccountHold
     )
 }
 
@@ -621,56 +623,56 @@ private fun NamiPurchaseCompleteResult.convertToMap(): Map<String, Any?> {
 
 private fun NamiEntitlement.convertToMap(): Map<String, Any?> {
     return hashMapOf(
-            "name" to name,
-            "desc" to desc,
-            "namiId" to namiId,
-            "referenceId" to referenceId,
-            "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
-            "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
-            "activePurchases" to activePurchases.map { it.convertToMap() })
+        "name" to name,
+        "desc" to desc,
+        "namiId" to namiId,
+        "referenceId" to referenceId,
+        "relatedSKUs" to relatedSKUs.map { it.convertToMap() },
+        "purchasedSKUs" to purchasedSKUs.map { it.convertToMap() },
+        "activePurchases" to activePurchases.map { it.convertToMap() })
 }
 
 
 private fun NamiCampaign.convertToMap(): Map<String, Any?> {
     return mapOf(
-            "paywall" to paywall,
-            "segment" to segment,
-            "type" to type.name,
-            "value" to value
+        "paywall" to paywall,
+        "segment" to segment,
+        "type" to type.name,
+        "value" to value
     )
 }
 
 private fun NamiPurchase.convertToMap(): Map<String, Any?> {
     return hashMapOf(
-            "purchaseInitiatedTimestamp" to purchaseInitiatedTimestamp,
-            "expires" to expires?.time,
-            "purchaseSource" to purchaseSource.getFlutterString(),
-            "skuId" to skuId,
-            "transactionIdentifier" to transactionIdentifier,
-            "localizedDescription" to localizedDescription
+        "purchaseInitiatedTimestamp" to purchaseInitiatedTimestamp,
+        "expires" to expires?.time,
+        "purchaseSource" to purchaseSource.getFlutterString(),
+        "skuId" to skuId,
+        "transactionIdentifier" to transactionIdentifier,
+        "localizedDescription" to localizedDescription
     )
 }
 
 private fun NamiPaywallEvent.converToMap(): Map<String, Any?> {
     return hashMapOf<String, Any?>(
-            "action" to this.action.name,
-            "campaignId" to this.campaignId,
-            "campaignName" to this.campaignName,
-            "campaignType" to this.campaignType,
-            "campaignLabel" to this.campaignLabel,
-            "campaignUrl" to this.campaignUrl,
-            "paywallId" to this.paywallId,
-            "paywallName" to this.paywallName,
-            "componentChange" to this.componentChange?.convertToMap(),
-            "segmentId" to this.segmentId,
-            "externalSegmentid" to this.externalSegmentId,
-            "deeplinkUrl" to this.deeplinkUrl,
-            "sku" to this.sku?.convertToMap(),
-            "purchaseError" to this.purchaseError,
-            "purchases" to this.purchases?.map { it.convertToMap() },
-            "skus" to this.skus?.map { it.convertToMap() },
-            "videoMetadata" to this.videoMetadata?.convertToMap(),
-            "timeSpentOnPaywall" to this.timeSpentOnPaywall
+        "action" to this.action.name,
+        "campaignId" to this.campaignId,
+        "campaignName" to this.campaignName,
+        "campaignType" to this.campaignType,
+        "campaignLabel" to this.campaignLabel,
+        "campaignUrl" to this.campaignUrl,
+        "paywallId" to this.paywallId,
+        "paywallName" to this.paywallName,
+        "componentChange" to this.componentChange?.convertToMap(),
+        "segmentId" to this.segmentId,
+        "externalSegmentid" to this.externalSegmentId,
+        "deeplinkUrl" to this.deeplinkUrl,
+        "sku" to this.sku?.convertToMap(),
+        "purchaseError" to this.purchaseError,
+        "purchases" to this.purchases?.map { it.convertToMap() },
+        "skus" to this.skus?.map { it.convertToMap() },
+        "videoMetadata" to this.videoMetadata?.convertToMap(),
+        "timeSpentOnPaywall" to this.timeSpentOnPaywall
     )
 }
 
@@ -704,37 +706,51 @@ private fun AccountStateAction.getFlutterString(): String {
 
 private fun NamiSKU.convertToMap(): Map<String, Any?> {
     return hashMapOf(
-            "name" to this.name,
-            "skuId" to this.skuId,
-            "type" to this.type.getFlutterString(),
+        "name" to this.name,
+        "skuId" to this.skuId,
+        "type" to this.type.getFlutterString(),
     )
 }
 
 
 private fun Map<String, Any?>.convertToNamiSKU(): NamiSKU {
     return NamiSKU(
-            skuId = this["skuId"] as String,
-            productDetails = null,
-            amazonProduct = null,
-            id = this["id"] as String?,
-            type = NamiSKUType.valueOf(this["type"] as String),
-            name = this["name"] as String,
-            featured = false,
-            rawDisplayText = null,
-            rawSubDisplayText = null,
-            entitlements = emptyList(),
-            variables = null,
-            promoId = null
+        skuId = this["skuId"] as String,
+        productDetails = null,
+        amazonProduct = null,
+        id = this["id"] as String?,
+        type = NamiSKUType.valueOf(this["type"] as String),
+        name = this["name"] as String,
+        featured = false,
+        rawDisplayText = null,
+        rawSubDisplayText = null,
+        entitlements = emptyList(),
+        variables = null,
+        promoId = null
     )
 }
 
 
 private fun NamiPaywallComponentChange.convertToMap(): Map<String, Any?> {
     return hashMapOf(
-            "id" to this.id,
-            "name" to this.name,
+        "id" to this.id,
+        "name" to this.name,
     )
 }
+
+private fun NamiPaywallEventVideoMetadata.convertToMap(): Map<String, Any?> {
+    return hashMapOf(
+        "id" to this.id,
+        "name" to this.name,
+        "url" to this.url,
+        "loopVideo" to this.loopVideo,
+        "muteByDefault" to this.muteByDefault,
+        "autoplayVideo" to this.autoplayVideo,
+        "contentTimecode" to this.contentTimecode,
+        "contentDuration" to this.contentDuration,
+    )
+}
+
 
 private fun NamiSKUType.getFlutterString(): String {
     return when (this) {

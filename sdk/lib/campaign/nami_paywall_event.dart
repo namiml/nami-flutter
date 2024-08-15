@@ -142,8 +142,8 @@ extension on String {
       return NamiPaywallAction.NAMI_PURCHASE_PENDING;
     } else if (this == "NAMI_PURCHASE_UNKNOWN") {
       return NamiPaywallAction.NAMI_PURCHASE_UNKNOWN;
-    } else if (this == "NAMI_DEEPLINK") {
-      return NamiPaywallAction.NAMI_DEEPLINK;
+    } else if (this == "NAMI_DEEP_LINK") {
+      return NamiPaywallAction.NAMI_DEEP_LINK;
     } else if (this == "NAMI_PAGE_CHANGE") {
       return NamiPaywallAction.NAMI_PAGE_CHANGE;
     } else if (this == "NAMI_TOGGLE_CHANGE") {
@@ -156,20 +156,28 @@ extension on String {
       return NamiPaywallAction.NAMI_COLLAPSIBLE_DRAWER_OPEN;
     } else if (this == "NAMI_COLLAPSIBLE_DRAWER_CLOSE") {
       return NamiPaywallAction.NAMI_COLLAPSIBLE_DRAWER_CLOSE;
-    } else if (this == "NAMI_VIDEO_PLAY") {
-      return NamiPaywallAction.NAMI_VIDEO_PLAY;
-    } else if (this == "NAMI_VIDEO_PAUSE") {
-      return NamiPaywallAction.NAMI_VIDEO_PAUSE;
-    } else if (this == "NAMI_VIDEO_RESUME") {
-      return NamiPaywallAction.NAMI_VIDEO_RESUME;
-    } else if (this == "NAMI_VIDEO_END") {
-      return NamiPaywallAction.NAMI_VIDEO_END;
-    } else if (this == "NAMI_VIDEO_CHANGE") {
-      return NamiPaywallAction.NAMI_VIDEO_CHANGE;
-    } else if (this == "NAMI_VIDEO_MUTE") {
-      return NamiPaywallAction.NAMI_VIDEO_MUTE;
-    } else if (this == "NAMI_VIDEO_UNMUTE") {
-      return NamiPaywallAction.NAMI_VIDEO_UNMUTE;
+    } else if (this == "NAMI_PLAY_VIDEO") {
+      return NamiPaywallAction.NAMI_PLAY_VIDEO;
+    } else if (this == "NAMI_PAUSE_VIDEO") {
+      return NamiPaywallAction.NAMI_PAUSE_VIDEO;
+    } else if (this == "NAMI_MUTE_VIDEO") {
+      return NamiPaywallAction.NAMI_MUTE_VIDEO;
+    } else if (this == "NAMI_UNMUTE_VIDEO") {
+      return NamiPaywallAction.NAMI_UNMUTE_VIDEO;
+    } else if (this == "NAMI_VIDEO_STARTED") {
+      return NamiPaywallAction.NAMI_VIDEO_STARTED;
+    } else if (this == "NAMI_VIDEO_PAUSED") {
+      return NamiPaywallAction.NAMI_VIDEO_PAUSED;
+    } else if (this == "NAMI_VIDEO_RESUMED") {
+      return NamiPaywallAction.NAMI_VIDEO_RESUMED;
+    } else if (this == "NAMI_VIDEO_ENDED") {
+      return NamiPaywallAction.NAMI_VIDEO_ENDED;
+    } else if (this == "NAMI_VIDEO_CHANGED") {
+      return NamiPaywallAction.NAMI_VIDEO_CHANGED;
+    } else if (this == "NAMI_VIDEO_MUTED") {
+      return NamiPaywallAction.NAMI_VIDEO_MUTED;
+    } else if (this == "NAMI_VIDEO_UNMUTED") {
+      return NamiPaywallAction.NAMI_VIDEO_UNMUTED;
     } else {
       return NamiPaywallAction.NAMI_UNKNOWN;
     }
