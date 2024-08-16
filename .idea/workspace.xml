@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34fb21cf-9b67-4f62-9817-2b763ecb6c16" name="Changes" comment="Upgrade android sdk">
+    <list default="true" id="34fb21cf-9b67-4f62-9817-2b763ecb6c16" name="Changes" comment="Remove unused dependency">
       <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/nami-flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/nami-flutter.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sdk/ios/Classes/SwiftFlutterNamiSdkPlugin.swift" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/ios/Classes/SwiftFlutterNamiSdkPlugin.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sdk/lib/campaign/nami_campaign_manager.dart" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/lib/campaign/nami_campaign_manager.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sdk/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sdk/example/testnami/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/example/testnami/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,44 +28,56 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="UPDATE_TYPE" value="REBASE" />
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/namiml/nami-flutter.git",
-    "accountId": "3483718f-cac6-4f78-a022-ae53116431e0"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;cp-jimmy-s&quot;
   }
-}]]></component>
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/namiml/nami-flutter.git&quot;,
+    &quot;accountId&quot;: &quot;3483718f-cac6-4f78-a022-ae53116431e0&quot;
+  }
+}</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/sdk/ios/Classes/SwiftFlutterNamiSdkPlugin.swift" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2Xt78gvKTjFemi99B3ZQAkp01Iv" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Flutter.app.executor": "Run",
-    "Git.Branch.Popup.ShowAllRemotes": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "cidr.known.project.marker": "true",
-    "com.google.services.firebase.aqiPopupShown": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "upgrade-sdk-3.2.2",
-    "io.flutter.reload.alreadyRun": "true",
-    "last_opened_file_path": "/Users/sneha/StudioProjects/nami-flutter/sdk/android/libs",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.2",
-    "settings.editor.selected.configurable": "dart.settings",
-    "show.migrate.to.gradle.popup": "false"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Flutter.app.executor&quot;: &quot;Run&quot;,
+    &quot;Git.Branch.Popup.ShowAllRemotes&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;com.google.services.firebase.aqiPopupShown&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#47 on fix-test-build&quot;,
+    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/sneha/StudioProjects/nami-flutter/sdk/android/libs&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;dart.settings&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/sdk/android/libs" />
@@ -242,7 +254,15 @@
       <option name="project" value="LOCAL" />
       <updated>1711444704227</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Remove unused dependency">
+      <option name="closed" value="true" />
+      <created>1723706693176</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1723706693176</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -276,7 +296,8 @@
     <MESSAGE value="Clean up" />
     <MESSAGE value="Upgrade Flutter Version" />
     <MESSAGE value="Upgrade Flutter sdk version" />
-    <option name="LAST_COMMIT_MESSAGE" value="Upgrade Flutter sdk version" />
+    <MESSAGE value="Remove unused dependency" />
+    <option name="LAST_COMMIT_MESSAGE" value="Remove unused dependency" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
