@@ -103,7 +103,7 @@
         <entry key="in_app_purchase_storekit">
           <value>
             <list>
-              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.3.17+3/lib" />
+              <option value="$USER_HOME$/.pub-cache/hosted/pub.dev/in_app_purchase_storekit-0.3.6+7/lib" />
             </list>
           </value>
         </entry>
