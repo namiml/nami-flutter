@@ -1,0 +1,42 @@
+PODS:
+  - Flutter (1.0.0)
+  - in_app_purchase_storekit (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - Nami (3.2.2)
+  - nami_flutter (3.2.2):
+    - Flutter
+    - Nami (= 3.2.2)
+  - uni_links (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/darwin`)
+  - nami_flutter (from `.symlinks/plugins/nami_flutter/ios`)
+  - uni_links (from `.symlinks/plugins/uni_links/ios`)
+
+SPEC REPOS:
+  trunk:
+    - Nami
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  in_app_purchase_storekit:
+    :path: ".symlinks/plugins/in_app_purchase_storekit/darwin"
+  nami_flutter:
+    :path: ".symlinks/plugins/nami_flutter/ios"
+  uni_links:
+    :path: ".symlinks/plugins/uni_links/ios"
+
+SPEC CHECKSUMS:
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  in_app_purchase_storekit: 8c3b0b3eb1b0f04efbff401c3de6266d4258d433
+  Nami: c795d44b82d13716f877bef81488c7dbd2e8812d
+  nami_flutter: 7c631a559da38131b221c3dcf5d3b71d12483dab
+  uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
+
+PODFILE CHECKSUM: 9e4fde382aebf4451d38cc0735992d6842c79536
+
+COCOAPODS: 1.15.2

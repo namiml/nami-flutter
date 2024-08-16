@@ -4,12 +4,9 @@
 .packages
 .pub/
 
-Podfile.lock
-
 build/
 *.iml
 
 .idea
-pubspec.lock
 
 doc/

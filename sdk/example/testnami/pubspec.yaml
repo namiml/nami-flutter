@@ -44,6 +44,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   in_app_purchase: ^3.2.0
+  in_app_purchase_storekit:
+  in_app_purchase_android:
   uni_links: ^0.5.1
 
 dev_dependencies:
