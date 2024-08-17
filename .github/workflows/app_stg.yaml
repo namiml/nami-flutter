@@ -36,7 +36,7 @@ jobs:
         uses: flutter-actions/setup-flutter@v2
         with:
           channel: stable
-          version: 3.19.5
+          version: 3.24.0
 
       - name: 'Checkout ${{ inputs.ref }}'
         uses: actions/checkout@v2
