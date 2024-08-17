@@ -5,12 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="34fb21cf-9b67-4f62-9817-2b763ecb6c16" name="Changes" comment="Possible fix for ios build">
-      <change afterPath="$PROJECT_DIR$/sdk/example/testnami/ios/Podfile.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sdk/example/testnami/pubspec.lock" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sdk/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/nami-flutter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/nami-flutter.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sdk/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sdk/example/testnami/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/sdk/example/testnami/pubspec.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -271,7 +267,23 @@
       <option name="project" value="LOCAL" />
       <updated>1723780439477</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="Possible fix for ios build">
+      <option name="closed" value="true" />
+      <created>1723780650410</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1723780650410</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Possible fix for ios build">
+      <option name="closed" value="true" />
+      <created>1723786301046</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1723786301047</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
