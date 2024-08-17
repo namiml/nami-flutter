@@ -116,17 +116,17 @@ jobs:
           path: source
           ref: '${{ inputs.ref }}'
 
-      - name: Checkout appstoreconnect-build-tools
-        uses: actions/checkout@v2
-        with:
-          path: appstoreconnect-build-tools
-          ref: main
-          repository: namiml/appstoreconnect-build-tools
-
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: '3.10'
+#      - name: Checkout appstoreconnect-build-tools
+#        uses: actions/checkout@v2
+#        with:
+#          path: appstoreconnect-build-tools
+#          ref: main
+#          repository: namiml/appstoreconnect-build-tools
+#
+#      - name: Set up Python
+#        uses: actions/setup-python@v1
+#        with:
+#          python-version: '3.10'
 
       - name: Get expected build number
         run: |
