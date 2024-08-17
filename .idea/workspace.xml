@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="34fb21cf-9b67-4f62-9817-2b763ecb6c16" name="Changes" comment="Possible fix for ios build">
       <change beforePath="$PROJECT_DIR$/.github/workflows/app_stg.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/app_stg.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -299,7 +298,39 @@
       <option name="project" value="LOCAL" />
       <updated>1723870037028</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="Possible fix for ios build">
+      <option name="closed" value="true" />
+      <created>1723871033921</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1723871033921</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Possible fix for ios build">
+      <option name="closed" value="true" />
+      <created>1723871345682</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1723871345682</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Possible fix for ios build">
+      <option name="closed" value="true" />
+      <created>1723871479350</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1723871479351</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Possible fix for ios build">
+      <option name="closed" value="true" />
+      <created>1723871597062</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1723871597062</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
