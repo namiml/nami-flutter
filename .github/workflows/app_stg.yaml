@@ -1,23 +1,23 @@
 name: Generate Test Flutter STG
-on: push
-#  workflow_dispatch:
-#    inputs:
-#      ref:
-#        default: main
-#        description: 'Git Tag, Branch or SHA to build'
-#        required: true
-#    secrets:
-#      BUILD_USER_PAT:
-#        required: true
-#
-#  pull_request:
-#    types:
-#      - closed
-#    branches:
-#      - main
-#    secrets:
-#      BUILD_USER_PAT:
-#        required: true
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        default: main
+        description: 'Git Tag, Branch or SHA to build'
+        required: true
+    secrets:
+      BUILD_USER_PAT:
+        required: true
+
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+    secrets:
+      BUILD_USER_PAT:
+        required: true
 
 jobs:
   build-android:
