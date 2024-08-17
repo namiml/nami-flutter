@@ -36,7 +36,7 @@ jobs:
         uses: flutter-actions/setup-flutter@v2
         with:
           channel: stable
-          version: 3.24.0
+          version: 3.19.5
 
       - name: 'Checkout ${{ inputs.ref }}'
         uses: actions/checkout@v2
@@ -94,11 +94,15 @@ jobs:
       actions: write
       contents: write
       id-token: write
-    runs-on: macos-12
+    runs-on: macos-14
     steps:
       - uses: actions/setup-java@v1
         with:
           java-version: 17.0.6
+
+      - name: Set Xcode Version
+        run: |
+          sudo xcode-select -switch /Applications/Xcode_15.4.app
 
       - name: Setup Flutter SDK
         uses: flutter-actions/setup-flutter@v2
