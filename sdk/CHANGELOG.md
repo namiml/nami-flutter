@@ -1,3 +1,18 @@
+# 3.2.2 (Aug 19, 2024)
+
+# Changelog
+
+- Android: Bumped Android compile sdk to 34
+
+## Enhancements
+- Support new analytics events including for video metadata
+- Improve the sample app
+
+## Updated Native SDK Dependencies
+
+- Apple SDK v3.2.2- [Release Notes](https://github.com/namiml/nami-apple/wiki/Nami-SDK-Stable-Releases#322-aug-7-2024)
+- Android SDK v3.2.2- [Release Notes](https://github.com/namiml/nami-android/wiki/Nami-SDK-Stable-Releases#322-aug-8-2024)
+
 # 3.1.1 (Nov 8, 2023)
 
 # Changelog
