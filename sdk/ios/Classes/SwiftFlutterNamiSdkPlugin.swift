@@ -540,7 +540,7 @@ public extension NamiPaywallAction {
         case NamiPaywallAction.purchase_unknown:
             return "NAMI_PURCHASE_UNKNOWN"
         case NamiPaywallAction.deeplink:
-            return "NAMI_DEEPLINK"
+            return "NAMI_DEEP_LINK"
         case NamiPaywallAction.toggle_change:
             return "NAMI_TOGGLE_CHANGE"
         case NamiPaywallAction.page_change:
@@ -554,19 +554,19 @@ public extension NamiPaywallAction {
         case NamiPaywallAction.nami_collapsible_drawer_close:
             return "NAMI_COLLAPSIBLE_DRAWER_CLOSE"
         case NamiPaywallAction.video_play:
-            return "NAMI_VIDEO_PLAY"
+            return "NAMI_PLAY_VIDEO"
         case NamiPaywallAction.video_pause:
-            return "NAMI_VIDEO_PAUSE"
+            return "NAMI_PAUSE_VIDEO"
         case NamiPaywallAction.video_resume:
-            return "NAMI_VIDEO_RESUME"
+            return "NAMI_VIDEO_RESUMED"
         case NamiPaywallAction.video_end:
-            return "NAMI_VIDEO_END"
+            return "NAMI_VIDEO_ENDED"
         case NamiPaywallAction.video_change:
-            return "NAMI_VIDEO_CHANGE"
+            return "NAMI_VIDEO_CHANGED"
         case NamiPaywallAction.video_mute:
-            return "NAMI_VIDEO_MUTE"
+            return "NAMI_VIDEO_MUTED"
         case NamiPaywallAction.video_unmute:
-            return "NAMI_VIDEO_UNMUTE"
+            return "NAMI_VIDEO_UNMUTED"
         default:
             return "unknown"
         }
