@@ -2,16 +2,16 @@
 
 # nami-flutter
 
-Nami is on a mission to help you grow your app IAPs and subscription app revenue. Go beyond basic store payments integration and focus on results with:
+Nami ML gives you everything you need to power your paywall, streamline subscription management, and drive revenue growth through instantly deployable paywalls, precise targeting and segmentation, and enterprise-grade security and scaleability.
 
 * Library of smart paywall templates to choose from, implemented as native iOS and Android UI
-* Paywall CMS so you can make change instantly, without submitting an app update
+* No-code paywall creator so you can design your own paywall or make instant changes to an existing ones
 * Experimentation engine to run paywall A/B tests so you can improve your conversion rates
-* Built-in IAP & subscription management and analytics, so you don't need another solution
+* Optional IAP & subscription management, so you don't need another solution
 
 Nami is simple adopt while giving you the tools you need to improve revenue. Our free tier is generous, and gives you everything you need to get started. [Sign up for a free account](https://app.namiml.com/join/)
 
-Get started by heading over to our [quick start guide](https://docs.namiml.com/docs/nami-quickstart-guide)
+Get started by heading over to our [quick start guide](https://learn.namiml.com/public-docs/get-started/quickstart-guide)
 
 ## Getting the Nami for Flutter
 
