@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-
 import 'channel.dart';
 import 'nami_configuration.dart';
 
@@ -15,7 +13,7 @@ class Nami {
     var variableMap = {
       'appPlatformIdApple': namiConfiguration.appPlatformIdApple,
       "appPlatformIdAndroid": namiConfiguration.appPlatformIdAndroid,
-      "namiLogLevel": describeEnum(namiConfiguration.namiLogLevel),
+      "namiLogLevel": namiConfiguration.namiLogLevel.name,
       "extraDataList": extraDataList
     };
     return channel
